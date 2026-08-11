@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-TW" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERBLOG | 個人作品集</title>
+    <!-- 引入樣式表 -->
+    <link rel="stylesheet" href="base.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- 頂部導覽列 -->
+    <header class="header" id="header">
+        <div class="container header__inner">
+            <a href="#" class="header__logo">ERBLOG</a>
+            <nav class="header__nav">
+                <a href="#about" class="header__link">關於我</a>
+                <a href="#works" class="header__link">作品集</a>
+                <button class="header__toggle" data-theme-toggle aria-label="切換至深色模式">
+                    <!-- 圖示由 app.js 自動渲染 -->
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 首頁 Hero 區塊 -->
+    <section class="about-hero" id="about">
+        <div class="container about-hero__layout">
+            <div class="profile-card">
+                <div class="profile-card__image-wrapper">
+                    <!-- 💡 已更新頭像路徑 -->
+                    <img src="assets/avatar.jpg" alt="個人照片" class="profile-card__img">
+                    <div class="profile-card__status">
+                        <span class="profile-card__status-dot"></span> 在線中
+                    </div>
+                </div>
+                <div class="profile-card__info">
+                    <h3 class="profile-card__name">ERBLOG</h3>
+                    <p class="profile-card__role">創作者 / 開發者</p>
+                </div>
+            </div>
+
+            <div class="about-hero__content">
+                <span class="badge"><span class="badge__dot"></span> 個人品牌與作品集</span>
+                <h1 class="about-hero__title">歡迎來到 <span class="text-gradient">ERBLOG</span></h1>
+                <p class="about-hero__bio">這裡是我的個人創作空間與技術作品集。探索我在程式設計、多媒體創作與 AI 專案中的豐富嘗試。</p>
+                <div class="about-hero__actions">
+                    <a href="#works" class="btn btn--primary">瀏覽作品集</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 作品集區塊 -->
+    <section class="works container" id="works">
+        <div class="works__header">
+            <span class="works__label">Portfolio</span>
+            <h2 class="works__title">精選作品</h2>
+            <p class="works__desc">點擊作品卡片可開啟全螢幕高畫質預覽</p>
+
+            <!-- 篩選按鈕 -->
+            <div class="works__filter">
+                <button class="filter-btn active" data-filter="all">全部</button>
+                <button class="filter-btn" data-filter="image">圖片專案</button>
+                <button class="filter-btn" data-filter="video">影片展示</button>
+                <button class="filter-btn" data-filter="ai">AI 應用</button>
+            </div>
+        </div>
+
+        <!-- 作品網格卡片 -->
+        <div class="works__grid">
+            <!-- 作品 1：圖片 -->
+            <div class="work-card" data-type="image" data-src="https://via.placeholder.com/800x450/3b82f6/ffffff?text=ERBLOG+Design" data-title="視覺設計專案" data-desc="探索現代感與極簡風格的品牌視覺創作。">
+                <div class="work-card__media">
+                    <span class="work-card__type-badge">圖片</span>
+                    <img src="https://via.placeholder.com/400x250/3b82f6/ffffff?text=ERBLOG+Design" alt="視覺設計專案">
+                </div>
+                <div class="work-card__content">
+                    <span class="work-card__tag">圖片專案</span>
+                    <h3 class="work-card__title">視覺設計專案</h3>
+                </div>
+            </div>
+
+            <!-- 作品 2：影片 -->
+            <div class="work-card" data-type="video" data-video-src="https://www.w3schools.com/html/mov_bbb.mp4" data-title="動態影像展示" data-desc="結合視覺特效與短片剪輯的創意呈現。">
+                <div class="work-card__media">
+                    <span class="work-card__type-badge work-card__type-badge--video">影片</span>
+                    <img src="https://via.placeholder.com/400x250/0284c7/ffffff?text=Video+Preview" alt="動態影像展示">
+                    <div class="work-card__play-btn">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                    </div>
+                </div>
+                <div class="work-card__content">
+                    <span class="work-card__tag">影片展示</span>
+                    <h3 class="work-card__title">動態影像展示</h3>
+                </div>
+            </div>
+
+            <!-- 作品 3：AI 專案 -->
+            <div class="work-card" data-type="ai" data-src="https://via.placeholder.com/800x450/10b981/ffffff?text=ERBLOG+AI+Project" data-title="AI 模組整合開發" data-desc="基於深度學習的自動化分析工具與應用介面開發。">
+                <div class="work-card__media">
+                    <span class="work-card__type-badge">AI</span>
+                    <img src="https://via.placeholder.com/400x250/10b981/ffffff?text=AI+Project" alt="AI 模組整合開發">
+                </div>
+                <div class="work-card__content">
+                    <span class="work-card__tag">AI 應用</span>
+                    <h3 class="work-card__title">AI 模組整合開發</h3>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lightbox Modal 全螢幕預覽 -->
+    <div class="lightbox" id="lightbox" aria-hidden="true">
+        <div class="lightbox__overlay" id="lightboxOverlay"></div>
+        <div class="lightbox__container">
+            <button class="lightbox__close" id="lightboxClose" aria-label="關閉預覽">&times;</button>
+            <div class="lightbox__media" id="lightboxMedia"></div>
+            <div class="lightbox__caption">
+                <h3 id="lightboxTitle"></h3>
+                <p id="lightboxDesc"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 頁尾 -->
+    <footer class="footer container">
+        <div class="footer__inner">
+            <p>&copy; 2026 ERBLOG. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- 引入 JavaScript 控制邏輯 -->
+    <script src="app.js"></script>
+</body>
+</html>
