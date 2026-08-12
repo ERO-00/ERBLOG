@@ -44,10 +44,6 @@ document.addEventListener('DOMContentLoaded', () => {
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
         </svg>`;
 
-    const savedTheme = localStorage.getItem('erblog-theme');
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const initialTheme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
-
     function setTheme(theme) {
         htmlElement.setAttribute('data-theme', theme);
         localStorage.setItem('erblog-theme', theme);
@@ -57,12 +53,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    setTheme(initialTheme);
+    // 初始化按鈕圖示與狀態
+    const currentTheme = htmlElement.getAttribute('data-theme') || 'light';
+    setTheme(currentTheme);
 
     if (themeToggleBtn) {
         themeToggleBtn.addEventListener('click', () => {
-            const currentTheme = htmlElement.getAttribute('data-theme');
-            setTheme(currentTheme === 'dark' ? 'light' : 'dark');
+            const activeTheme = htmlElement.getAttribute('data-theme');
+            setTheme(activeTheme === 'dark' ? 'light' : 'dark');
         });
     }
 
@@ -168,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     slideIdx = (slideIdx + 1) % gallery.length;
                     const nextSlide = gallery[slideIdx];
 
-                    if (imgElem) {
+                    if (imgElem && nextSlide.type !== 'video') {
                         imgElem.classList.add('fade-out');
                         setTimeout(() => {
                             imgElem.src = nextSlide.src;
