@@ -134,7 +134,7 @@ body {
 }
 
 .about-hero__layout > * {
-    min-width: 0; /* 防止子元素在網路載入時無預設寬度推擠破版 */
+    min-width: 0;
 }
 
 @media (max-width: 992px) {
@@ -441,6 +441,76 @@ body {
     border-color: var(--primary-color);
 }
 
+/* --- 特殊：「我推」常闇トワ卡片風格 --- */
+.work-card--oshi {
+    border: 1px solid rgba(168, 85, 247, 0.4);
+    box-shadow: 0 4px 20px rgba(147, 51, 234, 0.12);
+}
+
+.work-card--oshi:hover {
+    border-color: #a855f7;
+    box-shadow: 0 12px 32px rgba(168, 85, 247, 0.38);
+}
+
+.work-card__type-badge--oshi {
+    background: linear-gradient(135deg, #7e22ce, #a855f7);
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.work-card__count-badge--oshi {
+    background: rgba(126, 34, 206, 0.85);
+}
+
+.work-card__tag--oshi {
+    color: #a855f7;
+    font-weight: 700;
+}
+
+.tech-badge--oshi {
+    background: rgba(168, 85, 247, 0.15);
+    color: #c084fc;
+    border: 1px solid rgba(168, 85, 247, 0.3);
+}
+
+.work-card__header-flex {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+/* --- 玻璃質感 Wiki 捷徑膠囊按鈕 --- */
+.wiki-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.65rem;
+    background: rgba(168, 85, 247, 0.15);
+    border: 1px solid rgba(168, 85, 247, 0.4);
+    border-radius: 1rem;
+    color: #a855f7;
+    font-size: 0.75rem;
+    font-weight: 600;
+    backdrop-filter: blur(4px);
+    transition: all 0.25s ease;
+    text-decoration: none;
+}
+
+.wiki-btn:hover {
+    background: rgba(168, 85, 247, 0.35);
+    color: #f3e8ff;
+    border-color: #c084fc;
+    transform: translateY(-1px);
+    box-shadow: 0 0 12px rgba(168, 85, 247, 0.45);
+}
+
+.wiki-btn--lightbox {
+    padding: 0.4rem 0.9rem;
+    font-size: 0.85rem;
+    border-radius: 1.5rem;
+}
+
 .work-card__media {
     position: relative;
     aspect-ratio: 16 / 9;
@@ -448,14 +518,18 @@ body {
     background-color: #000;
 }
 
-.work-card__media img {
+.work-card__img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.4s ease;
+    transition: opacity 0.4s ease-in-out, transform 0.4s ease;
 }
 
-.work-card:hover .work-card__media img {
+.work-card__img.fade-out {
+    opacity: 0.25;
+}
+
+.work-card:hover .work-card__img {
     transform: scale(1.05);
 }
 
@@ -465,6 +539,7 @@ body {
     left: 0.75rem;
     display: flex;
     gap: 0.4rem;
+    z-index: 5;
 }
 
 .work-card__type-badge {
@@ -489,6 +564,23 @@ body {
     border-radius: 0.25rem;
 }
 
+/* 卡片右下角頁碼指示燈膠囊 */
+.work-card__slide-indicator {
+    position: absolute;
+    bottom: 0.6rem;
+    right: 0.6rem;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(4px);
+    color: #ffffff;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.15rem 0.55rem;
+    border-radius: 1rem;
+    letter-spacing: 0.05em;
+    pointer-events: none;
+    z-index: 5;
+}
+
 .work-card__play-btn {
     position: absolute;
     inset: 0;
@@ -502,6 +594,7 @@ body {
     align-items: center;
     justify-content: center;
     box-shadow: var(--shadow-sm);
+    z-index: 5;
 }
 
 .work-card__play-btn svg {
@@ -686,8 +779,17 @@ body {
     padding: 0.75rem 1.5rem 1.5rem;
 }
 
-.lightbox__caption h3 {
-    margin: 0 0 0.4rem;
+.lightbox__caption-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.4rem;
+    flex-wrap: wrap;
+}
+
+.lightbox__caption-header h3 {
+    margin: 0;
     font-size: 1.25rem;
 }
 

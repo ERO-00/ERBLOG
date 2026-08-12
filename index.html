@@ -54,7 +54,7 @@
                 <!-- 個人數據統計小卡 -->
                 <div class="stat-grid">
                     <div class="stat-card">
-                        <span class="stat-card__number">3+</span>
+                        <span class="stat-card__number">4+</span>
                         <span class="stat-card__label">核心專案</span>
                     </div>
                     <div class="stat-card">
@@ -99,7 +99,8 @@
             <!-- 篩選按鈕 -->
             <div class="works__filter">
                 <button class="filter-btn active" data-filter="all">全部</button>
-                <button class="filter-btn" data-filter="image">圖片專案</button>
+                <button class="filter-btn" data-filter="image">日常照片</button>
+                <button class="filter-btn" data-filter="oshi">我推 (トワ)</button>
                 <button class="filter-btn" data-filter="video">影片展示</button>
                 <button class="filter-btn" data-filter="ai">AI 應用</button>
             </div>
@@ -108,34 +109,86 @@
         <!-- 作品網格卡片 -->
         <div class="works__grid">
             
-            <!-- 作品 1：視覺設計專案 (多圖輪播) -->
+            <!-- 作品 1：日常照片記錄 (11張照片自動輪播) -->
             <div class="work-card" 
                  data-type="image" 
-                 data-title="視覺設計專案" 
-                 data-desc="探索現代感與極簡風格的品牌視覺創作，包含主動態圖與延伸特別版畫作。"
+                 data-title="日常照片記錄" 
+                 data-desc="記錄日常生活中的精彩瞬間與光影捕捉，收錄 11 張生活影像。"
                  data-gallery='[
-                    {"type":"image","src":"angerbird.gif","title":"視覺設計專案 - 經典 GIF 動畫","desc":"以簡約線條與動態感呈現經典形象。"},
-                    {"type":"image","src":"angerbird_3.jpg","title":"視覺設計專案 - 藝術聲波特別版","desc":"結合音樂符號與溫暖金色質感的延伸視覺創作。"}
+                    {"type":"image","src":"img1 (1).jpg","title":"日常照片記錄 01","desc":"日常生活隨筆與視覺記錄。"},
+                    {"type":"image","src":"img1 (2).jpg","title":"日常照片記錄 02","desc":"日常生活隨筆與視覺記錄。"},
+                    {"type":"image","src":"img1 (3).jpg","title":"日常照片記錄 03","desc":"日常生活隨筆與視覺記錄。"},
+                    {"type":"image","src":"img1 (4).jpg","title":"日常照片記錄 04","desc":"日常生活隨筆與視覺記錄。"},
+                    {"type":"image","src":"img1 (5).jpg","title":"日常照片記錄 05","desc":"日常生活隨筆與視覺記錄。"},
+                    {"type":"image","src":"img1 (6).jpg","title":"日常照片記錄 06","desc":"日常生活隨筆與視覺記錄。"},
+                    {"type":"image","src":"img1 (7).jpg","title":"日常照片記錄 07","desc":"日常生活隨筆與視覺記錄。"},
+                    {"type":"image","src":"img1 (8).jpg","title":"日常照片記錄 08","desc":"日常生活隨筆與視覺記錄。"},
+                    {"type":"image","src":"img1 (9).jpg","title":"日常照片記錄 09","desc":"日常生活隨筆與視覺記錄。"},
+                    {"type":"image","src":"img1 (10).jpg","title":"日常照片記錄 10","desc":"日常生活隨筆與視覺記錄。"},
+                    {"type":"image","src":"img1 (11).jpg","title":"日常照片記錄 11","desc":"日常生活隨筆與視覺記錄。"}
                  ]'>
                 <div class="work-card__media">
                     <div class="work-card__badge-group">
-                        <span class="work-card__type-badge">圖片</span>
-                        <span class="work-card__count-badge">2 張照片</span>
+                        <span class="work-card__type-badge">日常照片</span>
+                        <span class="work-card__count-badge">11 張照片</span>
                     </div>
-                    <img src="angerbird.gif" alt="視覺設計專案">
+                    <img src="img1 (1).jpg" alt="日常照片記錄" class="work-card__img">
+                    <div class="work-card__slide-indicator">1 / 11</div>
                 </div>
                 <div class="work-card__content">
-                    <span class="work-card__tag">圖片專案</span>
-                    <h3 class="work-card__title">視覺設計專案</h3>
+                    <span class="work-card__tag">日常照片記錄</span>
+                    <h3 class="work-card__title">日常照片記錄</h3>
                     <div class="tech-stack">
-                        <span class="tech-badge">GIF 動畫</span>
-                        <span class="tech-badge">品牌視覺</span>
-                        <span class="tech-badge">Photoshop</span>
+                        <span class="tech-badge">生活隨筆</span>
+                        <span class="tech-badge">光影捕捉</span>
+                        <span class="tech-badge">攝影紀錄</span>
                     </div>
                 </div>
             </div>
 
-            <!-- 作品 2：動態影像展示 (影片專案) -->
+            <!-- 作品 2：我推 (常闇トワ - Tokoyami Towa) -->
+            <div class="work-card work-card--oshi" 
+                 data-type="oshi" 
+                 data-title="我推 — 常闇トワ (Tokoyami Towa)" 
+                 data-desc="Hololive 4期生，擁有強烈感染力低音與無敵歌唱實力的小惡魔 VTuber。收錄 5 張精選畫作與寫真。"
+                 data-gallery='[
+                    {"type":"image","src":"towa1.jpg","title":"常闇トワ (Tokoyami Towa)","desc":"Hololive 4期生，歌聲具強烈感染力的小惡魔 VTuber。","wiki":"https://zh.wikipedia.org/zh-tw/%E5%B8%B8%E9%97%87%E6%B0%B8%E9%81%A0"},
+                    {"type":"image","src":"towa2.jpg","title":"常闇トワ — 精選寫真 02","desc":"獨特微厚低音歌唱風格與 stage 舞台魅力。","wiki":"https://zh.wikipedia.org/zh-tw/%E5%B8%B8%E9%97%87%E6%B0%B8%E9%81%A0"},
+                    {"type":"image","src":"towa3.jpg","title":"常闇トワ — 精選寫真 03","desc":"概念視覺與個人角色氣場展現。","wiki":"https://zh.wikipedia.org/zh-tw/%E5%B8%B8%E9%97%87%E6%B0%B8%E9%81%A0"},
+                    {"type":"image","src":"towa4.jpg","title":"常闇トワ — 精選寫真 04","desc":"粉絲與創作圈熱愛的小惡魔特色。","wiki":"https://zh.wikipedia.org/zh-tw/%E5%B8%B8%E9%97%87%E6%B0%B8%E9%81%A0"},
+                    {"type":"image","src":"towa5.jpg","title":"常闇トワ — 精選寫真 05","desc":"舞台演出與演唱會亮眼動態視覺。","wiki":"https://zh.wikipedia.org/zh-tw/%E5%B8%B8%E9%97%87%E6%B0%B8%E9%81%A0"}
+                 ]'>
+                <div class="work-card__media">
+                    <div class="work-card__badge-group">
+                        <span class="work-card__type-badge work-card__type-badge--oshi">👾 我推</span>
+                        <span class="work-card__count-badge work-card__count-badge--oshi">5 張照片</span>
+                    </div>
+                    <img src="towa1.jpg" alt="常闇トワ" class="work-card__img">
+                    <div class="work-card__slide-indicator">1 / 5</div>
+                </div>
+                <div class="work-card__content">
+                    <div class="work-card__header-flex">
+                        <span class="work-card__tag work-card__tag--oshi">Hololive Production</span>
+                        <a href="https://zh.wikipedia.org/zh-tw/%E5%B8%B8%E9%97%87%E6%B0%B8%E9%81%A0" 
+                           target="_blank" 
+                           rel="noopener noreferrer" 
+                           class="wiki-btn" 
+                           onclick="event.stopPropagation();"
+                           title="前往 常闇トワ Wikipedia">
+                            <span>Wiki 介紹</span>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                        </a>
+                    </div>
+                    <h3 class="work-card__title">我推 — 常闇トワ</h3>
+                    <div class="tech-stack">
+                        <span class="tech-badge tech-badge--oshi">Hololive 4期生</span>
+                        <span class="tech-badge tech-badge--oshi">常闇トワ</span>
+                        <span class="tech-badge tech-badge--oshi">Towa-sama</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 作品 3：動態影像展示 (影片專案) -->
             <div class="work-card" 
                  data-type="video" 
                  data-title="動態影像展示" 
@@ -147,7 +200,7 @@
                     <div class="work-card__badge-group">
                         <span class="work-card__type-badge work-card__type-badge--video">影片</span>
                     </div>
-                    <img src="https://via.placeholder.com/400x225/0284c7/ffffff?text=Gura+Video+Preview" alt="動態影像展示">
+                    <img src="https://via.placeholder.com/400x225/0284c7/ffffff?text=Gura+Video+Preview" alt="動態影像展示" class="work-card__img">
                     <div class="work-card__play-btn">
                         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
                     </div>
@@ -163,7 +216,7 @@
                 </div>
             </div>
 
-            <!-- 作品 3：AI 模組整合開發 (多圖輪播) -->
+            <!-- 作品 4：AI 模組整合開發 (多圖輪播) -->
             <div class="work-card" 
                  data-type="ai" 
                  data-title="AI 模組整合開發" 
@@ -177,7 +230,8 @@
                         <span class="work-card__type-badge">AI / IoT</span>
                         <span class="work-card__count-badge">2 張照片</span>
                     </div>
-                    <img src="aiassist.jpg" alt="AI 模組整合開發">
+                    <img src="aiassist.jpg" alt="AI 模組整合開發" class="work-card__img">
+                    <div class="work-card__slide-indicator">1 / 2</div>
                 </div>
                 <div class="work-card__content">
                     <span class="work-card__tag">AI 應用</span>
@@ -213,9 +267,15 @@
                 <div class="lightbox__counter" id="lightboxCounter">1 / 1</div>
             </div>
 
-            <!-- 文字說明 -->
+            <!-- 文字說明與 Wiki 捷徑按鈕 -->
             <div class="lightbox__caption">
-                <h3 id="lightboxTitle">作品標題</h3>
+                <div class="lightbox__caption-header">
+                    <h3 id="lightboxTitle">作品標題</h3>
+                    <a id="lightboxWikiBtn" href="#" target="_blank" rel="noopener noreferrer" class="wiki-btn wiki-btn--lightbox" style="display: none;">
+                        <span>Wikipedia 介紹</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                    </a>
+                </div>
                 <p id="lightboxDesc">作品敘述內容...</p>
             </div>
         </div>

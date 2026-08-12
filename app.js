@@ -85,7 +85,61 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // -------------------------------------------------------------
-    // 3. 作品集分類篩選 (Portfolio Filter)
+    // 3. 首頁卡片自動縮圖輪播 (Homepage Card Auto-Slideshow, 3.5s)
+    // -------------------------------------------------------------
+    let cardSlideshowIntervals = [];
+
+    function startCardSlideshows() {
+        stopCardSlideshows(); // 先清空舊有的計時器
+
+        const cards = document.querySelectorAll('.work-card');
+
+        cards.forEach((card) => {
+            const rawGallery = card.getAttribute('data-gallery');
+            if (!rawGallery) return;
+
+            try {
+                const gallery = JSON.parse(rawGallery);
+                if (gallery.length <= 1) return;
+
+                let slideIdx = 0;
+                const imgElem = card.querySelector('.work-card__img');
+                const indicator = card.querySelector('.work-card__slide-indicator');
+
+                const interval = setInterval(() => {
+                    slideIdx = (slideIdx + 1) % gallery.length;
+                    const nextSlide = gallery[slideIdx];
+
+                    if (imgElem) {
+                        imgElem.classList.add('fade-out');
+                        setTimeout(() => {
+                            imgElem.src = nextSlide.src;
+                            imgElem.classList.remove('fade-out');
+                        }, 250);
+                    }
+
+                    if (indicator) {
+                        indicator.textContent = `${slideIdx + 1} / ${gallery.length}`;
+                    }
+                }, 3500); // 每 3.5 秒淡入淡出自動切換照片
+
+                cardSlideshowIntervals.push(interval);
+            } catch (e) {
+                console.error('Card gallery parse error:', e);
+            }
+        });
+    }
+
+    function stopCardSlideshows() {
+        cardSlideshowIntervals.forEach(interval => clearInterval(interval));
+        cardSlideshowIntervals = [];
+    }
+
+    // 啟動首頁卡片自動輪播
+    startCardSlideshows();
+
+    // -------------------------------------------------------------
+    // 4. 作品集分類篩選 (Portfolio Filter)
     // -------------------------------------------------------------
     const filterBtns = document.querySelectorAll('.filter-btn');
     const workCards = document.querySelectorAll('.work-card');
@@ -117,7 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // -------------------------------------------------------------
-    // 4. 多圖/影片 Lightbox 輪播 Slider
+    // 5. 多圖/影片 Lightbox 輪播 Slider
     // -------------------------------------------------------------
     const lightbox = document.getElementById('lightbox');
     const lightboxOverlay = document.getElementById('lightboxOverlay');
@@ -129,6 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const lightboxCounter = document.getElementById('lightboxCounter');
     const lightboxTitle = document.getElementById('lightboxTitle');
     const lightboxDesc = document.getElementById('lightboxDesc');
+    const lightboxWikiBtn = document.getElementById('lightboxWikiBtn');
 
     let currentGallery = [];
     let currentIndex = 0;
@@ -158,10 +213,18 @@ document.addEventListener('DOMContentLoaded', () => {
             lightboxMedia.appendChild(imgElem);
         }
 
-        // 更新文字與頁碼
+        // 更新文字說明與頁碼
         lightboxTitle.textContent = item.title || '';
         lightboxDesc.textContent = item.desc || '';
         lightboxCounter.textContent = `${currentIndex + 1} / ${currentGallery.length}`;
+
+        // Wikipedia 按鈕判斷與設定
+        if (item.wiki) {
+            lightboxWikiBtn.href = item.wiki;
+            lightboxWikiBtn.style.display = 'inline-flex';
+        } else {
+            lightboxWikiBtn.style.display = 'none';
+        }
 
         // 更新指示點 (Pagination Dots)
         lightboxDots.innerHTML = '';
@@ -191,7 +254,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentGallery.length > 1) {
             autoPlayTimer = setInterval(() => {
                 renderSlide(currentIndex + 1);
-            }, 5000); // 5秒自動切換
+            }, 5000); // 燈箱開啟時 5 秒自動切換
         }
     }
 
@@ -203,6 +266,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function openLightbox(card) {
+        // 開啟全螢幕燈箱時，暫停首頁縮圖自動輪播
+        stopCardSlideshows();
+
         try {
             const rawGallery = card.getAttribute('data-gallery');
             if (rawGallery) {
@@ -212,7 +278,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     type: card.getAttribute('data-type') === 'video' ? 'video' : 'image',
                     src: card.getAttribute('data-src') || card.getAttribute('data-video-src'),
                     title: card.getAttribute('data-title'),
-                    desc: card.getAttribute('data-desc')
+                    desc: card.getAttribute('data-desc'),
+                    wiki: card.getAttribute('data-wiki')
                 }];
             }
         } catch (e) {
@@ -237,6 +304,9 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             lightboxMedia.innerHTML = '';
         }, 300);
+
+        // 關閉燈箱後，恢復首頁卡片縮圖自動輪播
+        startCardSlideshows();
     }
 
     // 事件監聽：點擊卡片開啟
@@ -276,7 +346,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { passive: true });
 
     // -------------------------------------------------------------
-    // 5. Header 滾動毛玻璃陰影效果
+    // 6. Header 滾動毛玻璃陰影效果
     // -------------------------------------------------------------
     const header = document.getElementById('header');
     window.addEventListener('scroll', () => {
