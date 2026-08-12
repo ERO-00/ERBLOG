@@ -43,12 +43,14 @@ body {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     margin: 0;
     transition: background-color 0.3s ease, color 0.3s ease;
+    overflow-x: hidden;
 }
 
 .container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 1.5rem;
+    width: 100%;
 }
 
 /* ==========================================================================
@@ -121,19 +123,24 @@ body {
    3. Hero Section & Profile Card
    ========================================================================== */
 .about-hero {
-    padding: 5rem 0 3rem;
+    padding: 4rem 0 3rem;
 }
 
 .about-hero__layout {
     display: grid;
-    grid-template-columns: 320px 1fr;
+    grid-template-columns: 320px minmax(0, 1fr);
     gap: 3rem;
     align-items: center;
 }
 
-@media (max-width: 868px) {
+.about-hero__layout > * {
+    min-width: 0; /* 防止子元素在網路載入時無預設寬度推擠破版 */
+}
+
+@media (max-width: 992px) {
     .about-hero__layout {
         grid-template-columns: 1fr;
+        gap: 2.5rem;
     }
 }
 
@@ -145,6 +152,9 @@ body {
     backdrop-filter: blur(8px);
     box-shadow: var(--shadow-lg);
     transition: transform 0.3s ease;
+    max-width: 360px;
+    width: 100%;
+    margin: 0 auto;
 }
 
 .profile-card:hover {
@@ -159,9 +169,9 @@ body {
 
 .profile-card__img {
     width: 100%;
-    height: auto;
-    display: block;
+    aspect-ratio: 1 / 1;
     object-fit: cover;
+    display: block;
 }
 
 .profile-card__status {
@@ -206,6 +216,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    width: 100%;
 }
 
 .badge {
@@ -240,7 +251,6 @@ body {
     -webkit-text-fill-color: transparent;
 }
 
-/* 打字機效果樣式 */
 .typing-wrapper {
     font-size: 1.25rem;
     font-weight: 600;
@@ -273,7 +283,6 @@ body {
     margin-bottom: 1.5rem;
 }
 
-/* 數據統計小卡 */
 .stat-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -303,7 +312,6 @@ body {
     color: var(--text-muted);
 }
 
-/* Hero 操作與社群連結 */
 .about-hero__actions {
     display: flex;
     align-items: center;
@@ -411,10 +419,9 @@ body {
     border-color: var(--primary-color);
 }
 
-/* Works Grid */
 .works__grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 2rem;
 }
 
@@ -517,7 +524,6 @@ body {
     font-size: 1.15rem;
 }
 
-/* 技術棧標籤 */
 .tech-stack {
     display: flex;
     flex-wrap: wrap;
@@ -533,7 +539,7 @@ body {
 }
 
 /* ==========================================================================
-   5. Lightbox Modal with Slider (多圖輪播燈箱)
+   5. Lightbox Modal
    ========================================================================== */
 .lightbox {
     position: fixed;
@@ -594,7 +600,6 @@ body {
     background: rgba(225, 29, 72, 0.8);
 }
 
-/* 輪播切換按鈕 */
 .lightbox__nav {
     position: absolute;
     top: 40%;
@@ -644,7 +649,6 @@ body {
     object-fit: contain;
 }
 
-/* 輪播頁碼與指示點 */
 .lightbox__controls {
     display: flex;
     align-items: center;
