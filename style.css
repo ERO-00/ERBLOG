@@ -17,6 +17,7 @@
     --glass-border: rgba(255, 255, 255, 0.6);
     --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
+    --glow-color: rgba(37, 99, 235, 0.15);
 }
 
 :root[data-theme="dark"] {
@@ -33,9 +34,9 @@
     --glass-border: rgba(255, 255, 255, 0.1);
     --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
     --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+    --glow-color: rgba(59, 130, 246, 0.25);
 }
 
-/* Base Adjustments */
 body {
     background-color: var(--bg-primary);
     color: var(--text-primary);
@@ -57,8 +58,8 @@ body {
     position: sticky;
     top: 0;
     z-index: 100;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     background-color: var(--bg-surface);
     border-bottom: 1px solid var(--border-color);
     transition: all 0.3s ease;
@@ -79,7 +80,6 @@ body {
     font-size: 1.25rem;
     font-weight: 700;
     color: var(--primary-color);
-    text-decoration: none;
     letter-spacing: 0.05em;
 }
 
@@ -91,7 +91,6 @@ body {
 
 .header__link {
     color: var(--text-secondary);
-    text-decoration: none;
     font-weight: 500;
     transition: color 0.2s ease;
 }
@@ -145,6 +144,11 @@ body {
     padding: 1.25rem;
     backdrop-filter: blur(8px);
     box-shadow: var(--shadow-lg);
+    transition: transform 0.3s ease;
+}
+
+.profile-card:hover {
+    transform: translateY(-4px);
 }
 
 .profile-card__image-wrapper {
@@ -225,9 +229,9 @@ body {
 }
 
 .about-hero__title {
-    font-size: 2.75rem;
+    font-size: 2.5rem;
     line-height: 1.2;
-    margin: 0 0 1rem;
+    margin: 0 0 0.5rem;
 }
 
 .text-gradient {
@@ -236,11 +240,75 @@ body {
     -webkit-text-fill-color: transparent;
 }
 
+/* 打字機效果樣式 */
+.typing-wrapper {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    min-height: 1.8rem;
+}
+
+.typing-text {
+    color: var(--primary-color);
+}
+
+.typing-cursor {
+    display: inline-block;
+    width: 2px;
+    background-color: var(--primary-color);
+    margin-left: 2px;
+    animation: blink 0.8s infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
 .about-hero__bio {
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     color: var(--text-secondary);
     line-height: 1.6;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+/* 數據統計小卡 */
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    width: 100%;
+    margin-bottom: 1.5rem;
+}
+
+.stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    text-align: center;
+    backdrop-filter: blur(8px);
+}
+
+.stat-card__number {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    display: block;
+}
+
+.stat-card__label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+/* Hero 操作與社群連結 */
+.about-hero__actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
 }
 
 .btn {
@@ -248,7 +316,6 @@ body {
     padding: 0.75rem 1.75rem;
     border-radius: 0.5rem;
     font-weight: 600;
-    text-decoration: none;
     transition: all 0.2s ease;
     cursor: pointer;
 }
@@ -261,6 +328,31 @@ body {
 
 .btn--primary:hover {
     background-color: var(--primary-hover);
+    transform: translateY(-2px);
+}
+
+.social-links {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.social-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.social-btn:hover {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
     transform: translateY(-2px);
 }
 
@@ -333,11 +425,13 @@ body {
     overflow: hidden;
     cursor: pointer;
     transition: all 0.3s ease;
+    position: relative;
 }
 
 .work-card:hover {
     transform: translateY(-6px);
-    box-shadow: var(--shadow-lg);
+    box-shadow: 0 12px 30px var(--glow-color);
+    border-color: var(--primary-color);
 }
 
 .work-card__media {
@@ -358,10 +452,15 @@ body {
     transform: scale(1.05);
 }
 
-.work-card__type-badge {
+.work-card__badge-group {
     position: absolute;
     top: 0.75rem;
     left: 0.75rem;
+    display: flex;
+    gap: 0.4rem;
+}
+
+.work-card__type-badge {
     background: rgba(15, 23, 42, 0.75);
     backdrop-filter: blur(4px);
     color: #fff;
@@ -372,6 +471,15 @@ body {
 
 .work-card__type-badge--video {
     background: rgba(225, 29, 72, 0.85);
+}
+
+.work-card__count-badge {
+    background: rgba(37, 99, 235, 0.85);
+    backdrop-filter: blur(4px);
+    color: #fff;
+    font-size: 0.75rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 0.25rem;
 }
 
 .work-card__play-btn {
@@ -405,12 +513,27 @@ body {
 }
 
 .work-card__title {
-    margin: 0.4rem 0 0;
+    margin: 0.4rem 0 0.75rem;
     font-size: 1.15rem;
 }
 
+/* 技術棧標籤 */
+.tech-stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.tech-badge {
+    background: rgba(148, 163, 184, 0.15);
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 0.25rem;
+}
+
 /* ==========================================================================
-   5. Lightbox Modal
+   5. Lightbox Modal with Slider (多圖輪播燈箱)
    ========================================================================== */
 .lightbox {
     position: fixed;
@@ -432,18 +555,18 @@ body {
 .lightbox__overlay {
     position: absolute;
     inset: 0;
-    background: rgba(15, 23, 42, 0.85);
-    backdrop-filter: blur(8px);
+    background: rgba(15, 23, 42, 0.88);
+    backdrop-filter: blur(10px);
 }
 
 .lightbox__container {
     position: relative;
     z-index: 1001;
-    width: 90%;
-    max-width: 900px;
+    width: 92%;
+    max-width: 960px;
     background: var(--bg-card);
     border: 1px solid var(--border-color);
-    border-radius: 1rem;
+    border-radius: 1.25rem;
     overflow: hidden;
     box-shadow: var(--shadow-lg);
 }
@@ -452,43 +575,115 @@ body {
     position: absolute;
     top: 1rem;
     right: 1rem;
-    z-index: 10;
-    background: rgba(0, 0, 0, 0.5);
+    z-index: 20;
+    background: rgba(0, 0, 0, 0.6);
     color: #ffffff;
     border: none;
     font-size: 1.5rem;
-    width: 36px;
-    height: 36px;
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: background 0.2s;
+}
+
+.lightbox__close:hover {
+    background: rgba(225, 29, 72, 0.8);
+}
+
+/* 輪播切換按鈕 */
+.lightbox__nav {
+    position: absolute;
+    top: 40%;
+    transform: translateY(-50%);
+    z-index: 15;
+    background: rgba(0, 0, 0, 0.5);
+    color: #ffffff;
+    border: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    transition: all 0.2s ease;
+}
+
+.lightbox__nav:hover {
+    background: var(--primary-color);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.lightbox__nav--prev {
+    left: 1rem;
+}
+
+.lightbox__nav--next {
+    right: 1rem;
 }
 
 .lightbox__media {
     width: 100%;
-    max-height: 70vh;
+    height: 65vh;
     background: #000;
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
 }
 
 .lightbox__img,
 .lightbox__video {
     max-width: 100%;
-    max-height: 70vh;
+    max-height: 100%;
     object-fit: contain;
-    width: 100%;
+}
+
+/* 輪播頁碼與指示點 */
+.lightbox__controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1.5rem 0;
+}
+
+.lightbox__dots {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.lightbox__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.lightbox__dot.active {
+    background: var(--primary-color);
+    width: 20px;
+    border-radius: 4px;
+}
+
+.lightbox__counter {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 600;
 }
 
 .lightbox__caption {
-    padding: 1.5rem;
+    padding: 0.75rem 1.5rem 1.5rem;
 }
 
 .lightbox__caption h3 {
-    margin: 0 0 0.5rem;
+    margin: 0 0 0.4rem;
     font-size: 1.25rem;
 }
 
@@ -503,9 +698,19 @@ body {
    ========================================================================== */
 .footer {
     border-top: 1px solid var(--border-color);
-    padding: 2rem 1.5rem;
+    padding: 2.5rem 1.5rem;
     margin-top: 4rem;
-    text-align: center;
+}
+
+.footer__inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.footer__copy {
     color: var(--text-muted);
     font-size: 0.9rem;
 }

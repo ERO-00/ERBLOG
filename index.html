@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ERBLOG | 個人作品集</title>
-    <!-- 引入樣式表 -->
+    <!-- 引入 CSS 樣式 -->
     <link rel="stylesheet" href="base.css">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -17,7 +17,7 @@
             <nav class="header__nav">
                 <a href="#about" class="header__link">關於我</a>
                 <a href="#works" class="header__link">作品集</a>
-                <button class="header__toggle" data-theme-toggle aria-label="切換至深色模式">
+                <button class="header__toggle" data-theme-toggle aria-label="切換主題">
                     <!-- 圖示由 app.js 自動渲染 -->
                 </button>
             </nav>
@@ -29,7 +29,7 @@
         <div class="container about-hero__layout">
             <div class="profile-card">
                 <div class="profile-card__image-wrapper">
-                    <img src="assets/avatar.jpg" alt="個人照片" class="profile-card__img">
+                    <img src="assets/avatar.jpg" alt="個人照片" class="profile-card__img" onerror="this.src='https://via.placeholder.com/300x300/0284c7/ffffff?text=ERBLOG'">
                     <div class="profile-card__status">
                         <span class="profile-card__status-dot"></span> 在線中
                     </div>
@@ -43,9 +43,41 @@
             <div class="about-hero__content">
                 <span class="badge"><span class="badge__dot"></span> 個人品牌與作品集</span>
                 <h1 class="about-hero__title">歡迎來到 <span class="text-gradient">ERBLOG</span></h1>
-                <p class="about-hero__bio">這裡是我的個人創作空間與技術作品集。探索我在程式設計、多媒體創作與 AI 專案中的豐富嘗試。</p>
+                
+                <!-- 打字機動態特效 -->
+                <div class="typing-wrapper">
+                    專長於 <span class="typing-text" id="typingText"></span><span class="typing-cursor"></span>
+                </div>
+
+                <p class="about-hero__bio">這裡是我的個人創作空間與技術作品集。探索我在程式設計、嵌入式硬體、多媒體創作與 AI 專案中的豐富嘗試。</p>
+                
+                <!-- 個人數據統計小卡 -->
+                <div class="stat-grid">
+                    <div class="stat-card">
+                        <span class="stat-card__number">3+</span>
+                        <span class="stat-card__label">核心專案</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-card__number">100%</span>
+                        <span class="stat-card__label">熱情投入</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-card__number">2026</span>
+                        <span class="stat-card__label">最新版本</span>
+                    </div>
+                </div>
+
+                <!-- 操作與社群連結 -->
                 <div class="about-hero__actions">
                     <a href="#works" class="btn btn--primary">瀏覽作品集</a>
+                    <div class="social-links">
+                        <a href="https://github.com" target="_blank" class="social-btn" aria-label="GitHub">
+                            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                        </a>
+                        <a href="mailto:contact@example.com" class="social-btn" aria-label="Email">
+                            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -56,7 +88,7 @@
         <div class="works__header">
             <span class="works__label">Portfolio</span>
             <h2 class="works__title">精選作品</h2>
-            <p class="works__desc">點擊作品卡片可開啟全螢幕高畫質預覽</p>
+            <p class="works__desc">點擊作品卡片可開啟多圖/影片全螢幕輪播預覽</p>
 
             <!-- 篩選按鈕 -->
             <div class="works__filter">
@@ -69,23 +101,47 @@
 
         <!-- 作品網格卡片 -->
         <div class="works__grid">
-            <!-- 作品 1：視覺設計專案 (憤怒鳥) -->
-            <div class="work-card" data-type="image" data-src="angerbird.gif" data-title="視覺設計專案" data-desc="探索現代感與極簡風格的品牌視覺創作。">
+            
+            <!-- 作品 1：視覺設計專案 (多圖輪播) -->
+            <div class="work-card" 
+                 data-type="image" 
+                 data-title="視覺設計專案" 
+                 data-desc="探索現代感與極簡風格的品牌視覺創作，包含主動態圖與延伸特別版畫作。"
+                 data-gallery='[
+                    {"type":"image","src":"angerbird.gif","title":"視覺設計專案 - 經典 GIF 動畫","desc":"以簡約線條與動態感呈現經典形象。"},
+                    {"type":"image","src":"angerbird_3.jpg","title":"視覺設計專案 - 藝術聲波特別版","desc":"結合音樂符號與溫暖金色質感的延伸視覺創作。"}
+                 ]'>
                 <div class="work-card__media">
-                    <span class="work-card__type-badge">圖片</span>
+                    <div class="work-card__badge-group">
+                        <span class="work-card__type-badge">圖片</span>
+                        <span class="work-card__count-badge">2 張照片</span>
+                    </div>
                     <img src="angerbird.gif" alt="視覺設計專案">
                 </div>
                 <div class="work-card__content">
                     <span class="work-card__tag">圖片專案</span>
                     <h3 class="work-card__title">視覺設計專案</h3>
+                    <div class="tech-stack">
+                        <span class="tech-badge">GIF 動畫</span>
+                        <span class="tech-badge">品牌視覺</span>
+                        <span class="tech-badge">Photoshop</span>
+                    </div>
                 </div>
             </div>
 
-            <!-- 作品 2：動態影像展示 (Gura 影片) -->
-            <div class="work-card" data-type="video" data-video-src="gura.mp4" data-title="動態影像展示" data-desc="結合視覺特效與短片剪輯的創意呈現。">
+            <!-- 作品 2：動態影像展示 (影片專案) -->
+            <div class="work-card" 
+                 data-type="video" 
+                 data-title="動態影像展示" 
+                 data-desc="結合視覺特效與短片剪輯的創意呈現，展現角色精緻細節與節奏感。"
+                 data-gallery='[
+                    {"type":"video","src":"gura.mp4","title":"Gura 動態短片展示","desc":"精心調校的視角與音效搭配。"}
+                 ]'>
                 <div class="work-card__media">
-                    <span class="work-card__type-badge work-card__type-badge--video">影片</span>
-                    <img src="https://via.placeholder.com/400x250/0284c7/ffffff?text=Gura+Video" alt="動態影像展示">
+                    <div class="work-card__badge-group">
+                        <span class="work-card__type-badge work-card__type-badge--video">影片</span>
+                    </div>
+                    <img src="https://via.placeholder.com/400x225/0284c7/ffffff?text=Gura+Video+Preview" alt="動態影像展示">
                     <div class="work-card__play-btn">
                         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
                     </div>
@@ -93,32 +149,68 @@
                 <div class="work-card__content">
                     <span class="work-card__tag">影片展示</span>
                     <h3 class="work-card__title">動態影像展示</h3>
+                    <div class="tech-stack">
+                        <span class="tech-badge">動態攝影</span>
+                        <span class="tech-badge">Premiere Pro</span>
+                        <span class="tech-badge">音效剪輯</span>
+                    </div>
                 </div>
             </div>
 
-            <!-- 作品 3：AI 模組整合開發 (液晶硬體顯示專案) -->
-            <div class="work-card" data-type="ai" data-src="aiassist.jpg" data-title="AI 模組整合開發" data-desc="基於深度學習的自動化分析工具與應用介面開發。">
+            <!-- 作品 3：AI 模組整合開發 (多圖輪播) -->
+            <div class="work-card" 
+                 data-type="ai" 
+                 data-title="AI 模組整合開發" 
+                 data-desc="硬體感測器與液晶螢幕顯示整合，結合嵌入式邏輯與物聯網數據監控。"
+                 data-gallery='[
+                    {"type":"image","src":"aiassist.jpg","title":"AI 模組 - LCD 螢幕實時數據","desc":"清晰呈現溫濕度、大氣壓力與即時時間顯示。"},
+                    {"type":"image","src":"aiassist_3.jpg","title":"AI 模組 - 面包板硬體電路佈線","desc":"ESP32 與各種感測器模組的實作線路測試與驗證。"}
+                 ]'>
                 <div class="work-card__media">
-                    <span class="work-card__type-badge">AI</span>
+                    <div class="work-card__badge-group">
+                        <span class="work-card__type-badge">AI / IoT</span>
+                        <span class="work-card__count-badge">2 張照片</span>
+                    </div>
                     <img src="aiassist.jpg" alt="AI 模組整合開發">
                 </div>
                 <div class="work-card__content">
                     <span class="work-card__tag">AI 應用</span>
                     <h3 class="work-card__title">AI 模組整合開發</h3>
+                    <div class="tech-stack">
+                        <span class="tech-badge">ESP32</span>
+                        <span class="tech-badge">C++ / Arduino</span>
+                        <span class="tech-badge">LCD 1602</span>
+                        <span class="tech-badge">DHT22</span>
+                    </div>
                 </div>
             </div>
+
         </div>
     </section>
 
-    <!-- Lightbox Modal 全螢幕預覽 -->
+    <!-- Lightbox Modal 全螢幕多媒體輪播預覽 -->
     <div class="lightbox" id="lightbox" aria-hidden="true">
         <div class="lightbox__overlay" id="lightboxOverlay"></div>
         <div class="lightbox__container">
             <button class="lightbox__close" id="lightboxClose" aria-label="關閉預覽">&times;</button>
+            
+            <!-- 輪播切換按鈕 -->
+            <button class="lightbox__nav lightbox__nav--prev" id="lightboxPrev" aria-label="上一張">&#8249;</button>
+            <button class="lightbox__nav lightbox__nav--next" id="lightboxNext" aria-label="下一張">&#8250;</button>
+
+            <!-- 媒體播放/顯示區 -->
             <div class="lightbox__media" id="lightboxMedia"></div>
+
+            <!-- 輪播頁碼指示區 -->
+            <div class="lightbox__controls">
+                <div class="lightbox__dots" id="lightboxDots"></div>
+                <div class="lightbox__counter" id="lightboxCounter">1 / 1</div>
+            </div>
+
+            <!-- 文字說明 -->
             <div class="lightbox__caption">
-                <h3 id="lightboxTitle"></h3>
-                <p id="lightboxDesc"></p>
+                <h3 id="lightboxTitle">作品標題</h3>
+                <p id="lightboxDesc">作品敘述內容...</p>
             </div>
         </div>
     </div>
@@ -126,11 +218,16 @@
     <!-- 頁尾 -->
     <footer class="footer container">
         <div class="footer__inner">
-            <p>&copy; 2026 ERBLOG. All rights reserved.</p>
+            <p class="footer__copy">&copy; 2026 ERBLOG. All rights reserved.</p>
+            <div class="social-links">
+                <a href="https://github.com" target="_blank" class="social-btn" aria-label="GitHub">
+                    <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                </a>
+            </div>
         </div>
     </footer>
 
-    <!-- 引入 JavaScript 控制邏輯 -->
+    <!-- 引入 JavaScript 控制腳本 -->
     <script src="app.js"></script>
 </body>
 </html>
