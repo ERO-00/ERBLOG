@@ -3,6 +3,24 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     // -------------------------------------------------------------
+    // 0. 開場中間展開動畫控制 (Intro Unfold Curtain)
+    // -------------------------------------------------------------
+    const introCurtain = document.getElementById('introCurtain');
+    
+    // 開場展示 600ms 後展開遮罩，並解鎖頁面滾動
+    setTimeout(() => {
+        if (introCurtain) {
+            introCurtain.classList.add('active');
+            document.body.classList.remove('is-loading');
+            
+            // 動畫徹底結束後隱藏遮罩 DOM
+            setTimeout(() => {
+                introCurtain.style.display = 'none';
+            }, 1200);
+        }
+    }, 600);
+
+    // -------------------------------------------------------------
     // 1. 深淺色主題切換 (Theme Toggle)
     // -------------------------------------------------------------
     const themeToggleBtn = document.querySelector('[data-theme-toggle]');
@@ -49,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // -------------------------------------------------------------
-    // 2. 打字機動態效果 (Typing Effect)
+    // 2. 打字機動態特效 (Typing Effect)
     // -------------------------------------------------------------
     const typingTextElem = document.getElementById('typingText');
     if (typingTextElem) {
@@ -71,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let typeSpeed = isDeleting ? 40 : 80;
 
             if (!isDeleting && charIdx === currentPhrase.length) {
-                typeSpeed = 1800; // 拼完後停頓
+                typeSpeed = 1800;
                 isDeleting = true;
             } else if (isDeleting && charIdx === 0) {
                 isDeleting = false;
@@ -85,12 +103,52 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // -------------------------------------------------------------
-    // 3. 首頁卡片自動縮圖輪播 (Homepage Card Auto-Slideshow, 3.5s)
+    // 3. 滾動進入動畫 (Scroll Reveal via Intersection Observer)
+    // -------------------------------------------------------------
+    const revealElements = document.querySelectorAll('.reveal');
+    if ('IntersectionObserver' in window) {
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('revealed');
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+
+        revealElements.forEach(el => revealObserver.observe(el));
+    } else {
+        revealElements.forEach(el => el.classList.add('revealed'));
+    }
+
+    // -------------------------------------------------------------
+    // 4. 回到頂部按鈕 (Back to Top Button)
+    // -------------------------------------------------------------
+    const backToTopBtn = document.getElementById('backToTop');
+    if (backToTopBtn) {
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTopBtn.classList.add('show');
+            } else {
+                backToTopBtn.classList.remove('show');
+            }
+        });
+
+        backToTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    }
+
+    // -------------------------------------------------------------
+    // 5. 卡片預覽自動縮圖輪播 (Homepage Card Auto-Slideshow, 3.5s)
     // -------------------------------------------------------------
     let cardSlideshowIntervals = [];
 
     function startCardSlideshows() {
-        stopCardSlideshows(); // 先清空舊有的計時器
+        stopCardSlideshows();
 
         const cards = document.querySelectorAll('.work-card');
 
@@ -121,7 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (indicator) {
                         indicator.textContent = `${slideIdx + 1} / ${gallery.length}`;
                     }
-                }, 3500); // 每 3.5 秒淡入淡出自動切換照片
+                }, 3500);
 
                 cardSlideshowIntervals.push(interval);
             } catch (e) {
@@ -135,11 +193,10 @@ document.addEventListener('DOMContentLoaded', () => {
         cardSlideshowIntervals = [];
     }
 
-    // 啟動首頁卡片自動輪播
     startCardSlideshows();
 
     // -------------------------------------------------------------
-    // 4. 作品集分類篩選 (Portfolio Filter)
+    // 6. 作品集分類篩選 (Portfolio Filter)
     // -------------------------------------------------------------
     const filterBtns = document.querySelectorAll('.filter-btn');
     const workCards = document.querySelectorAll('.work-card');
@@ -171,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // -------------------------------------------------------------
-    // 5. 多圖/影片 Lightbox 輪播 Slider
+    // 7. Lightbox 全螢幕燈箱輪播 (Full Modal Preview)
     // -------------------------------------------------------------
     const lightbox = document.getElementById('lightbox');
     const lightboxOverlay = document.getElementById('lightboxOverlay');
@@ -195,7 +252,6 @@ document.addEventListener('DOMContentLoaded', () => {
         currentIndex = (index + currentGallery.length) % currentGallery.length;
         const item = currentGallery[currentIndex];
 
-        // 清空媒體容器
         lightboxMedia.innerHTML = '';
 
         if (item.type === 'video') {
@@ -213,12 +269,10 @@ document.addEventListener('DOMContentLoaded', () => {
             lightboxMedia.appendChild(imgElem);
         }
 
-        // 更新文字說明與頁碼
         lightboxTitle.textContent = item.title || '';
         lightboxDesc.textContent = item.desc || '';
         lightboxCounter.textContent = `${currentIndex + 1} / ${currentGallery.length}`;
 
-        // Wikipedia 按鈕判斷與設定
         if (item.wiki) {
             lightboxWikiBtn.href = item.wiki;
             lightboxWikiBtn.style.display = 'inline-flex';
@@ -226,7 +280,6 @@ document.addEventListener('DOMContentLoaded', () => {
             lightboxWikiBtn.style.display = 'none';
         }
 
-        // 更新指示點 (Pagination Dots)
         lightboxDots.innerHTML = '';
         if (currentGallery.length > 1) {
             lightboxDots.style.display = 'flex';
@@ -254,7 +307,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentGallery.length > 1) {
             autoPlayTimer = setInterval(() => {
                 renderSlide(currentIndex + 1);
-            }, 5000); // 燈箱開啟時 5 秒自動切換
+            }, 5000);
         }
     }
 
@@ -266,7 +319,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function openLightbox(card) {
-        // 開啟全螢幕燈箱時，暫停首頁縮圖自動輪播
         stopCardSlideshows();
 
         try {
@@ -305,22 +357,18 @@ document.addEventListener('DOMContentLoaded', () => {
             lightboxMedia.innerHTML = '';
         }, 300);
 
-        // 關閉燈箱後，恢復首頁卡片縮圖自動輪播
         startCardSlideshows();
     }
 
-    // 事件監聽：點擊卡片開啟
     workCards.forEach(card => {
         card.addEventListener('click', () => openLightbox(card));
     });
 
-    // 事件監聽：燈箱按鈕
     if (lightboxClose) lightboxClose.addEventListener('click', closeLightbox);
     if (lightboxOverlay) lightboxOverlay.addEventListener('click', closeLightbox);
     if (lightboxPrev) lightboxPrev.addEventListener('click', () => { stopAutoPlay(); renderSlide(currentIndex - 1); });
     if (lightboxNext) lightboxNext.addEventListener('click', () => { stopAutoPlay(); renderSlide(currentIndex + 1); });
 
-    // 鍵盤左右箭頭與 ESC 支援
     document.addEventListener('keydown', (e) => {
         if (lightbox && lightbox.classList.contains('active')) {
             if (e.key === 'Escape') closeLightbox();
@@ -329,7 +377,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 移動端手勢滑動切換 (Touch Swipe)
     let touchStartX = 0;
     lightboxMedia.addEventListener('touchstart', (e) => {
         touchStartX = e.changedTouches[0].screenX;
@@ -340,13 +387,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const diffX = touchEndX - touchStartX;
         if (Math.abs(diffX) > 50) {
             stopAutoPlay();
-            if (diffX < 0) renderSlide(currentIndex + 1); // 向左滑動 ➔ 下一張
-            else renderSlide(currentIndex - 1);           // 向右滑動 ➔ 上一張
+            if (diffX < 0) renderSlide(currentIndex + 1);
+            else renderSlide(currentIndex - 1);
         }
     }, { passive: true });
 
     // -------------------------------------------------------------
-    // 6. Header 滾動毛玻璃陰影效果
+    // 8. Header 滾動陰影效果
     // -------------------------------------------------------------
     const header = document.getElementById('header');
     window.addEventListener('scroll', () => {

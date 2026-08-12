@@ -4,13 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ERBLOG | 個人作品集</title>
-    <!-- 引入 CSS 樣式 -->
-    <link rel="stylesheet" href="base.css">
+    
+    <!-- 網站 Favicon 圖示 (內嵌 SVG) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%232563eb'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-size='50' font-weight='bold' fill='white' font-family='sans-serif'>E</text></svg>">
+
+    <!-- 引入主樣式表 -->
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="is-loading">
 
-    <!-- 頂部導覽列 -->
+    <!-- 1. 開場中間展開動畫遮罩 -->
+    <div class="intro-curtain" id="introCurtain">
+        <div class="intro-curtain__panel intro-curtain__panel--top"></div>
+        <div class="intro-curtain__panel intro-curtain__panel--bottom"></div>
+        <div class="intro-curtain__content">
+            <span class="intro-curtain__logo">ERBLOG</span>
+            <div class="intro-curtain__line"></div>
+        </div>
+    </div>
+
+    <!-- 2. 頂部導覽列 -->
     <header class="header" id="header">
         <div class="container header__inner">
             <a href="#" class="header__logo">ERBLOG</a>
@@ -18,18 +31,18 @@
                 <a href="#about" class="header__link">關於我</a>
                 <a href="#works" class="header__link">作品集</a>
                 <button class="header__toggle" data-theme-toggle aria-label="切換主題">
-                    <!-- 圖示由 app.js 自動渲染 -->
+                    <!-- 圖示由 JS 動態渲染 -->
                 </button>
             </nav>
         </div>
     </header>
 
-    <!-- 首頁 Hero 區塊 -->
+    <!-- 3. 首頁 Hero 區塊 -->
     <section class="about-hero" id="about">
         <div class="container about-hero__layout">
-            <div class="profile-card">
+            <div class="profile-card reveal">
                 <div class="profile-card__image-wrapper">
-                    <img src="assets/avatar.jpg" alt="個人照片" class="profile-card__img" onerror="this.src='https://via.placeholder.com/300x300/0284c7/ffffff?text=ERBLOG'">
+                    <img src="assets/avatar.jpg" alt="個人照片" class="profile-card__img" loading="lazy" decoding="async" onerror="this.src='https://via.placeholder.com/300x300/0284c7/ffffff?text=ERBLOG'">
                     <div class="profile-card__status">
                         <span class="profile-card__status-dot"></span> 在線中
                     </div>
@@ -40,7 +53,7 @@
                 </div>
             </div>
 
-            <div class="about-hero__content">
+            <div class="about-hero__content reveal">
                 <span class="badge"><span class="badge__dot"></span> 個人品牌與作品集</span>
                 <h1 class="about-hero__title">歡迎來到 <span class="text-gradient">ERBLOG</span></h1>
                 
@@ -67,19 +80,16 @@
                     </div>
                 </div>
 
-                <!-- 操作與社群連結 -->
+                <!-- 社群連結 -->
                 <div class="about-hero__actions">
                     <a href="#works" class="btn btn--primary">瀏覽作品集</a>
                     <div class="social-links">
-                        <!-- GitHub -->
                         <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="GitHub" title="GitHub">
                             <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
                         </a>
-                        <!-- Gmail -->
                         <a href="mailto:albertaresocool@gmail.com" class="social-btn" aria-label="Gmail" title="Gmail: albertaresocool@gmail.com">
                             <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
                         </a>
-                        <!-- Instagram -->
                         <a href="https://www.instagram.com/holo_ero/" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="Instagram" title="Instagram">
                             <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
                         </a>
@@ -89,9 +99,9 @@
         </div>
     </section>
 
-    <!-- 作品集區塊 -->
+    <!-- 4. 作品集區塊 -->
     <section class="works container" id="works">
-        <div class="works__header">
+        <div class="works__header reveal">
             <span class="works__label">Portfolio</span>
             <h2 class="works__title">精選作品</h2>
             <p class="works__desc">點擊作品卡片可開啟多圖/影片全螢幕輪播預覽</p>
@@ -109,8 +119,8 @@
         <!-- 作品網格卡片 -->
         <div class="works__grid">
             
-            <!-- 作品 1：日常照片記錄 (11張照片自動輪播) -->
-            <div class="work-card" 
+            <!-- 作品 1：日常照片記錄 -->
+            <div class="work-card reveal" 
                  data-type="image" 
                  data-title="日常照片記錄" 
                  data-desc="記錄日常生活中的精彩瞬間與光影捕捉，收錄 11 張生活影像。"
@@ -132,7 +142,7 @@
                         <span class="work-card__type-badge">日常照片</span>
                         <span class="work-card__count-badge">11 張照片</span>
                     </div>
-                    <img src="img1 (1).jpg" alt="日常照片記錄" class="work-card__img">
+                    <img src="img1 (1).jpg" alt="日常照片記錄" class="work-card__img" loading="lazy" decoding="async">
                     <div class="work-card__slide-indicator">1 / 11</div>
                 </div>
                 <div class="work-card__content">
@@ -147,7 +157,7 @@
             </div>
 
             <!-- 作品 2：我推 (常闇トワ - Tokoyami Towa) -->
-            <div class="work-card work-card--oshi" 
+            <div class="work-card work-card--oshi reveal" 
                  data-type="oshi" 
                  data-title="我推 — 常闇トワ (Tokoyami Towa)" 
                  data-desc="Hololive 4期生，擁有強烈感染力低音與無敵歌唱實力的小惡魔 VTuber。收錄 5 張精選畫作與寫真。"
@@ -163,7 +173,7 @@
                         <span class="work-card__type-badge work-card__type-badge--oshi">👾 我推</span>
                         <span class="work-card__count-badge work-card__count-badge--oshi">5 張照片</span>
                     </div>
-                    <img src="towa1.jpg" alt="常闇トワ" class="work-card__img">
+                    <img src="towa1.jpg" alt="常闇トワ" class="work-card__img" loading="lazy" decoding="async">
                     <div class="work-card__slide-indicator">1 / 5</div>
                 </div>
                 <div class="work-card__content">
@@ -188,8 +198,8 @@
                 </div>
             </div>
 
-            <!-- 作品 3：動態影像展示 (影片專案) -->
-            <div class="work-card" 
+            <!-- 作品 3：動態影像展示 -->
+            <div class="work-card reveal" 
                  data-type="video" 
                  data-title="動態影像展示" 
                  data-desc="結合視覺特效與短片剪輯的創意呈現，展現角色精緻細節與節奏感。"
@@ -200,7 +210,7 @@
                     <div class="work-card__badge-group">
                         <span class="work-card__type-badge work-card__type-badge--video">影片</span>
                     </div>
-                    <img src="https://via.placeholder.com/400x225/0284c7/ffffff?text=Gura+Video+Preview" alt="動態影像展示" class="work-card__img">
+                    <img src="https://via.placeholder.com/400x225/0284c7/ffffff?text=Gura+Video+Preview" alt="動態影像展示" class="work-card__img" loading="lazy" decoding="async">
                     <div class="work-card__play-btn">
                         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
                     </div>
@@ -216,8 +226,8 @@
                 </div>
             </div>
 
-            <!-- 作品 4：AI 模組整合開發 (多圖輪播) -->
-            <div class="work-card" 
+            <!-- 作品 4：AI 模組整合開發 -->
+            <div class="work-card reveal" 
                  data-type="ai" 
                  data-title="AI 模組整合開發" 
                  data-desc="硬體感測器與液晶螢幕顯示整合，結合嵌入式邏輯與物聯網數據監控。"
@@ -230,7 +240,7 @@
                         <span class="work-card__type-badge">AI / IoT</span>
                         <span class="work-card__count-badge">2 張照片</span>
                     </div>
-                    <img src="aiassist.jpg" alt="AI 模組整合開發" class="work-card__img">
+                    <img src="aiassist.jpg" alt="AI 模組整合開發" class="work-card__img" loading="lazy" decoding="async">
                     <div class="work-card__slide-indicator">1 / 2</div>
                 </div>
                 <div class="work-card__content">
@@ -248,26 +258,22 @@
         </div>
     </section>
 
-    <!-- Lightbox Modal 全螢幕多媒體輪播預覽 -->
+    <!-- 5. Lightbox Modal 全螢幕多媒體輪播預覽 -->
     <div class="lightbox" id="lightbox" aria-hidden="true">
         <div class="lightbox__overlay" id="lightboxOverlay"></div>
         <div class="lightbox__container">
             <button class="lightbox__close" id="lightboxClose" aria-label="關閉預覽">&times;</button>
             
-            <!-- 輪播切換按鈕 -->
             <button class="lightbox__nav lightbox__nav--prev" id="lightboxPrev" aria-label="上一張">&#8249;</button>
             <button class="lightbox__nav lightbox__nav--next" id="lightboxNext" aria-label="下一張">&#8250;</button>
 
-            <!-- 媒體播放/顯示區 -->
             <div class="lightbox__media" id="lightboxMedia"></div>
 
-            <!-- 輪播頁碼指示區 -->
             <div class="lightbox__controls">
                 <div class="lightbox__dots" id="lightboxDots"></div>
                 <div class="lightbox__counter" id="lightboxCounter">1 / 1</div>
             </div>
 
-            <!-- 文字說明與 Wiki 捷徑按鈕 -->
             <div class="lightbox__caption">
                 <div class="lightbox__caption-header">
                     <h3 id="lightboxTitle">作品標題</h3>
@@ -281,7 +287,7 @@
         </div>
     </div>
 
-    <!-- 頁尾 -->
+    <!-- 6. 頁尾 -->
     <footer class="footer container">
         <div class="footer__inner">
             <p class="footer__copy">&copy; 2026 ERBLOG. All rights reserved.</p>
@@ -299,7 +305,14 @@
         </div>
     </footer>
 
-    <!-- 引入 JavaScript 控制腳本 -->
+    <!-- 7. 回到頂部懸浮按鈕 -->
+    <button class="back-to-top" id="backToTop" aria-label="回到頂部" title="回到頂部">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="18 15 12 9 6 15"></polyline>
+        </svg>
+    </button>
+
+    <!-- 腳本引入 -->
     <script src="app.js"></script>
 </body>
 </html>
