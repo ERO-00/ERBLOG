@@ -1,70 +1,62 @@
 /* ==========================================
-   1. Nothing OS 主題變數與明暗模式 (Light / Dark)
+   ERBLOG // NOTHING OS STYLE - FULL STYLESHEET
    ========================================== */
+
+/* 1. CSS 全域變數定義 (暗色/亮色主題) */
 :root {
   --bg-primary: #0a0a0a;
   --bg-secondary: #121212;
   --bg-card: #181818;
-  --text-main: #ffffff;
+  --text-main: #f0f0f0;
   --text-muted: #888888;
-  --accent-red: #ff2a2a;
   --border-color: #262626;
   --border-focus: #404040;
-  --dot-color: rgba(255, 255, 255, 0.12);
+  --accent-red: #ff2a2a;
   --font-mono: 'Space Mono', monospace;
   --font-sans: 'Noto Sans TC', sans-serif;
-  --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-/* 明亮主題變數 (Light Mode) */
+/* 明亮主題覆蓋 */
 body.light-theme {
-  --bg-primary: #f4f4f5;
-  --bg-secondary: #e4e4e7;
+  --bg-primary: #f4f4f6;
+  --bg-secondary: #e8e8ed;
   --bg-card: #ffffff;
-  --text-main: #09090b;
-  --text-muted: #71717a;
-  --accent-red: #ff2a2a;
-  --border-color: #d4d4d8;
-  --border-focus: #a1a1aa;
-  --dot-color: rgba(0, 0, 0, 0.12);
+  --text-main: #111111;
+  --text-muted: #666666;
+  --border-color: #d0d0d5;
+  --border-focus: #a0a0a5;
+  --accent-red: #e02424;
 }
 
+/* 2. Body 與全域佈局 */
 body {
-  font-family: var(--font-sans);
   background-color: var(--bg-primary);
   color: var(--text-main);
-  line-height: 1.6;
-  position: relative;
+  font-family: var(--font-sans);
   overflow-x: hidden;
   transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-/* 點陣背景圖層 */
-.dot-matrix-bg {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
-  background-size: 20px 20px;
-  pointer-events: none;
-  z-index: 0;
 }
 
 body.modal-open {
   overflow: hidden;
 }
 
-.container {
-  max-width: 1140px;
-  margin: 0 auto;
-  padding: 0 24px;
-  position: relative;
-  z-index: 1;
+/* 背景點陣圖層 */
+.dot-matrix-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-image: radial-gradient(var(--border-color) 1px, transparent 1px);
+  background-size: 24px 24px;
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: -1;
 }
 
-/* 紅點特徵元素 */
+/* 經典小紅點標記 */
 .red-dot {
   display: inline-block;
   width: 8px;
@@ -72,12 +64,10 @@ body.modal-open {
   background-color: var(--accent-red);
   border-radius: 50%;
   margin-right: 6px;
-  box-shadow: 0 0 8px rgba(255, 42, 42, 0.6);
+  vertical-align: middle;
 }
 
-/* ==========================================
-   2. 開場展開動畫 (Intro Curtain Animation)
-   ========================================== */
+/* 3. 開場中間展開動畫幕簾 */
 .intro-curtain {
   position: fixed;
   top: 0;
@@ -93,31 +83,39 @@ body.modal-open {
 .curtain-panel {
   width: 100%;
   height: 50vh;
-  background-color: #000000;
+  background: #000000;
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1);
-  color: #ffffff;
-  font-family: var(--font-mono);
-  border-bottom: 1px solid #222;
 }
 
 .curtain-top {
   align-items: flex-end;
   padding-bottom: 15px;
-  font-size: 1.4rem;
-  letter-spacing: 2px;
+  border-bottom: 1px solid var(--accent-red);
 }
 
 .curtain-bottom {
   align-items: flex-start;
   padding-top: 15px;
-  font-size: 0.85rem;
-  color: var(--text-muted);
 }
 
-/* 載入完成後向上下展開 */
+.intro-text {
+  font-family: var(--font-mono);
+  font-size: 1.6rem;
+  color: #ffffff;
+  letter-spacing: 2px;
+  font-weight: 700;
+}
+
+.intro-sub {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--accent-red);
+  letter-spacing: 1px;
+}
+
 .intro-curtain.loaded .curtain-top {
   transform: translateY(-100%);
 }
@@ -126,29 +124,25 @@ body.modal-open {
   transform: translateY(100%);
 }
 
-/* ==========================================
-   3. 導覽列與主題切換按鈕
-   ========================================== */
+/* 4. 導覽列 Navbar */
 .navbar {
-  position: fixed;
+  position: sticky;
   top: 0;
-  left: 0;
-  width: 100%;
-  background-color: rgba(10, 10, 10, 0.85);
-  backdrop-filter: blur(12px);
   z-index: 100;
+  background: rgba(10, 10, 10, 0.85);
+  backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border-color);
-  transition: background-color 0.3s ease;
+  transition: background 0.3s ease;
 }
 
 body.light-theme .navbar {
-  background-color: rgba(244, 244, 245, 0.85);
+  background: rgba(244, 244, 246, 0.85);
 }
 
 .nav-container {
-  max-width: 1140px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 1rem 24px;
+  padding: 16px 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -156,17 +150,15 @@ body.light-theme .navbar {
 
 .logo {
   font-family: var(--font-mono);
-  font-weight: 700;
   font-size: 1.2rem;
-  letter-spacing: 2px;
-  display: flex;
-  align-items: center;
+  font-weight: 700;
+  letter-spacing: 1px;
 }
 
 .nav-right {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 12px;
 }
 
 .nav-links {
@@ -182,46 +174,31 @@ body.light-theme .navbar {
 }
 
 .nav-links a:hover {
-  color: var(--text-main);
-  text-decoration: underline;
-  text-underline-offset: 6px;
-}
-
-.theme-toggle-btn {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  color: var(--text-main);
-  padding: 6px 12px;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  cursor: pointer;
-  transition: var(--transition);
-}
-
-.theme-toggle-btn:hover {
-  border-color: var(--accent-red);
   color: var(--accent-red);
 }
 
-/* ==========================================
-   4. Hero 個人簡介區塊
-   ========================================== */
+.mobile-menu-btn {
+  display: none;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 6px 10px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+/* 5. Hero 個人簡介區塊 */
 .hero-section {
-  padding: 160px 24px 80px;
-  position: relative;
-  z-index: 1;
+  padding: 80px 24px 60px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .hero-container {
-  max-width: 800px;
-  margin: 0 auto;
   display: flex;
   align-items: center;
   gap: 40px;
-  background-color: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  padding: 32px;
-  border-radius: 2px;
 }
 
 .avatar-wrapper {
@@ -230,76 +207,86 @@ body.light-theme .navbar {
 }
 
 .avatar-img {
-  width: 130px;
-  height: 130px;
-  border-radius: 2px;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
   object-fit: cover;
-  border: 1px solid var(--border-focus);
+  border: 2px solid var(--border-color);
+  padding: 4px;
+  background: var(--bg-secondary);
 }
 
 .avatar-badge {
   position: absolute;
-  bottom: -10px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: var(--bg-primary);
-  border: 1px solid var(--accent-red);
-  color: var(--accent-red);
+  bottom: 6px;
+  right: 6px;
+  background: var(--accent-red);
+  color: #fff;
   font-family: var(--font-mono);
   font-size: 0.65rem;
-  padding: 2px 8px;
-  letter-spacing: 1px;
+  padding: 2px 6px;
+  border-radius: 2px;
+}
+
+.hero-content {
+  flex-grow: 1;
 }
 
 .sys-tag {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: var(--text-muted);
+  font-size: 0.8rem;
+  color: var(--accent-red);
   margin-bottom: 8px;
 }
 
 .hero-content h1 {
-  font-size: 2rem;
-  letter-spacing: 1px;
+  font-size: 2.2rem;
+  font-weight: 700;
   margin-bottom: 8px;
+  line-height: 1.2;
 }
 
 .highlight {
-  color: var(--text-main);
-  border-bottom: 2px solid var(--accent-red);
+  color: var(--accent-red);
 }
 
 .subtitle {
   font-family: var(--font-mono);
+  font-size: 1.05rem;
   color: var(--text-muted);
-  font-size: 0.9rem;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
+  min-height: 1.6em;
 }
 
 .bio {
   font-size: 0.95rem;
+  color: var(--text-main);
+  max-width: 600px;
+  line-height: 1.7;
 }
 
-/* ==========================================
-   5. 作品集與幻燈片自動切換樣式
-   ========================================== */
+/* 6. 作品集區塊 */
 .portfolio-section {
-  padding: 60px 0;
+  padding: 60px 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.container {
+  width: 100%;
 }
 
 .section-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  margin-bottom: 2rem;
-  border-bottom: 1px dashed var(--border-color);
+  border-bottom: 1px solid var(--border-color);
   padding-bottom: 12px;
+  margin-bottom: 30px;
 }
 
 .section-title {
-  font-family: var(--font-mono);
-  font-size: 1.6rem;
-  letter-spacing: 1px;
+  font-size: 1.5rem;
   font-weight: 700;
 }
 
@@ -311,100 +298,95 @@ body.light-theme .navbar {
 
 .filter-buttons {
   display: flex;
-  flex-wrap: wrap;
   gap: 10px;
-  margin-bottom: 32px;
+  flex-wrap: wrap;
+  margin-bottom: 30px;
 }
 
 .filter-btn {
-  background-color: var(--bg-secondary);
-  color: var(--text-muted);
+  background: var(--bg-secondary);
   border: 1px solid var(--border-color);
-  padding: 8px 18px;
+  color: var(--text-muted);
+  padding: 8px 16px;
   font-family: var(--font-mono);
   font-size: 0.8rem;
   cursor: pointer;
   transition: var(--transition);
 }
 
-.filter-btn:hover {
-  border-color: var(--text-muted);
+.filter-btn:hover, .filter-btn.active {
+  border-color: var(--accent-red);
   color: var(--text-main);
+  background: var(--bg-card);
 }
 
 .filter-btn.active {
-  background-color: var(--text-main);
-  color: var(--bg-primary);
-  border-color: var(--text-main);
-  font-weight: 700;
+  border-left: 3px solid var(--accent-red);
 }
 
-/* 作品卡片網格 */
 .portfolio-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
 }
 
 .card {
-  background-color: var(--bg-card);
+  background: var(--bg-card);
   border: 1px solid var(--border-color);
+  overflow: hidden;
   cursor: pointer;
   transition: var(--transition);
   display: flex;
   flex-direction: column;
-  position: relative;
 }
 
 .card:hover {
   border-color: var(--accent-red);
   transform: translateY(-4px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 .card-media-wrapper {
   position: relative;
   width: 100%;
-  padding-top: 66.66%;
-  background-color: #000;
+  aspect-ratio: 4 / 3;
+  background: var(--bg-secondary);
   overflow: hidden;
-  border-bottom: 1px solid var(--border-color);
 }
 
 .card-media-wrapper img {
-  position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: opacity 0.6s ease, transform 0.5s ease;
+  transition: opacity 0.3s ease, transform 0.5s ease;
+}
+
+.card:hover .card-media-wrapper img {
+  transform: scale(1.03);
 }
 
 .card-badge {
   position: absolute;
   top: 10px;
-  right: 10px;
-  background-color: rgba(0, 0, 0, 0.85);
-  border: 1px solid var(--border-color);
-  color: #fff;
-  padding: 2px 8px;
+  left: 10px;
+  background: rgba(0, 0, 0, 0.75);
+  color: #ffffff;
   font-family: var(--font-mono);
   font-size: 0.7rem;
-  z-index: 2;
+  padding: 4px 8px;
+  border-left: 2px solid var(--accent-red);
+  backdrop-filter: blur(4px);
 }
 
 .card-slideshow-indicator {
   position: absolute;
-  bottom: 8px;
-  right: 8px;
-  background: rgba(0, 0, 0, 0.7);
+  bottom: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.75);
   color: var(--accent-red);
   font-family: var(--font-mono);
   font-size: 0.65rem;
-  padding: 2px 6px;
-  border: 1px solid var(--accent-red);
-  z-index: 2;
+  padding: 3px 6px;
+  border-radius: 2px;
 }
 
 .card-info {
@@ -415,29 +397,27 @@ body.light-theme .navbar {
 }
 
 .card-title {
-  font-size: 1.05rem;
-  margin-bottom: 6px;
+  font-size: 1.1rem;
   font-weight: 500;
+  margin-bottom: 6px;
 }
 
 .card-desc {
   font-size: 0.85rem;
   color: var(--text-muted);
+  line-height: 1.5;
 }
 
-/* ==========================================
-   6. 聯絡方式與按鈕
-   ========================================== */
+/* 7. 聯絡資訊與頁尾 */
 .contact-section {
-  padding: 80px 0;
-  background-color: var(--bg-secondary);
-  border-top: 1px solid var(--border-color);
-  border-bottom: 1px solid var(--border-color);
+  padding: 60px 24px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .contact-sub {
   color: var(--text-muted);
-  margin-bottom: 32px;
+  margin-bottom: 24px;
 }
 
 .contact-links {
@@ -447,63 +427,65 @@ body.light-theme .navbar {
 }
 
 .contact-btn {
-  display: inline-flex;
-  flex-direction: column;
-  background-color: var(--bg-primary);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-card);
   border: 1px solid var(--border-color);
-  padding: 16px 24px;
-  min-width: 200px;
+  padding: 12px 20px;
   transition: var(--transition);
 }
 
 .contact-btn:hover {
   border-color: var(--accent-red);
+  transform: translateX(4px);
 }
 
 .btn-tag {
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   color: var(--accent-red);
-  margin-bottom: 4px;
+  background: var(--bg-secondary);
+  padding: 2px 6px;
 }
 
 .btn-text {
+  font-size: 0.9rem;
   font-weight: 500;
-  font-size: 1rem;
 }
 
-/* 頁尾 */
 .footer {
-  padding: 32px 0;
+  border-top: 1px solid var(--border-color);
+  padding: 30px 24px;
+  margin-top: 60px;
+  background: var(--bg-secondary);
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   font-family: var(--font-mono);
   font-size: 0.75rem;
   color: var(--text-muted);
 }
 
-.footer-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-/* ==========================================
-   7. Lightbox 彈窗
-   ========================================== */
+/* 8. Lightbox 彈窗模組 */
 .lightbox {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
   z-index: 1000;
   display: flex;
   justify-content: center;
   align-items: center;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.25s ease;
+  transition: opacity 0.3s ease;
 }
 
 .lightbox.active {
@@ -517,78 +499,59 @@ body.light-theme .navbar {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.9);
+  background: rgba(0, 0, 0, 0.88);
   backdrop-filter: blur(10px);
 }
 
 .lightbox-container {
   position: relative;
   z-index: 1001;
-  width: 88vw;
-  max-width: 900px;
-  background-color: var(--bg-secondary);
-  border: 1px solid var(--border-focus);
+  max-width: 90vw;
+  max-height: 90vh;
   display: flex;
   flex-direction: column;
+  align-items: center;
 }
 
 .lightbox-close {
   position: absolute;
-  top: 12px;
-  right: 16px;
-  background: none;
+  top: -40px;
+  right: 0;
+  background: transparent;
   border: none;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-  font-size: 0.9rem;
-  cursor: pointer;
-  z-index: 1002;
-  transition: var(--transition);
-}
-
-.lightbox-close:hover {
   color: var(--accent-red);
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  cursor: pointer;
 }
 
 .lightbox-media-wrapper {
   position: relative;
-  width: 100%;
-  height: 62vh;
-  background-color: #000;
   display: flex;
-  justify-content: center;
   align-items: center;
-  border-bottom: 1px solid var(--border-color);
+  justify-content: center;
 }
 
-.lightbox-content {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.lightbox-content img,
-.lightbox-content video {
-  max-width: 100%;
-  max-height: 100%;
+.lightbox-content img, .lightbox-content video {
+  max-width: 80vw;
+  max-height: 70vh;
   object-fit: contain;
+  border: 1px solid var(--border-color);
+  background: #000;
 }
 
 .lightbox-nav {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.6);
   border: 1px solid var(--border-color);
   color: #fff;
-  font-family: var(--font-mono);
-  font-size: 0.9rem;
   padding: 12px 16px;
   cursor: pointer;
-  z-index: 1002;
+  font-size: 1.2rem;
   transition: var(--transition);
+  z-index: 1002;
 }
 
 .lightbox-nav:hover {
@@ -596,90 +559,265 @@ body.light-theme .navbar {
   color: var(--accent-red);
 }
 
-.lightbox-nav.prev { left: 12px; }
-.lightbox-nav.next { right: 12px; }
+.lightbox-nav.prev { left: -60px; }
+.lightbox-nav.next { right: -60px; }
 
 .lightbox-info {
-  padding: 20px;
-  position: relative;
+  margin-top: 16px;
+  text-align: center;
+  font-family: var(--font-mono);
 }
 
 .lightbox-info h3 {
-  font-size: 1.2rem;
-  margin-bottom: 4px;
+  font-size: 1.1rem;
+  color: #ffffff;
 }
 
 .lightbox-info p {
   font-size: 0.85rem;
   color: var(--text-muted);
+  margin-top: 4px;
 }
 
 .lightbox-counter {
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-  font-family: var(--font-mono);
+  display: inline-block;
+  margin-top: 8px;
   font-size: 0.75rem;
-  color: var(--text-muted);
+  color: var(--accent-red);
 }
 
-/* ==========================================
-   8. 返回頂部懸浮按鈕 (Back to Top)
-   ========================================== */
+/* 9. 返回頂部按鈕 */
 .back-to-top {
   position: fixed;
-  bottom: 28px;
-  right: 28px;
-  background-color: var(--bg-card);
-  color: var(--text-main);
+  bottom: 24px;
+  right: 24px;
+  background: var(--bg-card);
   border: 1px solid var(--border-color);
+  color: var(--text-main);
   padding: 10px 14px;
   font-family: var(--font-mono);
   font-size: 0.75rem;
+  cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
-  cursor: pointer;
-  z-index: 999;
+  gap: 2px;
   opacity: 0;
-  visibility: hidden;
   pointer-events: none;
   transition: var(--transition);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  z-index: 90;
 }
 
 .back-to-top.show {
   opacity: 1;
-  visibility: visible;
   pointer-events: auto;
 }
 
 .back-to-top:hover {
   border-color: var(--accent-red);
   color: var(--accent-red);
-  transform: translateY(-2px);
-}
-
-.back-to-top .arrow {
-  font-size: 1.1rem;
-  line-height: 1;
 }
 
 /* ==========================================
-   9. 響應式微調 (RWD)
+   10. Nothing OS 特色功能樣式補丁
    ========================================== */
+
+/* 導覽列通用按鈕 */
+.nav-btn {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 6px 10px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.nav-btn:hover {
+  border-color: var(--accent-red);
+  color: var(--accent-red);
+}
+
+/* 點陣即時時鐘 Widget */
+.matrix-clock-widget {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--accent-red);
+  background: rgba(255, 42, 42, 0.08);
+  border: 1px solid rgba(255, 42, 42, 0.25);
+  padding: 4px 10px;
+  border-radius: 2px;
+  letter-spacing: 1px;
+}
+
+/* 打字機 Cursor 光標閃爍效果 */
+.typing-cursor {
+  display: inline-block;
+  color: var(--accent-red);
+  font-weight: bold;
+  animation: blink 0.8s infinite;
+  margin-left: 2px;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* 快捷鍵命令列 Command Palette (Ctrl + K) */
+.cmd-palette {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 2000;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 15vh;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.cmd-palette.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.cmd-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+}
+
+.cmd-box {
+  position: relative;
+  z-index: 2001;
+  width: 90vw;
+  max-width: 600px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--accent-red);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.cmd-header {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-card);
+}
+
+.cmd-prompt {
+  font-family: var(--font-mono);
+  color: var(--accent-red);
+  font-weight: bold;
+  margin-right: 12px;
+}
+
+.cmd-header input {
+  flex-grow: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+}
+
+.cmd-badge {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.cmd-list {
+  list-style: none;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.cmd-item {
+  padding: 12px 16px;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--text-main);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.cmd-item:hover, .cmd-item.selected {
+  background: var(--accent-red);
+  color: #ffffff;
+}
+
+.cmd-item:hover .cmd-tag, .cmd-item.selected .cmd-tag {
+  color: #ffffff;
+}
+
+.cmd-tag {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.cmd-empty {
+  padding: 20px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* 11. 行動端 RWD 響應式微調 */
 @media (max-width: 768px) {
   .hero-container {
     flex-direction: column;
     text-align: center;
-    padding: 24px;
   }
 
   .nav-links {
-    display: none; /* 手機版簡化，保留切換按鈕 */
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    flex-direction: column;
+    padding: 16px 24px;
+    display: none;
   }
 
-  .lightbox-media-wrapper {
-    height: 45vh;
+  .nav-links.active {
+    display: flex;
+  }
+
+  .mobile-menu-btn {
+    display: block;
+  }
+
+  .matrix-clock-widget, .cmd-trigger-btn {
+    display: none;
+  }
+
+  .lightbox-nav.prev { left: 10px; }
+  .lightbox-nav.next { right: 10px; }
+
+  .footer-content {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
   }
 }
