@@ -1,404 +1,313 @@
-// app.js — ERBLOG Interactive Script
+/**
+ * 作品集資料設定
+ */
+const portfolioData = [
+  {
+    id: 1,
+    title: "常闇永遠 精選創作集",
+    category: "gallery",
+    categoryLabel: "相片集錦",
+    desc: "精選相關插畫與視覺創作記錄。",
+    cover: "towa1.jpg",
+    items: [
+      { type: "image", src: "towa1.jpg", title: "常闇永遠 - 01", desc: "視覺插畫作品 1" },
+      { type: "image", src: "towa2.jpg", title: "常闇永遠 - 02", desc: "視覺插畫作品 2" },
+      { type: "image", src: "towa3.jpg", title: "常闇永遠 - 03", desc: "視覺插畫作品 3" },
+      { type: "image", src: "towa4.jpg", title: "常闇永遠 - 04", desc: "視覺插畫作品 4" },
+      { type: "image", src: "towa5.jpg", title: "常闇永遠 - 05", desc: "視覺插畫作品 5" }
+    ]
+  },
+  {
+    id: 2,
+    title: "Gura 動態展示影片",
+    category: "video",
+    categoryLabel: "動態影像",
+    desc: "短篇動態短片與剪輯記錄。",
+    cover: "gura_cover.jpg",
+    items: [
+      { type: "video", src: "gura.mp4", title: "Gura 動態影片", desc: "高畫質影片剪輯展示" }
+    ]
+  },
+  {
+    id: 3,
+    title: "AI 輔助設計概念",
+    category: "image",
+    categoryLabel: "精選插畫",
+    desc: "結合生成式 AI 工具輔助進行之概念視覺設計。",
+    cover: "aiassist.jpg",
+    items: [
+      { type: "image", src: "aiassist.jpg", title: "AI 設計概念 01", desc: "初稿概念生成" },
+      { type: "image", src: "aiassist_3.jpg", title: "AI 設計概念 02", desc: "細節強化與後製" }
+    ]
+  },
+  {
+    id: 4,
+    title: "日常隨筆記錄",
+    category: "image",
+    categoryLabel: "精選插畫",
+    desc: "日常生活隨筆與視覺記錄。",
+    cover: "img1 (1).jpg",
+    items: [
+      { type: "image", src: "img1 (1).jpg", title: "日常照片記錄 01", desc: "日常生活隨筆與視覺記錄。" }
+    ]
+  }
+];
 
-document.addEventListener('DOMContentLoaded', () => {
+// DOM 元素引用
+const gridContainer = document.getElementById('portfolio-grid');
+const filterBtns = document.querySelectorAll('.filter-btn');
 
-    // -------------------------------------------------------------
-    // 0. 開場中間展開動畫控制 (Intro Unfold Curtain)
-    // -------------------------------------------------------------
-    const introCurtain = document.getElementById('introCurtain');
+const lightbox = document.getElementById('lightbox');
+const lightboxOverlay = document.getElementById('lightbox-overlay');
+const lightboxClose = document.getElementById('lightbox-close');
+const lightboxContent = document.getElementById('lightbox-content');
+const lightboxTitle = document.getElementById('lightbox-title');
+const lightboxDesc = document.getElementById('lightbox-desc');
+const lightboxCounter = document.getElementById('lightbox-counter');
+const prevBtn = document.getElementById('lightbox-prev');
+const nextBtn = document.getElementById('lightbox-next');
+
+const backToTopBtn = document.getElementById('back-to-top');
+const themeToggleBtn = document.getElementById('theme-toggle');
+const themeIcon = document.getElementById('theme-icon');
+const introCurtain = document.getElementById('intro-curtain');
+
+// 狀態管理
+let currentGallery = [];
+let currentIndex = 0;
+let slideshowIntervals = [];
+
+/**
+ * 1. 開場展開動畫控制
+ */
+function handleIntroAnimation() {
+  setTimeout(() => {
+    if (introCurtain) {
+      introCurtain.classList.add('loaded');
+    }
+  }, 600);
+}
+
+/**
+ * 2. 亮暗主題切換控制 (Light / Dark)
+ */
+function setupThemeToggle() {
+  const savedTheme = localStorage.getItem('erblog_theme');
+  if (savedTheme === 'light') {
+    document.body.classList.add('light-theme');
+    if (themeIcon) themeIcon.textContent = '[ LIGHT ]';
+  }
+
+  themeToggleBtn.addEventListener('click', () => {
+    document.body.classList.toggle('light-theme');
+    const isLight = document.body.classList.contains('light-theme');
     
-    // 開場展示 600ms 後展開遮罩，並解鎖頁面滾動
-    setTimeout(() => {
-        if (introCurtain) {
-            introCurtain.classList.add('active');
-            document.body.classList.remove('is-loading');
-            
-            // 動畫徹底結束後隱藏遮罩 DOM
-            setTimeout(() => {
-                introCurtain.style.display = 'none';
-            }, 1200);
-        }
-    }, 600);
-
-    // -------------------------------------------------------------
-    // 1. 深淺色主題切換 (Theme Toggle)
-    // -------------------------------------------------------------
-    const themeToggleBtn = document.querySelector('[data-theme-toggle]');
-    const htmlElement = document.documentElement;
-
-    const sunIcon = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="5"></circle>
-            <line x1="12" y1="1" x2="12" y2="3"></line>
-            <line x1="12" y1="21" x2="12" y2="23"></line>
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-            <line x1="1" y1="12" x2="3" y2="12"></line>
-            <line x1="21" y1="12" x2="23" y2="12"></line>
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-        </svg>`;
-    
-    const moonIcon = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-        </svg>`;
-
-    function setTheme(theme) {
-        htmlElement.setAttribute('data-theme', theme);
-        localStorage.setItem('erblog-theme', theme);
-        if (themeToggleBtn) {
-            themeToggleBtn.innerHTML = theme === 'dark' ? sunIcon : moonIcon;
-            themeToggleBtn.setAttribute('aria-label', theme === 'dark' ? '切換至淺色模式' : '切換至深色模式');
-        }
+    if (themeIcon) {
+      themeIcon.textContent = isLight ? '[ LIGHT ]' : '[ DARK ]';
     }
+    localStorage.setItem('erblog_theme', isLight ? 'light' : 'dark');
+  });
+}
 
-    // 初始化按鈕圖示與狀態
-    const currentTheme = htmlElement.getAttribute('data-theme') || 'light';
-    setTheme(currentTheme);
+/**
+ * 3. 清除並重新設定卡片縮圖自動幻燈片（Slideshow）
+ */
+function clearSlideshows() {
+  slideshowIntervals.forEach(interval => clearInterval(interval));
+  slideshowIntervals = [];
+}
 
-    if (themeToggleBtn) {
-        themeToggleBtn.addEventListener('click', () => {
-            const activeTheme = htmlElement.getAttribute('data-theme');
-            setTheme(activeTheme === 'dark' ? 'light' : 'dark');
-        });
-    }
+function startCardSlideshows() {
+  clearSlideshows();
 
-    // -------------------------------------------------------------
-    // 2. 打字機動態特效 (Typing Effect)
-    // -------------------------------------------------------------
-    const typingTextElem = document.getElementById('typingText');
-    if (typingTextElem) {
-        const phrases = ['嵌入式硬體開發', 'AI 模組整合', '多媒體視覺設計', 'Web 前端互動 design'];
-        let phraseIdx = 0;
-        let charIdx = 0;
-        let isDeleting = false;
+  portfolioData.forEach(item => {
+    // 僅針對多於 1 張圖片的作品啟用自動縮圖輪播
+    if (item.items && item.items.length > 1) {
+      const cardImg = document.querySelector(`.card[data-id="${item.id}"] .card-media-wrapper img`);
+      if (!cardImg) return;
 
-        function type() {
-            const currentPhrase = phrases[phraseIdx];
-            if (isDeleting) {
-                typingTextElem.textContent = currentPhrase.substring(0, charIdx - 1);
-                charIdx--;
-            } else {
-                typingTextElem.textContent = currentPhrase.substring(0, charIdx + 1);
-                charIdx++;
-            }
-
-            let typeSpeed = isDeleting ? 40 : 80;
-
-            if (!isDeleting && charIdx === currentPhrase.length) {
-                typeSpeed = 1800;
-                isDeleting = true;
-            } else if (isDeleting && charIdx === 0) {
-                isDeleting = false;
-                phraseIdx = (phraseIdx + 1) % phrases.length;
-                typeSpeed = 400;
-            }
-
-            setTimeout(type, typeSpeed);
+      let imgIndex = 0;
+      const interval = setInterval(() => {
+        imgIndex = (imgIndex + 1) % item.items.length;
+        const nextMedia = item.items[imgIndex];
+        if (nextMedia && nextMedia.type === 'image') {
+          cardImg.style.opacity = '0.3';
+          setTimeout(() => {
+            cardImg.src = nextMedia.src;
+            cardImg.style.opacity = '1';
+          }, 300);
         }
-        type();
+      }, 3500); // 每 3.5 秒輪播一張
+
+      slideshowIntervals.push(interval);
     }
+  });
+}
 
-    // -------------------------------------------------------------
-    // 3. 滾動進入動畫 (Scroll Reveal via Intersection Observer)
-    // -------------------------------------------------------------
-    const revealElements = document.querySelectorAll('.reveal');
-    if ('IntersectionObserver' in window) {
-        const revealObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('revealed');
-                    revealObserver.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.1 });
+/**
+ * 4. 渲染作品卡片網格
+ */
+function renderPortfolio(data) {
+  if (!gridContainer) return;
+  gridContainer.innerHTML = '';
 
-        revealElements.forEach(el => revealObserver.observe(el));
+  data.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.setAttribute('data-id', item.id);
+
+    const hasSlideshow = item.items && item.items.length > 1;
+
+    card.innerHTML = `
+      <div class="card-media-wrapper">
+        <img src="${item.cover}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/400x300/181818/ffffff?text=PREVIEW'">
+        <span class="card-badge">${item.categoryLabel}</span>
+        ${hasSlideshow ? `<span class="card-slideshow-indicator">SLIDESHOW [1/${item.items.length}]</span>` : ''}
+      </div>
+      <div class="card-info">
+        <h3 class="card-title">${item.title}</h3>
+        <p class="card-desc">${item.desc}</p>
+      </div>
+    `;
+
+    card.addEventListener('click', () => openLightbox(item));
+    gridContainer.appendChild(card);
+  });
+
+  startCardSlideshows();
+}
+
+/**
+ * 5. 分類篩選邏輯
+ */
+function setupFilters() {
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const filter = btn.getAttribute('data-filter');
+      if (filter === 'all') {
+        renderPortfolio(portfolioData);
+      } else {
+        const filteredData = portfolioData.filter(item => item.category === filter);
+        renderPortfolio(filteredData);
+      }
+    });
+  });
+}
+
+/**
+ * 6. Lightbox 彈窗模組
+ */
+function openLightbox(portfolioItem) {
+  currentGallery = portfolioItem.items;
+  currentIndex = 0;
+  
+  updateLightboxContent();
+  lightbox.classList.add('active');
+  document.body.classList.add('modal-open');
+}
+
+function closeLightbox() {
+  lightbox.classList.remove('active');
+  document.body.classList.remove('modal-open');
+  
+  const video = lightboxContent.querySelector('video');
+  if (video) video.pause();
+  lightboxContent.innerHTML = '';
+}
+
+function updateLightboxContent() {
+  const media = currentGallery[currentIndex];
+  if (!media) return;
+
+  lightboxContent.innerHTML = '';
+
+  if (media.type === 'video') {
+    const video = document.createElement('video');
+    video.src = media.src;
+    video.controls = true;
+    video.autoplay = true;
+    lightboxContent.appendChild(video);
+  } else {
+    const img = document.createElement('img');
+    img.src = media.src;
+    img.alt = media.title;
+    img.onerror = () => { img.src = 'https://via.placeholder.com/800x600/181818/ffffff?text=Image+Not+Found'; };
+    lightboxContent.appendChild(img);
+  }
+
+  lightboxTitle.textContent = media.title || '';
+  lightboxDesc.textContent = media.desc || '';
+
+  if (currentGallery.length > 1) {
+    prevBtn.style.display = 'block';
+    nextBtn.style.display = 'block';
+    lightboxCounter.style.display = 'block';
+    lightboxCounter.textContent = `[ ${currentIndex + 1} / ${currentGallery.length} ]`;
+  } else {
+    prevBtn.style.display = 'none';
+    nextBtn.style.display = 'none';
+    lightboxCounter.style.display = 'none';
+  }
+}
+
+function navigateLightbox(direction) {
+  const video = lightboxContent.querySelector('video');
+  if (video) video.pause();
+
+  if (direction === 'next') {
+    currentIndex = (currentIndex + 1) % currentGallery.length;
+  } else {
+    currentIndex = (currentIndex - 1 + currentGallery.length) % currentGallery.length;
+  }
+  updateLightboxContent();
+}
+
+/**
+ * 7. 返回頂部 (Back to Top) 滾動控制
+ */
+function setupBackToTop() {
+  if (!backToTopBtn) return;
+
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 200) {
+      backToTopBtn.classList.add('show');
     } else {
-        revealElements.forEach(el => el.classList.add('revealed'));
+      backToTopBtn.classList.remove('show');
     }
+  });
 
-    // -------------------------------------------------------------
-    // 4. 回到頂部按鈕 (Back to Top Button)
-    // -------------------------------------------------------------
-    const backToTopBtn = document.getElementById('backToTop');
-    if (backToTopBtn) {
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 300) {
-                backToTopBtn.classList.add('show');
-            } else {
-                backToTopBtn.classList.remove('show');
-            }
-        });
-
-        backToTopBtn.addEventListener('click', () => {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        });
-    }
-
-    // -------------------------------------------------------------
-    // 5. 卡片預覽自動縮圖輪播 (Homepage Card Auto-Slideshow, 3.5s)
-    // -------------------------------------------------------------
-    let cardSlideshowIntervals = [];
-
-    function startCardSlideshows() {
-        stopCardSlideshows();
-
-        const cards = document.querySelectorAll('.work-card');
-
-        cards.forEach((card) => {
-            const rawGallery = card.getAttribute('data-gallery');
-            if (!rawGallery) return;
-
-            try {
-                const gallery = JSON.parse(rawGallery);
-                if (gallery.length <= 1) return;
-
-                let slideIdx = 0;
-                const imgElem = card.querySelector('.work-card__img');
-                const indicator = card.querySelector('.work-card__slide-indicator');
-
-                const interval = setInterval(() => {
-                    slideIdx = (slideIdx + 1) % gallery.length;
-                    const nextSlide = gallery[slideIdx];
-
-                    if (imgElem && nextSlide.type !== 'video') {
-                        imgElem.classList.add('fade-out');
-                        setTimeout(() => {
-                            imgElem.src = nextSlide.src;
-                            imgElem.classList.remove('fade-out');
-                        }, 250);
-                    }
-
-                    if (indicator) {
-                        indicator.textContent = `${slideIdx + 1} / ${gallery.length}`;
-                    }
-                }, 3500);
-
-                cardSlideshowIntervals.push(interval);
-            } catch (e) {
-                console.error('Card gallery parse error:', e);
-            }
-        });
-    }
-
-    function stopCardSlideshows() {
-        cardSlideshowIntervals.forEach(interval => clearInterval(interval));
-        cardSlideshowIntervals = [];
-    }
-
-    startCardSlideshows();
-
-    // -------------------------------------------------------------
-    // 6. 作品集分類篩選 (Portfolio Filter)
-    // -------------------------------------------------------------
-    const filterBtns = document.querySelectorAll('.filter-btn');
-    const workCards = document.querySelectorAll('.work-card');
-
-    filterBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            filterBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-
-            const filterValue = btn.getAttribute('data-filter');
-
-            workCards.forEach(card => {
-                const cardType = card.getAttribute('data-type');
-                if (filterValue === 'all' || cardType === filterValue) {
-                    card.style.display = 'block';
-                    setTimeout(() => {
-                        card.style.opacity = '1';
-                        card.style.transform = 'translateY(0)';
-                    }, 50);
-                } else {
-                    card.style.opacity = '0';
-                    card.style.transform = 'translateY(10px)';
-                    setTimeout(() => {
-                        card.style.display = 'none';
-                    }, 300);
-                }
-            });
-        });
+  backToTopBtn.addEventListener('click', () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
     });
+  });
+}
 
-    // -------------------------------------------------------------
-    // 7. Lightbox 全螢幕燈箱輪播 (Full Modal Preview)
-    // -------------------------------------------------------------
-    const lightbox = document.getElementById('lightbox');
-    const lightboxOverlay = document.getElementById('lightboxOverlay');
-    const lightboxClose = document.getElementById('lightboxClose');
-    const lightboxPrev = document.getElementById('lightboxPrev');
-    const lightboxNext = document.getElementById('lightboxNext');
-    const lightboxMedia = document.getElementById('lightboxMedia');
-    const lightboxDots = document.getElementById('lightboxDots');
-    const lightboxCounter = document.getElementById('lightboxCounter');
-    const lightboxTitle = document.getElementById('lightboxTitle');
-    const lightboxDesc = document.getElementById('lightboxDesc');
-    const lightboxWikiBtn = document.getElementById('lightboxWikiBtn');
+/**
+ * 8. 初始化執行
+ */
+document.addEventListener('DOMContentLoaded', () => {
+  handleIntroAnimation();
+  setupThemeToggle();
+  renderPortfolio(portfolioData);
+  setupFilters();
+  
+  // Lightbox 事件
+  lightboxClose.addEventListener('click', closeLightbox);
+  lightboxOverlay.addEventListener('click', closeLightbox);
+  prevBtn.addEventListener('click', () => navigateLightbox('prev'));
+  nextBtn.addEventListener('click', () => navigateLightbox('next'));
 
-    let currentGallery = [];
-    let currentIndex = 0;
-    let autoPlayTimer = null;
+  document.addEventListener('keydown', (e) => {
+    if (!lightbox.classList.contains('active')) return;
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft' && currentGallery.length > 1) navigateLightbox('prev');
+    if (e.key === 'ArrowRight' && currentGallery.length > 1) navigateLightbox('next');
+  });
 
-    function renderSlide(index) {
-        if (!currentGallery || currentGallery.length === 0) return;
-
-        currentIndex = (index + currentGallery.length) % currentGallery.length;
-        const item = currentGallery[currentIndex];
-
-        lightboxMedia.innerHTML = '';
-
-        if (item.type === 'video') {
-            const videoElem = document.createElement('video');
-            videoElem.src = item.src;
-            videoElem.controls = true;
-            videoElem.autoplay = true;
-            videoElem.className = 'lightbox__video';
-            lightboxMedia.appendChild(videoElem);
-        } else {
-            const imgElem = document.createElement('img');
-            imgElem.src = item.src;
-            imgElem.alt = item.title || '';
-            imgElem.className = 'lightbox__img';
-            lightboxMedia.appendChild(imgElem);
-        }
-
-        lightboxTitle.textContent = item.title || '';
-        lightboxDesc.textContent = item.desc || '';
-        lightboxCounter.textContent = `${currentIndex + 1} / ${currentGallery.length}`;
-
-        if (item.wiki) {
-            lightboxWikiBtn.href = item.wiki;
-            lightboxWikiBtn.style.display = 'inline-flex';
-        } else {
-            lightboxWikiBtn.style.display = 'none';
-        }
-
-        lightboxDots.innerHTML = '';
-        if (currentGallery.length > 1) {
-            lightboxDots.style.display = 'flex';
-            lightboxPrev.style.display = 'flex';
-            lightboxNext.style.display = 'flex';
-
-            currentGallery.forEach((_, i) => {
-                const dot = document.createElement('div');
-                dot.className = `lightbox__dot ${i === currentIndex ? 'active' : ''}`;
-                dot.addEventListener('click', () => {
-                    stopAutoPlay();
-                    renderSlide(i);
-                });
-                lightboxDots.appendChild(dot);
-            });
-        } else {
-            lightboxDots.style.display = 'none';
-            lightboxPrev.style.display = 'none';
-            lightboxNext.style.display = 'none';
-        }
-    }
-
-    function startAutoPlay() {
-        stopAutoPlay();
-        if (currentGallery.length > 1) {
-            autoPlayTimer = setInterval(() => {
-                renderSlide(currentIndex + 1);
-            }, 5000);
-        }
-    }
-
-    function stopAutoPlay() {
-        if (autoPlayTimer) {
-            clearInterval(autoPlayTimer);
-            autoPlayTimer = null;
-        }
-    }
-
-    function openLightbox(card) {
-        stopCardSlideshows();
-
-        try {
-            const rawGallery = card.getAttribute('data-gallery');
-            if (rawGallery) {
-                currentGallery = JSON.parse(rawGallery);
-            } else {
-                currentGallery = [{
-                    type: card.getAttribute('data-type') === 'video' ? 'video' : 'image',
-                    src: card.getAttribute('data-src') || card.getAttribute('data-video-src'),
-                    title: card.getAttribute('data-title'),
-                    desc: card.getAttribute('data-desc'),
-                    wiki: card.getAttribute('data-wiki')
-                }];
-            }
-        } catch (e) {
-            console.error('Gallery JSON Parse Error:', e);
-            return;
-        }
-
-        renderSlide(0);
-        lightbox.classList.add('active');
-        lightbox.setAttribute('aria-hidden', 'false');
-        document.body.style.overflow = 'hidden';
-
-        startAutoPlay();
-    }
-
-    function closeLightbox() {
-        if (!lightbox) return;
-        stopAutoPlay();
-        lightbox.classList.remove('active');
-        lightbox.setAttribute('aria-hidden', 'true');
-        document.body.style.overflow = '';
-        setTimeout(() => {
-            lightboxMedia.innerHTML = '';
-        }, 300);
-
-        startCardSlideshows();
-    }
-
-    workCards.forEach(card => {
-        card.addEventListener('click', () => openLightbox(card));
-    });
-
-    if (lightboxClose) lightboxClose.addEventListener('click', closeLightbox);
-    if (lightboxOverlay) lightboxOverlay.addEventListener('click', closeLightbox);
-    if (lightboxPrev) lightboxPrev.addEventListener('click', () => { stopAutoPlay(); renderSlide(currentIndex - 1); });
-    if (lightboxNext) lightboxNext.addEventListener('click', () => { stopAutoPlay(); renderSlide(currentIndex + 1); });
-
-    document.addEventListener('keydown', (e) => {
-        if (lightbox && lightbox.classList.contains('active')) {
-            if (e.key === 'Escape') closeLightbox();
-            if (e.key === 'ArrowLeft') { stopAutoPlay(); renderSlide(currentIndex - 1); }
-            if (e.key === 'ArrowRight') { stopAutoPlay(); renderSlide(currentIndex + 1); }
-        }
-    });
-
-    let touchStartX = 0;
-    lightboxMedia.addEventListener('touchstart', (e) => {
-        touchStartX = e.changedTouches[0].screenX;
-    }, { passive: true });
-
-    lightboxMedia.addEventListener('touchend', (e) => {
-        const touchEndX = e.changedTouches[0].screenX;
-        const diffX = touchEndX - touchStartX;
-        if (Math.abs(diffX) > 50) {
-            stopAutoPlay();
-            if (diffX < 0) renderSlide(currentIndex + 1);
-            else renderSlide(currentIndex - 1);
-        }
-    }, { passive: true });
-
-    // -------------------------------------------------------------
-    // 8. Header 滾動陰影效果
-    // -------------------------------------------------------------
-    const header = document.getElementById('header');
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 20) {
-            header.classList.add('header--scrolled');
-        } else {
-            header.classList.remove('header--scrolled');
-        }
-    });
+  setupBackToTop();
 });
