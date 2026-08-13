@@ -33,26 +33,28 @@
       </a>
       
       <div class="nav-right">
-        <!-- 功能 1: 點陣數字即時時鐘 Widget -->
+        <!-- 點陣數字即時時鐘 Widget -->
         <div id="matrix-clock" class="matrix-clock-widget">[ 00:00:00 CST ]</div>
 
-        <!-- 功能 4: 音效開關按鈕 -->
+        <!-- 音效開關按鈕 -->
         <button id="sound-toggle" class="nav-btn sound-toggle-btn" aria-label="切換音效">[ SOUND: ON ]</button>
 
         <!-- 命令列快捷提示 / 按鈕 -->
         <button id="cmd-trigger-btn" class="nav-btn cmd-trigger-btn" title="快捷鍵 Ctrl + K">[ Ctrl+K ]</button>
 
+        <!-- 明暗主題切換按鈕 -->
+        <button id="theme-toggle" class="nav-btn theme-toggle-btn" aria-label="切換亮暗主題">
+          <span id="theme-icon">[ DARK ]</span>
+        </button>
+
+        <!-- 手機版選單按鈕 -->
         <button id="mobile-menu-btn" class="mobile-menu-btn" aria-label="切換選單">[ MENU ]</button>
+        
         <nav class="nav-links" id="nav-links">
           <a href="#about">// 關於我</a>
           <a href="#portfolio">// 作品集</a>
           <a href="#contact">// 聯絡我</a>
         </nav>
-
-        <!-- 明暗主題切換按鈕 -->
-        <button id="theme-toggle" class="nav-btn theme-toggle-btn" aria-label="切換亮暗主題">
-          <span id="theme-icon">[ DARK ]</span>
-        </button>
       </div>
     </div>
   </header>
@@ -68,7 +70,7 @@
         <div class="sys-tag">[ SYS_USER: PO_YI ]</div>
         <h1>HELLO, 我是 <span class="highlight">柏頤</span></h1>
         
-        <!-- 功能 2: 極簡打字機輪播字幕效果 -->
+        <!-- 極簡打字機輪播字幕效果 -->
         <p class="subtitle"><span id="typewriter"></span><span class="typing-cursor">_</span></p>
 
         <p class="bio">專注於數位媒體內容創作與視覺呈現，熱衷於探索人工智慧應用與各類前沿科技工具。</p>
@@ -106,11 +108,11 @@
       <p class="contact-sub">如果有任何合作想法或問題，歡迎隨時透過下方管道與我聯繫！</p>
       
       <div class="contact-links">
-        <a href="mailto:example@gmail.com" class="contact-btn email-btn">
+        <a href="mailto:albertaresocool@gmail.com" class="contact-btn email-btn">
           <span class="btn-tag">GMAIL</span>
           <span class="btn-text">發送 Email</span>
         </a>
-        <a href="https://instagram.com/" target="_blank" rel="noopener noreferrer" class="contact-btn instagram-btn">
+        <a href="https://www.instagram.com/holo_ero/" target="_blank" rel="noopener noreferrer" class="contact-btn instagram-btn">
           <span class="btn-tag">INSTAGRAM</span>
           <span class="btn-text">追蹤 Instagram</span>
         </a>
@@ -146,7 +148,7 @@
     </div>
   </div>
 
-  <!-- 功能 3: 快捷鍵命令列 (Command Palette Ctrl + K) -->
+  <!-- 快捷鍵命令列 (Command Palette Ctrl + K) -->
   <div id="cmd-palette" class="cmd-palette" aria-hidden="true">
     <div class="cmd-overlay" id="cmd-overlay"></div>
     <div class="cmd-box">

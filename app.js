@@ -1,5 +1,5 @@
 /**
- * 作品集資料設定 (已修正封面 pgura.jpg 與 AI 設計 concept aiassist1.jpg，並補回常闇永遠維基創作集)
+ * 作品集資料設定 (已補齊日常隨筆記錄 11 張照片)
  */
 const portfolioData = [
   {
@@ -23,7 +23,7 @@ const portfolioData = [
     category: "video",
     categoryLabel: "動態影像",
     desc: "短篇動態短片與剪輯記錄。",
-    cover: "assets/pgura.jpg", // 已更新封面圖檔名
+    cover: "assets/pgura.jpg",
     items: [
       { type: "video", src: "assets/gura.mp4", title: "Gura 動態影片", desc: "高畫質影片剪輯展示" }
     ]
@@ -37,23 +37,33 @@ const portfolioData = [
     cover: "assets/aiassist.jpg",
     items: [
       { type: "image", src: "assets/aiassist.jpg", title: "AI 設計概念 01", desc: "初稿概念生成" },
-      { type: "image", src: "assets/aiassist1.jpg", title: "AI 設計概念 02", desc: "細節強化與後製" } // 已補上 aiassist1.jpg
+      { type: "image", src: "assets/aiassist1.jpg", title: "AI 設計概念 02", desc: "細節強化與後製" }
     ]
   },
   {
     id: 4,
     title: "日常隨筆記錄",
-    category: "image",
-    categoryLabel: "精選插畫",
-    desc: "日常生活隨筆與視覺記錄。",
+    category: "gallery",
+    categoryLabel: "相片集錦",
+    desc: "日常生活隨筆與視覺記錄（共 11 張）。",
     cover: "assets/img1 (1).jpg",
     items: [
-      { type: "image", src: "assets/img1 (1).jpg", title: "日常照片記錄 01", desc: "日常生活隨筆與視覺記錄。" }
+      { type: "image", src: "assets/img1 (1).jpg", title: "日常照片記錄 01", desc: "日常生活隨筆與視覺記錄" },
+      { type: "image", src: "assets/img1 (2).jpg", title: "日常照片記錄 02", desc: "日常生活隨筆與視覺記錄" },
+      { type: "image", src: "assets/img1 (3).jpg", title: "日常照片記錄 03", desc: "日常生活隨筆與視覺記錄" },
+      { type: "image", src: "assets/img1 (4).jpg", title: "日常照片記錄 04", desc: "日常生活隨筆與視覺記錄" },
+      { type: "image", src: "assets/img1 (5).jpg", title: "日常照片記錄 05", desc: "日常生活隨筆與視覺記錄" },
+      { type: "image", src: "assets/img1 (6).jpg", title: "日常照片記錄 06", desc: "日常生活隨筆與視覺記錄" },
+      { type: "image", src: "assets/img1 (7).jpg", title: "日常照片記錄 07", desc: "日常生活隨筆與視覺記錄" },
+      { type: "image", src: "assets/img1 (8).jpg", title: "日常照片記錄 08", desc: "日常生活隨筆與視覺記錄" },
+      { type: "image", src: "assets/img1 (9).jpg", title: "日常照片記錄 09", desc: "日常生活隨筆與視覺記錄" },
+      { type: "image", src: "assets/img1 (10).jpg", title: "日常照片記錄 10", desc: "日常生活隨筆與視覺記錄" },
+      { type: "image", src: "assets/img1 (11).jpg", title: "日常照片記錄 11", desc: "日常生活隨筆與視覺記錄" }
     ]
   }
 ];
 
-// 預設 SVG / Nothing OS 風格圖片缺失替代圖 (當實體檔案不存在時自動呈現點陣風格提示)
+// 預設 SVG / Nothing OS 風格圖片缺失替代圖
 const FALLBACK_IMG = "data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22400%22%20height%3D%22300%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20style%3D%22background%3A%23121212%3B%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22none%22%20stroke%3D%22%23262626%22%20stroke-width%3D%222%22%2F%3E%3Ccircle%20cx%3D%22200%22%20cy%3D%22130%22%20r%3D%224%22%20fill%3D%22%23ff2a2a%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2255%25%22%20fill%3D%22%23888888%22%20font-family%3D%22Space%20Mono%2C%20monospace%22%20font-size%3D%2212%22%20text-anchor%3D%22middle%22%3E%5B%20IMAGE%20NOT%20FOUND%20%5D%3C%2Ftext%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2268%25%22%20fill%3D%22%23404040%22%20font-family%3D%22Space%20Mono%2C%20monospace%22%20font-size%3D%2210%22%20text-anchor%3D%22middle%22%3E請確認%20assets%2F%20圖檔路徑%3C%2Ftext%3E%3C%2Fsvg%3E";
 
 // DOM 元素引用
@@ -92,9 +102,6 @@ let slideshowIntervals = [];
 let soundEnabled = true;
 let audioCtx = null;
 
-/**
- * 功能 4: Nothing OS 機械合成音效 Engine (無需外部音訊檔，高相容)
- */
 function playClickSound(freq = 750, type = 'sine', duration = 0.035) {
   if (!soundEnabled) return;
   try {
@@ -119,9 +126,7 @@ function playClickSound(freq = 750, type = 'sine', duration = 0.035) {
 
     osc.start();
     osc.stop(audioCtx.currentTime + duration);
-  } catch (e) {
-    // 忽略未存取的音訊例外
-  }
+  } catch (e) {}
 }
 
 function setupSoundToggle() {
@@ -133,9 +138,6 @@ function setupSoundToggle() {
   });
 }
 
-/**
- * 功能 1: 點陣數字即時時鐘 Widget
- */
 function setupMatrixClock() {
   const clockEl = document.getElementById('matrix-clock');
   if (!clockEl) return;
@@ -151,9 +153,6 @@ function setupMatrixClock() {
   update();
 }
 
-/**
- * 功能 2: Hero 區塊 Terminal Typing 打字機輪播效果
- */
 function setupTypewriter() {
   const typewriterEl = document.getElementById('typewriter');
   if (!typewriterEl) return;
@@ -181,7 +180,7 @@ function setupTypewriter() {
     let speed = isDeleting ? 35 : 75;
 
     if (!isDeleting && charIdx === current.length) {
-      speed = 2200; // 打完後停留 2.2 秒
+      speed = 2200;
       isDeleting = true;
     } else if (isDeleting && charIdx === 0) {
       isDeleting = false;
@@ -194,9 +193,6 @@ function setupTypewriter() {
   type();
 }
 
-/**
- * 功能 3: 快捷鍵命令列 (Command Palette Ctrl + K)
- */
 function setupCommandPalette() {
   if (!cmdPalette || !cmdInput || !cmdList) return;
 
@@ -286,9 +282,6 @@ function setupCommandPalette() {
   if (cmdTriggerBtn) cmdTriggerBtn.addEventListener('click', openCmd);
 }
 
-/**
- * 1. 開場展開動畫控制
- */
 function handleIntroAnimation() {
   setTimeout(() => {
     if (introCurtain) {
@@ -297,9 +290,6 @@ function handleIntroAnimation() {
   }, 600);
 }
 
-/**
- * 2. 亮暗主題切換控制 (Light / Dark)
- */
 function setupThemeToggle() {
   const savedTheme = localStorage.getItem('erblog_theme');
   if (savedTheme === 'light') {
@@ -321,9 +311,6 @@ function setupThemeToggle() {
   }
 }
 
-/**
- * 3. 幻燈片輪播管理
- */
 function clearSlideshows() {
   slideshowIntervals.forEach(interval => clearInterval(interval));
   slideshowIntervals = [];
@@ -361,9 +348,6 @@ function startCardSlideshows(data) {
   });
 }
 
-/**
- * 4. 渲染作品卡片網格 (加入常闇永遠維基百科按鈕)
- */
 function renderPortfolio(data) {
   if (!gridContainer) return;
   gridContainer.innerHTML = '';
@@ -374,8 +358,6 @@ function renderPortfolio(data) {
     card.setAttribute('data-id', item.id);
 
     const hasSlideshow = item.items && item.items.length > 1;
-    
-    // 如果是 ID 1 (常闇永遠)，額外加入維基百科外連按鈕
     const isTowaCard = (item.id === 1);
 
     card.innerHTML = `
@@ -407,9 +389,6 @@ function renderPortfolio(data) {
   startCardSlideshows(data);
 }
 
-/**
- * 5. 分類篩選邏輯
- */
 function setupFilters() {
   filterBtns.forEach(btn => {
     btn.addEventListener('click', () => {
@@ -428,9 +407,6 @@ function setupFilters() {
   });
 }
 
-/**
- * 6. Lightbox 彈窗模組
- */
 function openLightbox(portfolioItem) {
   currentGallery = portfolioItem.items;
   currentIndex = 0;
@@ -502,9 +478,6 @@ function navigateLightbox(direction) {
   updateLightboxContent();
 }
 
-/**
- * 7. 返回頂部與手機選單
- */
 function setupBackToTop() {
   if (!backToTopBtn) return;
 
@@ -537,9 +510,6 @@ function setupMobileMenu() {
   }
 }
 
-/**
- * 8. 初始化執行
- */
 document.addEventListener('DOMContentLoaded', () => {
   handleIntroAnimation();
   setupThemeToggle();

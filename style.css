@@ -17,7 +17,6 @@
   --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-/* 明亮主題覆蓋 */
 body.light-theme {
   --bg-primary: #f4f4f6;
   --bg-secondary: #e8e8ed;
@@ -42,7 +41,6 @@ body.modal-open {
   overflow: hidden;
 }
 
-/* 背景點陣圖層 */
 .dot-matrix-bg {
   position: fixed;
   top: 0;
@@ -56,7 +54,6 @@ body.modal-open {
   z-index: -1;
 }
 
-/* 經典小紅點標記 */
 .red-dot {
   display: inline-block;
   width: 8px;
@@ -153,6 +150,7 @@ body.light-theme .navbar {
   font-size: 1.2rem;
   font-weight: 700;
   letter-spacing: 1px;
+  white-space: nowrap;
 }
 
 .nav-right {
@@ -618,11 +616,7 @@ body.light-theme .navbar {
   color: var(--accent-red);
 }
 
-/* ==========================================
-   10. Nothing OS 特色功能樣式補丁
-   ========================================== */
-
-/* 導覽列通用按鈕 */
+/* 10. Nothing OS 特色功能樣式 */
 .nav-btn {
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
@@ -639,7 +633,6 @@ body.light-theme .navbar {
   color: var(--accent-red);
 }
 
-/* 點陣即時時鐘 Widget */
 .matrix-clock-widget {
   font-family: var(--font-mono);
   font-size: 0.8rem;
@@ -651,7 +644,6 @@ body.light-theme .navbar {
   letter-spacing: 1px;
 }
 
-/* 打字機 Cursor 光標閃爍效果 */
 .typing-cursor {
   display: inline-block;
   color: var(--accent-red);
@@ -665,7 +657,6 @@ body.light-theme .navbar {
   50% { opacity: 0; }
 }
 
-/* 快捷鍵命令列 Command Palette (Ctrl + K) */
 .cmd-palette {
   position: fixed;
   top: 0;
@@ -781,11 +772,14 @@ body.light-theme .navbar {
   color: var(--text-muted);
 }
 
-/* 11. 行動端 RWD 響應式微調 */
+/* 11. 行動端 RWD 響應式優化 */
 @media (max-width: 768px) {
-  .hero-container {
-    flex-direction: column;
-    text-align: center;
+  .nav-container {
+    padding: 12px 16px;
+  }
+
+  .nav-right {
+    gap: 8px;
   }
 
   .nav-links {
@@ -795,8 +789,10 @@ body.light-theme .navbar {
     width: 100%;
     background: var(--bg-secondary);
     border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.6);
     flex-direction: column;
     padding: 16px 24px;
+    gap: 12px;
     display: none;
   }
 
@@ -808,8 +804,16 @@ body.light-theme .navbar {
     display: block;
   }
 
-  .matrix-clock-widget, .cmd-trigger-btn {
+  /* 在手機版隱藏次要的時鐘與音效按鈕，避免導覽列過度擁擠 */
+  .matrix-clock-widget, 
+  .cmd-trigger-btn, 
+  .sound-toggle-btn {
     display: none;
+  }
+
+  .hero-container {
+    flex-direction: column;
+    text-align: center;
   }
 
   .lightbox-nav.prev { left: 10px; }
