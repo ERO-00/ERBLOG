@@ -103,6 +103,7 @@ const mobileCmdBtn = document.getElementById('mobile-cmd-btn');
 const miniPlayer = document.getElementById('mini-player');
 const playerTrackName = document.getElementById('player-track-name');
 const playerPlayBtn = document.getElementById('player-play-btn');
+const playerDockBtn = document.getElementById('player-dock-btn');
 let globalAudio = new Audio();
 
 // 狀態變數
@@ -222,6 +223,15 @@ function setupSoundToggle() {
 /* ----------------------------------------------------
    4. Mini Music Player
 ---------------------------------------------------- */
+function updatePlayBtnText(isPlaying) {
+  const isMobile = window.matchMedia('(max-width: 900px)').matches;
+  if (isPlaying) {
+    playerPlayBtn.textContent = isMobile ? '[ ⏸ ]' : '[ ⏸ PAUSE ]';
+  } else {
+    playerPlayBtn.textContent = isMobile ? '[ ▶ ]' : '[ ▶ PLAY ]';
+  }
+}
+
 function setupMiniPlayer() {
   if (!playerPlayBtn) return;
 
@@ -230,17 +240,24 @@ function setupMiniPlayer() {
     if (globalAudio.paused) {
       globalAudio.play();
       miniPlayer.classList.add('playing');
-      playerPlayBtn.textContent = '[ ⏸ ]';
+      updatePlayBtnText(true);
     } else {
       globalAudio.pause();
       miniPlayer.classList.remove('playing');
-      playerPlayBtn.textContent = '[ ▶ ]';
+      updatePlayBtnText(false);
     }
   });
 
+  if (playerDockBtn) {
+    playerDockBtn.addEventListener('click', () => {
+      miniPlayer.classList.toggle('collapsed');
+      playClickSound(700, 'sine');
+    });
+  }
+
   globalAudio.addEventListener('ended', () => {
     miniPlayer.classList.remove('playing');
-    playerPlayBtn.textContent = '[ ▶ ]';
+    updatePlayBtnText(false);
   });
 }
 
@@ -250,7 +267,7 @@ function playAudioTrack(fileName, trackDisplayName) {
   
   globalAudio.play().then(() => {
     miniPlayer.classList.add('playing');
-    playerPlayBtn.textContent = '[ ⏸ ]';
+    updatePlayBtnText(true);
   }).catch(() => {
     console.warn(`請確認 assets/audio/${fileName} 檔案是否存在。`);
   });
@@ -288,6 +305,10 @@ function spawnJojoMenace() {
 
 function handleEasterEgg(keyword) {
   const key = keyword.trim().toLowerCase();
+  
+  // 💡 觸發彩蛋時，確保手機選單徹底關閉（避免遺留不可見遮罩按鍵）
+  if (mobileNavMenu) mobileNavMenu.classList.remove('active');
+
   document.body.classList.remove('towa-theme', 'jojo-theme', 'holo-theme');
 
   if (key === 'towa') {
@@ -326,7 +347,7 @@ function handleEasterEgg(keyword) {
 }
 
 /* ----------------------------------------------------
-   6. Command Palette 命令列 (手機點擊打字徹底修正)
+   6. Command Palette 命令列
 ---------------------------------------------------- */
 function setupCommandPalette() {
   if (!cmdPalette || !cmdInput || !cmdList) return;
@@ -346,6 +367,7 @@ function setupCommandPalette() {
   let currentFilteredCommands = [...commands];
 
   function openCmd() {
+    if (mobileNavMenu) mobileNavMenu.classList.remove('active');
     cmdPalette.classList.add('active');
     cmdPalette.setAttribute('aria-hidden', 'false');
     cmdInput.value = '';
@@ -354,7 +376,6 @@ function setupCommandPalette() {
     renderCmds(currentFilteredCommands);
     playClickSound(800, 'square');
     
-    // 💡 同步觸發聚焦，確保 iOS / Android 手機軟體鍵盤流暢彈出
     cmdInput.focus();
     cmdInput.select();
   }
@@ -751,12 +772,21 @@ function setupBackToTop() {
 
 function setupMobileMenu() {
   if (mobileMenuBtn && mobileNavMenu) {
-    mobileMenuBtn.addEventListener('click', () => {
+    mobileMenuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
       playClickSound(600, 'square');
       mobileNavMenu.classList.toggle('active');
     });
 
-    mobileNavMenu.querySelectorAll('a').forEach(link => {
+    document.addEventListener('click', (e) => {
+      if (mobileNavMenu.classList.contains('active') && 
+          !mobileNavMenu.contains(e.target) && 
+          !mobileMenuBtn.contains(e.target)) {
+        mobileNavMenu.classList.remove('active');
+      }
+    });
+
+    mobileNavMenu.querySelectorAll('a, button').forEach(link => {
       link.addEventListener('click', () => {
         mobileNavMenu.classList.remove('active');
       });

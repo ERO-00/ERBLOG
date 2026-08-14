@@ -42,6 +42,19 @@
   <!-- 背景點陣圖層 -->
   <div class="dot-matrix-bg"></div>
 
+  <!-- 獨立式音樂播放器 Widget (桌機左側懸浮 / 手機小白點懸浮) -->
+  <div id="mini-player" class="mini-player-widget">
+    <button id="player-dock-btn" class="player-dock-btn" title="收合/展開" aria-label="收合/展開">[ 🎵 ]</button>
+    <div class="player-main-content">
+      <div class="player-header">
+        <span class="player-status-dot"></span>
+        <span class="player-label">AUDIO_PLAYER</span>
+      </div>
+      <div id="player-track-name" class="player-track-name">[ NO AUDIO ]</div>
+      <button id="player-play-btn" class="player-btn" title="播放/暫停">[ ▶ PLAY ]</button>
+    </div>
+  </div>
+
   <!-- 優化版雙端導覽列 -->
   <header class="navbar">
     <div class="nav-container">
@@ -61,13 +74,6 @@
       <!-- 右側模組化系統工具列 -->
       <div class="nav-tools">
         
-        <!-- 音樂播放器 Widget -->
-        <div id="mini-player" class="mini-player-widget">
-          <span class="player-status-dot"></span>
-          <span id="player-track-name" class="player-track-name">[ NO AUDIO ]</span>
-          <button id="player-play-btn" class="player-btn" title="播放/暫停">[ ▶ ]</button>
-        </div>
-
         <!-- 點陣數字即時時鐘 Widget -->
         <div id="matrix-clock" class="matrix-clock-widget">[ 00:00:00 CST ]</div>
 
@@ -88,7 +94,7 @@
 
     </div>
 
-    <!-- 手機版下拉選單 (含功能快捷鍵) -->
+    <!-- 手機版下拉選單 -->
     <nav class="mobile-nav-menu" id="mobile-nav-menu">
       <a href="#about" class="mobile-nav-item">// 01. 關於我</a>
       <a href="#portfolio" class="mobile-nav-item">// 02. 作品集</a>
