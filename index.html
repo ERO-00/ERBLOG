@@ -26,7 +26,7 @@
   <!-- 彩蛋特效燈光秀閃爍層 -->
   <div id="lightshow-overlay" class="lightshow-overlay"></div>
 
-  <!-- JOJO 彩蛋: 動態 ゴゴゴ (Menace) 文字容器 -->
+  <!-- JOJO / 99 彩蛋: 動態 ゴゴゴ (Menace) 文字容器 -->
   <div id="jojo-menace-container" class="jojo-menace-container"></div>
 
   <!-- 開場中間展開動畫 -->
@@ -42,7 +42,7 @@
   <!-- 背景點陣圖層 -->
   <div class="dot-matrix-bg"></div>
 
-  <!-- 獨立式音樂播放器 Widget (整合 64 Bins 音訊視覺化 Canvas) -->
+  <!-- 獨立式音樂播放器 Widget (整合高敏度頻譜視覺化 Canvas) -->
   <div id="mini-player" class="mini-player-widget">
     <div class="player-drag-handle" id="player-drag-handle" title="按住可隨意拖動播放器">
       <span class="drag-dots">⋮⋮</span>
@@ -113,13 +113,13 @@
 
     </div>
 
-    <!-- 手機版下拉選單 -->
+    <!-- 手機版下拉選單 (附滑順平移動畫) -->
     <nav class="mobile-nav-menu" id="mobile-nav-menu">
       <a href="#about" class="mobile-nav-item">// 01. 關於我</a>
       <a href="#portfolio" class="mobile-nav-item">// 02. 作品集</a>
       <a href="#contact" class="mobile-nav-item">// 03. 聯絡我</a>
       <div class="mobile-menu-divider"></div>
-      <button id="mobile-cmd-btn" class="mobile-cmd-launch-btn">// >_ 輸入彩蛋 / 執行指令</button>
+      <button id="mobile-cmd-btn" class="mobile-cmd-launch-btn">// >_ 輸入彩蛋 (99, towa...) / 執行指令</button>
     </nav>
   </header>
 
@@ -134,7 +134,7 @@
         <div class="sys-tag">[ SYS_USER: PO_YI ]</div>
         <h1 class="hero-title">HELLO, 我是 <span class="highlight">柏頤</span></h1>
         
-        <!-- 極簡打字機輪播字幕效果 -->
+        <!-- 打字機字幕效果 -->
         <p class="subtitle"><span id="typewriter"></span><span class="typing-cursor">_</span></p>
 
         <p class="bio">專注於數位媒體內容創作與視覺呈現，熱衷於探索人工智慧應用與各類前沿科技工具。</p>
@@ -197,7 +197,6 @@
     <div class="lightbox-overlay" id="lightbox-overlay"></div>
     <div class="lightbox-container">
       
-      <!-- 控制按鈕群組 -->
       <div class="lightbox-top-tools">
         <button id="lightbox-zoom-reset" class="lightbox-tool-btn" title="重置縮放">[ 100% ]</button>
         <button id="lightbox-fullscreen" class="lightbox-tool-btn" title="全螢幕展示">[ ⛶ ]</button>
@@ -226,7 +225,7 @@
     <div class="cmd-box">
       <div class="cmd-header">
         <span class="cmd-prompt">></span>
-        <input type="text" id="cmd-input" placeholder="輸入指令或彩蛋 (例: towa, jojo1~7, holo)..." autocomplete="off" autocorrect="off" autocapitalize="none">
+        <input type="text" id="cmd-input" placeholder="輸入指令或彩蛋 (例: 99, towa, jojo1~7, holo)..." autocomplete="off" autocorrect="off" autocapitalize="none">
         <span class="cmd-badge">[ ESC ]</span>
       </div>
       <ul id="cmd-list" class="cmd-list"></ul>

@@ -1,5 +1,5 @@
 /* ==========================================
-   ERBLOG // NOTHING OS STYLE - FULL STYLESHEET
+   ERBLOG // NOTHING OS STYLE - ENHANCED STYLESHEET
    ========================================== */
 
 /* 1. CSS 全域變數定義 */
@@ -45,7 +45,7 @@ body.towa-theme {
   --accent-glow: rgba(177, 66, 255, 0.4);
 }
 
-/* 彩蛋 2：JOJO 奇妙冒險主題 */
+/* 彩蛋 2：JOJO / 99 奇妙冒險主題 (已針對中文模糊進行字型優化) */
 body.jojo-theme {
   --bg-primary: #0d0118;
   --bg-secondary: #19022e;
@@ -58,13 +58,19 @@ body.jojo-theme {
   --accent-glow: rgba(255, 0, 127, 0.4);
 }
 
+/* 🎯 修正：徹底解決 99/JOJO 彩蛋字體過粗與糊在一起的問題 */
 body.jojo-theme h1, 
 body.jojo-theme h2, 
 body.jojo-theme .card-title,
 body.jojo-theme .section-title {
   font-family: var(--font-jojo) !important;
-  letter-spacing: 2px;
-  text-shadow: 3px 3px 0px #000, -2px -2px 0px #ff007f;
+  font-weight: 400 !important; /* 取消重複加粗，避免字體重疊 */
+  letter-spacing: 0.5px !important; /* 適度緊湊，避免繁體字邊緣打架 */
+  line-height: 1.35;
+  /* 精簡單向黑影，移除造成糊在一起的多重強光暈與紅影 */
+  text-shadow: 2px 2px 0px #000000 !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* 彩蛋 3：Hololive 專屬科技藍主題 */
@@ -189,7 +195,7 @@ body.modal-open {
   font-family: var(--font-jojo);
   font-size: 3.5rem;
   color: #ff007f;
-  text-shadow: 3px 3px 0px #ffe600, -2px -2px 0px #000;
+  text-shadow: 2px 2px 0px #ffe600, -1px -1px 0px #000;
   animation: menaceFloat 2s ease-out forwards;
   user-select: none;
 }
@@ -200,7 +206,7 @@ body.modal-open {
   100% { opacity: 0; transform: translateY(-80px) scale(1) rotate(0deg); }
 }
 
-/* 背景點陣與極簡氛圍 */
+/* 背景點陣圖層 */
 .dot-matrix-bg {
   position: fixed;
   top: 0;
@@ -214,7 +220,7 @@ body.modal-open {
   z-index: -1;
 }
 
-/* ✨ 紅點呼吸燈特效 (Nothing OS Iconic Dot) */
+/* ✨ 紅點呼吸燈特效 */
 .red-dot {
   display: inline-block;
   width: 8px;
@@ -322,9 +328,13 @@ body.modal-open {
   display: flex;
   align-items: center;
   flex-shrink: 0;
+  transition: transform 0.25s ease;
 }
 
-/* 桌機獨立導覽連結 */
+.logo:hover {
+  transform: scale(1.03);
+}
+
 .desktop-nav-links {
   display: flex;
   align-items: center;
@@ -337,12 +347,23 @@ body.modal-open {
   font-family: var(--font-mono);
   font-size: 0.85rem;
   color: var(--text-muted);
+  position: relative;
+  padding: 4px 0;
   transition: var(--transition);
 }
 
-.desktop-nav-links .nav-item:hover { color: var(--accent-red); }
+.desktop-nav-links .nav-item::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 0%; height: 2px;
+  background: var(--accent-red);
+  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
 
-/* 右側工具模組區塊 */
+.desktop-nav-links .nav-item:hover { color: var(--accent-red); }
+.desktop-nav-links .nav-item:hover::after { width: 100%; }
+
 .nav-tools {
   display: flex;
   align-items: center;
@@ -366,7 +387,12 @@ body.modal-open {
   white-space: nowrap;
 }
 
-.nav-btn:hover { border-color: var(--accent-red); color: var(--accent-red); }
+.nav-btn:hover { 
+  border-color: var(--accent-red); 
+  color: var(--accent-red);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--accent-glow);
+}
 
 .matrix-clock-widget {
   height: 32px;
@@ -393,11 +419,16 @@ body.modal-open {
   font-family: var(--font-mono);
   font-size: 0.8rem;
   cursor: pointer;
+  transition: var(--transition);
 }
 
-/* 📱 手機版下拉選單 */
+.mobile-menu-btn:active {
+  transform: scale(0.92);
+}
+
+/* 🎯 修正：加強手機選單 Menu 開啟/關閉滑順動畫 */
 .mobile-nav-menu {
-  display: none;
+  display: flex;
   position: absolute;
   top: 100%;
   left: 0;
@@ -406,15 +437,23 @@ body.modal-open {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 2px solid var(--accent-red);
-  box-shadow: 0 15px 30px rgba(0,0,0,0.8);
-  padding: 16px 20px;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.85);
+  padding: 18px 24px;
   flex-direction: column;
   gap: 12px;
   z-index: 1001;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-16px) scale(0.98);
+  pointer-events: none;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, visibility 0.3s ease;
 }
 
 .mobile-nav-menu.active {
-  display: flex !important;
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
 }
 
 .mobile-nav-item {
@@ -423,9 +462,13 @@ body.modal-open {
   color: var(--text-main);
   padding: 10px 0;
   border-bottom: 1px dashed var(--border-color);
+  transition: var(--transition);
 }
 
-.mobile-nav-item:hover { color: var(--accent-red); }
+.mobile-nav-item:hover { 
+  color: var(--accent-red); 
+  padding-left: 8px;
+}
 
 .mobile-menu-divider {
   height: 1px;
@@ -443,11 +486,15 @@ body.modal-open {
   text-align: left;
   cursor: pointer;
   border-radius: 2px;
+  transition: var(--transition);
 }
 
-/* ----------------------------------------------------
-   🎵 獨立懸浮 Mini Music Player Widget (高質感 Nothing OS 風格)
----------------------------------------------------- */
+.mobile-cmd-launch-btn:active {
+  background: var(--accent-red);
+  color: #ffffff;
+}
+
+/* 🎵 懸浮 Mini Music Player Widget */
 .mini-player-widget {
   position: fixed;
   left: 24px;
@@ -464,7 +511,7 @@ body.modal-open {
   gap: 10px;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
   user-select: none;
 }
 
@@ -508,7 +555,6 @@ body.modal-open {
   animation: redDotPulse 1.2s infinite ease-in-out;
 }
 
-/* 聲波 Equalizer 動畫 */
 .player-eq {
   display: flex;
   align-items: flex-end;
@@ -547,14 +593,19 @@ body.modal-open {
   width: 100%;
 }
 
-/* 🔥 真實音訊視覺化 Canvas 畫面樣式 */
+/* 音訊視覺化 Canvas 畫面 */
 .player-visualizer {
   width: 100%;
   height: 52px;
-  background: rgba(10, 10, 10, 0.7);
+  background: rgba(10, 10, 10, 0.75);
   border: 1px solid var(--border-color);
   border-radius: 2px;
   display: block;
+  transition: border-color 0.3s ease;
+}
+
+.mini-player-widget.playing .player-visualizer {
+  border-color: rgba(255, 42, 42, 0.5);
 }
 
 .player-track-name {
@@ -586,9 +637,9 @@ body.modal-open {
 .player-btn:hover {
   border-color: var(--accent-red);
   background: rgba(255, 42, 42, 0.1);
+  transform: translateY(-1px);
 }
 
-/* 音量控制拉條樣式 */
 .player-volume-box {
   display: flex;
   align-items: center;
@@ -649,11 +700,12 @@ body.modal-open {
   border: 2px solid var(--border-color);
   padding: 4px;
   background: var(--bg-secondary);
-  transition: border-color 0.3s ease;
+  transition: border-color 0.4s ease, transform 0.4s ease;
 }
 
 .avatar-wrapper:hover .avatar-img {
   border-color: var(--accent-red);
+  transform: scale(1.04) rotate(2deg);
 }
 
 .avatar-badge {
@@ -753,13 +805,19 @@ body.modal-open {
   transition: var(--transition);
 }
 
-.filter-btn:hover, .filter-btn.active {
+.filter-btn:hover {
+  border-color: var(--accent-red);
+  color: var(--text-main);
+  transform: translateY(-2px);
+}
+
+.filter-btn.active {
   border-color: var(--accent-red);
   color: var(--text-main);
   background: var(--bg-card);
+  border-left: 3px solid var(--accent-red);
+  box-shadow: 0 4px 12px var(--accent-glow);
 }
-
-.filter-btn.active { border-left: 3px solid var(--accent-red); }
 
 .portfolio-grid {
   display: grid;
@@ -768,7 +826,7 @@ body.modal-open {
   perspective: 1200px;
 }
 
-/* 3D Card 卡片 */
+/* 3D Card 卡片與動畫 */
 .card {
   position: relative;
   background: var(--bg-card);
@@ -779,7 +837,13 @@ body.modal-open {
   flex-direction: column;
   transform-style: preserve-3d;
   will-change: transform;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  transition: border-color 0.35s ease, box-shadow 0.35s ease, transform 0.35s ease;
+  animation: cardFadeIn 0.5s ease backwards;
+}
+
+@keyframes cardFadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .card::after {
@@ -815,7 +879,11 @@ body.modal-open {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: opacity 0.3s ease, transform 0.5s ease;
+  transition: opacity 0.3s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card:hover .card-media-wrapper img {
+  transform: scale(1.06);
 }
 
 .card-badge {
@@ -855,6 +923,11 @@ body.modal-open {
   font-size: 1.1rem;
   font-weight: 500;
   margin-bottom: 6px;
+  transition: color 0.3s ease;
+}
+
+.card:hover .card-title {
+  color: var(--accent-red);
 }
 
 .card-desc {
@@ -893,7 +966,7 @@ body.modal-open {
 
 .contact-btn:hover {
   border-color: var(--accent-red);
-  transform: translateX(4px);
+  transform: translateX(6px);
   box-shadow: 0 4px 15px var(--accent-glow);
 }
 
@@ -928,7 +1001,7 @@ body.modal-open {
   color: var(--text-muted);
 }
 
-/* 8. Lightbox 彈窗 */
+/* 8. Lightbox 彈窗與動態展演 */
 .lightbox {
   position: fixed;
   top: 0; left: 0; width: 100vw; height: 100vh;
@@ -936,7 +1009,7 @@ body.modal-open {
   display: flex; justify-content: center; align-items: center;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .lightbox.active { opacity: 1; pointer-events: auto; }
@@ -955,8 +1028,8 @@ body.modal-open {
   max-width: 92vw;
   max-height: 90vh;
   display: flex; flex-direction: column; align-items: center;
-  transform: scale(0.95);
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: scale(0.92);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .lightbox.active .lightbox-container { transform: scale(1); }
@@ -983,6 +1056,7 @@ body.modal-open {
   border-color: var(--accent-red);
   color: var(--accent-red);
   background: rgba(255, 42, 42, 0.1);
+  transform: translateY(-2px);
 }
 
 .lightbox-media-wrapper {
@@ -1037,6 +1111,7 @@ body.modal-open {
 .lightbox-nav:hover {
   border-color: var(--accent-red);
   color: var(--accent-red);
+  transform: translateY(-50%) scale(1.1);
 }
 
 .lightbox-nav.prev { left: 10px; }
@@ -1083,9 +1158,14 @@ body.modal-open {
 }
 
 .back-to-top.show { opacity: 1; pointer-events: auto; }
-.back-to-top:hover { border-color: var(--accent-red); color: var(--accent-red); }
+.back-to-top:hover { 
+  border-color: var(--accent-red); 
+  color: var(--accent-red); 
+  transform: translateY(-4px);
+  box-shadow: 0 4px 15px var(--accent-glow);
+}
 
-/* 10. Command Palette 指令選單 */
+/* 10. Command Palette 指令選單 (滑順降落動畫) */
 .typing-cursor {
   display: inline-block;
   color: var(--accent-red);
@@ -1097,16 +1177,22 @@ body.modal-open {
 @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
 .cmd-palette {
-  display: none;
+  display: flex;
   position: fixed;
   top: 0; left: 0; width: 100vw; height: 100vh;
   z-index: 3000;
   justify-content: center; align-items: flex-start;
   padding-top: 10vh;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
 .cmd-palette.active {
-  display: flex !important;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .cmd-overlay {
@@ -1127,6 +1213,12 @@ body.modal-open {
   box-shadow: 0 10px 40px rgba(0,0,0,0.8), 0 0 20px var(--accent-glow);
   border-radius: 2px;
   overflow: hidden;
+  transform: translateY(-20px) scale(0.96);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cmd-palette.active .cmd-box {
+  transform: translateY(0) scale(1);
 }
 
 .cmd-header {
@@ -1182,6 +1274,7 @@ body.modal-open {
 .cmd-item:hover, .cmd-item.selected {
   background: var(--accent-red);
   color: #ffffff;
+  padding-left: 20px;
 }
 
 .cmd-item:hover .cmd-tag, .cmd-item.selected .cmd-tag { color: #ffffff; }
@@ -1197,14 +1290,14 @@ body.modal-open {
 }
 
 /* ==========================================
-   📱 11. 響應式排版與手機端音樂播放器微調
+   📱 11. 響應式排版微調
    ========================================== */
 @media (max-width: 900px) {
   .desktop-nav-links { display: none; }
   .matrix-clock-widget, .cmd-trigger-btn, .sound-toggle-btn { display: none; }
   .mobile-menu-btn { display: inline-flex; align-items: center; justify-content: center; }
 
-  /* 手機端音樂播放器特化 (精細高質感 / 支援手勢拖曳) */
+  /* 手機端音樂播放器特化 */
   .mini-player-widget {
     left: 16px;
     top: auto;
@@ -1228,7 +1321,6 @@ body.modal-open {
     margin-left: 4px;
   }
 
-  /* 收合狀態小白點模組 */
   .mini-player-widget.collapsed {
     width: 44px;
     height: 44px;

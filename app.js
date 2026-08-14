@@ -1,5 +1,5 @@
 /**
- * ERBLOG // NOTHING OS STYLE - MAIN APP SCRIPT WITH ENHANCED WEB AUDIO VISUALIZER
+ * ERBLOG // NOTHING OS STYLE - MAIN APP SCRIPT WITH ENHANCED AUDIO ANALYSER
  */
 
 // 作品集資料設定
@@ -119,7 +119,7 @@ let analyserNode = null;
 let audioSourceNode = null;
 let dataArray = null;
 let bufferLength = 0;
-let peakCaps = []; // 高光頂點降落點陣列
+let peakCaps = []; // 高光頂點陣列
 
 let soundEnabled = true;
 let ripplePhase = 0; // 待機波紋動畫相位
@@ -243,22 +243,21 @@ function setupSoundToggle() {
 }
 
 /* ----------------------------------------------------
-   4. 重寫 Web Audio API 頻譜分析模組 (高敏度 64 Bins + Canvas 視覺化)
+   4. 🎯 重寫 Web Audio API 頻譜分析模組 (高敏度對數分配 + Canvas 視覺化)
 ---------------------------------------------------- */
 function initWebAudioAnalyser() {
   const ctx = getAudioContext();
 
   if (!analyserNode) {
     analyserNode = ctx.createAnalyser();
-    analyserNode.fftSize = 128; // FFT 128 -> 產生精確的 64 Bins 頻率數據
-    analyserNode.smoothingTimeConstant = 0.82; // 高敏度平滑係數
+    analyserNode.fftSize = 256; // 提高 FFT 分辨率以精細計算對數頻段
+    analyserNode.smoothingTimeConstant = 0.80; // 平滑度
 
-    bufferLength = analyserNode.frequencyBinCount; // 64
+    bufferLength = analyserNode.frequencyBinCount; // 128 Bins
     dataArray = new Uint8Array(bufferLength);
-    peakCaps = new Array(bufferLength).fill(0);
+    peakCaps = new Array(40).fill(0); // 呈現 40 根音波柱
   }
 
-  // 避免重複綁定 AudioSourceNode
   if (!audioSourceNode && globalAudio) {
     try {
       audioSourceNode = ctx.createMediaElementSource(globalAudio);
@@ -274,7 +273,6 @@ function setupCanvasVisualizer() {
   if (!playerVisualizerCanvas) return;
   const ctx = playerVisualizerCanvas.getContext('2d');
 
-  // 防模糊：動態調整 Canvas 解析度與容器縮放相符
   function resizeCanvas() {
     const rect = playerVisualizerCanvas.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
@@ -285,7 +283,6 @@ function setupCanvasVisualizer() {
   resizeCanvas();
   window.addEventListener('resize', resizeCanvas);
 
-  // Canvas 渲染主迴圈
   function renderFrame() {
     requestAnimationFrame(renderFrame);
 
@@ -298,20 +295,34 @@ function setupCanvasVisualizer() {
     const isPlaying = globalAudio && !globalAudio.paused && globalAudio.currentTime > 0;
 
     if (isPlaying && analyserNode) {
-      // 擷取實時頻譜數據
       analyserNode.getByteFrequencyData(dataArray);
 
-      const numBins = bufferLength; // 64 Bins
-      const barWidth = w / numBins;
+      const numBars = 40; // 繪製 40 根均勻分佈的音波柱
+      const barWidth = w / numBars;
       const capHeight = 2 * dpr;
-      const gravity = 0.65 * dpr;
+      const gravity = 0.55 * dpr;
+      
+      // 截斷高頻完全空置的段落 (16kHz 以上)
+      const activeLength = Math.floor(bufferLength * 0.72);
 
-      for (let i = 0; i < numBins; i++) {
-        const value = dataArray[i];
-        const percent = value / 255;
-        const barHeight = Math.max(2 * dpr, percent * (h - 6 * dpr));
+      for (let i = 0; i < numBars; i++) {
+        // 🎯 1. 對數採樣索引：低頻緊密採樣、高頻寬廣採樣
+        const logRatio = Math.pow(i / (numBars - 1), 1.65);
+        const binIndex = Math.min(bufferLength - 1, Math.floor(logRatio * activeLength));
 
-        // 計算高光頂點 (Peak Cap) 降落與重力下落機制
+        // 🎯 2. 高頻增益補償Multiplier (自然衰減修復機制)
+        const freqGain = 1 + (i / numBars) * 1.85;
+        let rawVal = dataArray[binIndex] * freqGain;
+
+        // 🎯 3. 低頻軟限幅，防止重低音卡滿頂部
+        if (i < numBars * 0.15) {
+          rawVal = rawVal * 0.82;
+        }
+
+        const percent = Math.min(1, Math.max(0, rawVal / 255));
+        const barHeight = Math.max(2 * dpr, percent * (h - 8 * dpr));
+
+        // 高光頂點降落機制
         if (barHeight > peakCaps[i]) {
           peakCaps[i] = barHeight;
         } else {
@@ -321,7 +332,7 @@ function setupCanvasVisualizer() {
         const x = i * barWidth;
         const y = h - barHeight;
 
-        // 霓虹漸層（紅色至白色）
+        // 霓虹漸層
         const gradient = ctx.createLinearGradient(0, h, 0, 0);
         gradient.addColorStop(0, '#ff2a2a');
         gradient.addColorStop(0.65, '#ff7777');
@@ -330,18 +341,18 @@ function setupCanvasVisualizer() {
         // 繪製動態頻譜柱
         ctx.fillStyle = gradient;
         ctx.shadowColor = 'rgba(255, 42, 42, 0.75)';
-        ctx.shadowBlur = 6 * dpr;
+        ctx.shadowBlur = 5 * dpr;
         ctx.fillRect(x + 0.5 * dpr, y, Math.max(1 * dpr, barWidth - 1 * dpr), barHeight);
 
-        // 繪製高光頂點降落點 (Peak Cap)
+        // 繪製頂點 (Peak Cap)
         ctx.fillStyle = '#ffffff';
         ctx.shadowColor = '#ffffff';
-        ctx.shadowBlur = 8 * dpr;
+        ctx.shadowBlur = 6 * dpr;
         const capY = h - peakCaps[i] - capHeight;
         ctx.fillRect(x + 0.5 * dpr, Math.max(0, capY), Math.max(1 * dpr, barWidth - 1 * dpr), capHeight);
       }
     } else {
-      // 無音訊/暫停時的動態波紋待機效果 (Idle Wave Ripples)
+      // 無音訊/暫停時的波紋待機效果
       ripplePhase += 0.04;
       const centerX = w / 2;
       const centerY = h / 2;
@@ -350,7 +361,6 @@ function setupCanvasVisualizer() {
       ctx.shadowColor = 'rgba(255, 42, 42, 0.6)';
       ctx.shadowBlur = 8 * dpr;
 
-      // 繪製擴散雙同心圓波紋
       for (let r = 1; r <= 2; r++) {
         const currentRadius = ((ripplePhase * 16 * dpr + r * 18 * dpr) % maxRadius);
         const alpha = Math.max(0, 1 - (currentRadius / maxRadius));
@@ -362,7 +372,6 @@ function setupCanvasVisualizer() {
         ctx.stroke();
       }
 
-      // 中心點科技感微光呼吸
       const pulseRadius = (Math.sin(ripplePhase * 2.5) * 1.5 + 3) * dpr;
       ctx.beginPath();
       ctx.arc(centerX, centerY, pulseRadius, 0, Math.PI * 2);
@@ -391,7 +400,6 @@ function updatePlayBtnText(isPlaying) {
 function setupMiniPlayer() {
   if (!playerPlayBtn) return;
 
-  // 播放 / 暫停按鈕點擊
   playerPlayBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     if (!globalAudio.src) return;
@@ -410,7 +418,6 @@ function setupMiniPlayer() {
     }
   });
 
-  // 音量滑桿控制 (預設 70%)
   if (playerVolumeSlider && playerVolumeText) {
     playerVolumeSlider.value = 0.7;
     globalAudio.volume = 0.7;
@@ -423,7 +430,6 @@ function setupMiniPlayer() {
     });
   }
 
-  // 手機版展開 / 收合按鈕
   if (playerDockBtn) {
     playerDockBtn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -437,11 +443,9 @@ function setupMiniPlayer() {
     updatePlayBtnText(false);
   });
 
-  // 設定電腦端與手機端隨意拖動功能
   setupDraggableWidget(miniPlayer, playerDragHandle || miniPlayer);
 }
 
-// 播放音樂模組
 function playAudioTrack(fileName, trackDisplayName) {
   initWebAudioAnalyser();
   getAudioContext();
@@ -458,7 +462,7 @@ function playAudioTrack(fileName, trackDisplayName) {
 }
 
 /* ----------------------------------------------------
-   5.1 雙端 Widget 隨意拖動邏輯 (電腦 + 手機端)
+   5.1 雙端 Widget 隨意拖動邏輯
 ---------------------------------------------------- */
 function setupDraggableWidget(element, handle) {
   let isDrag = false;
@@ -523,7 +527,7 @@ function setupDraggableWidget(element, handle) {
 }
 
 /* ----------------------------------------------------
-   6. 彩蛋處理器 (Easter Eggs)
+   6. 彩蛋處理器 (Easter Eggs - 支援 99 / JOJO / Towa / Holo)
 ---------------------------------------------------- */
 function triggerLightShow() {
   const overlay = document.getElementById('lightshow-overlay');
@@ -566,6 +570,15 @@ function handleEasterEgg(keyword) {
     return true;
   }
 
+  // 🎯 支援輸入 '99' 直接進入經典 JOJO 彩蛋
+  if (key === '99') {
+    document.body.classList.add('jojo-theme');
+    triggerLightShow();
+    spawnJojoMenace();
+    playAudioTrack('il vento doro.mp3', 'il vento doro (99 Egg)');
+    return true;
+  }
+
   const jojoMap = {
     'jojo1': { file: 'JOJO SONO CHINO SADAME.mp3', name: 'JOJO SONO CHINO SADAME' },
     'jojo2': { file: 'BLOODY STREAM.mp3', name: 'BLOODY STREAM' },
@@ -601,6 +614,7 @@ function setupCommandPalette() {
   if (!cmdPalette || !cmdInput || !cmdList) return;
 
   const commands = [
+    { label: "[ 彩蛋 ] 輸入 '99' 觸發 JOJO 經典 99 特效主題", action: () => handleEasterEgg('99') },
     { label: "[ 彩蛋 ] 輸入 'towa' 觸發常闇永遠專屬主題", action: () => handleEasterEgg('towa') },
     { label: "[ 彩蛋 ] 輸入 'jojo1' ~ 'jojo7' 觸發 JOJO 奇妙冒險", action: () => handleEasterEgg('jojo1') },
     { label: "[ 彩蛋 ] 輸入 'holo' 觸發 Hololive 藍色科技風", action: () => handleEasterEgg('holo') },
@@ -624,7 +638,7 @@ function setupCommandPalette() {
     renderCmds(currentFilteredCommands);
     playClickSound(800, 'square');
     
-    cmdInput.focus();
+    setTimeout(() => cmdInput.focus(), 50);
   }
 
   function closeCmd() {
@@ -885,10 +899,11 @@ function renderPortfolio(data) {
   if (!gridContainer) return;
   gridContainer.innerHTML = '';
 
-  data.forEach(item => {
+  data.forEach((item, index) => {
     const card = document.createElement('div');
     card.className = 'card';
     card.setAttribute('data-id', item.id);
+    card.style.animationDelay = `${index * 0.08}s`;
 
     const hasSlideshow = item.items && item.items.length > 1;
     const isTowaCard = (item.id === 1);
@@ -1063,7 +1078,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupTypewriter();
   setupCommandPalette();
   setupMiniPlayer();
-  setupCanvasVisualizer(); // 啟動 Canvas 視覺化繪製
+  setupCanvasVisualizer();
   setupLightboxZoomAndDrag();
   
   renderPortfolio(portfolioData);
