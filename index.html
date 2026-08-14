@@ -42,16 +42,32 @@
   <!-- 背景點陣圖層 -->
   <div class="dot-matrix-bg"></div>
 
-  <!-- 獨立式音樂播放器 Widget (桌機左側懸浮 / 手機小白點懸浮) -->
+  <!-- 獨立式音樂播放器 Widget (可隨意拖動 / 內建音量控制 / 高級 Nothing OS 精細質感) -->
   <div id="mini-player" class="mini-player-widget">
-    <button id="player-dock-btn" class="player-dock-btn" title="收合/展開" aria-label="收合/展開">[ 🎵 ]</button>
-    <div class="player-main-content">
-      <div class="player-header">
-        <span class="player-status-dot"></span>
-        <span class="player-label">AUDIO_PLAYER</span>
+    <div class="player-drag-handle" id="player-drag-handle" title="按住可隨意拖動播放器">
+      <span class="drag-dots">⋮⋮</span>
+      <span class="player-status-dot"></span>
+      <span class="player-label">AUDIO_PLAYER</span>
+      <!-- 動態等化器波形條 -->
+      <div class="player-eq">
+        <span></span><span></span><span></span>
       </div>
+      <button id="player-dock-btn" class="player-dock-btn" title="收合/展開" aria-label="收合/展開">[ 🎵 ]</button>
+    </div>
+
+    <div class="player-main-content">
       <div id="player-track-name" class="player-track-name">[ NO AUDIO ]</div>
-      <button id="player-play-btn" class="player-btn" title="播放/暫停">[ ▶ PLAY ]</button>
+      
+      <div class="player-controls">
+        <button id="player-play-btn" class="player-btn" title="播放/暫停">[ ▶ PLAY ]</button>
+      </div>
+
+      <!-- 音量控制區域 (預設 70%) -->
+      <div class="player-volume-box">
+        <span class="vol-label">VOL</span>
+        <input type="range" id="player-volume-slider" class="volume-slider" min="0" max="1" step="0.01" value="0.7" aria-label="音量控制">
+        <span id="player-volume-text" class="vol-text">70%</span>
+      </div>
     </div>
   </div>
 

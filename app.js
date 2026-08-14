@@ -1,5 +1,5 @@
 /**
- * ERBLOG // NOTHING OS STYLE - MAIN APP SCRIPT (OPTIMIZED & FIXED)
+ * ERBLOG // NOTHING OS STYLE - MAIN APP SCRIPT (OPTIMIZED & BUG FIXED)
  */
 
 // 作品集資料設定
@@ -104,7 +104,12 @@ const miniPlayer = document.getElementById('mini-player');
 const playerTrackName = document.getElementById('player-track-name');
 const playerPlayBtn = document.getElementById('player-play-btn');
 const playerDockBtn = document.getElementById('player-dock-btn');
+const playerVolumeSlider = document.getElementById('player-volume-slider');
+const playerVolumeText = document.getElementById('player-volume-text');
+const playerDragHandle = document.getElementById('player-drag-handle');
+
 let globalAudio = new Audio();
+globalAudio.volume = 0.7; // 預設音量 70%
 
 // 狀態變數
 let currentGallery = [];
@@ -137,13 +142,13 @@ function setupCustomCursor() {
   });
 
   document.addEventListener('mouseover', (e) => {
-    if (e.target.closest('a, button, .card, .filter-btn, .cmd-item, input, .wiki-link-btn')) {
+    if (e.target.closest('a, button, .card, .filter-btn, .cmd-item, input, .wiki-link-btn, .player-drag-handle')) {
       cursor.classList.add('hovered');
     }
   });
 
   document.addEventListener('mouseout', (e) => {
-    if (e.target.closest('a, button, .card, .filter-btn, .cmd-item, input, .wiki-link-btn')) {
+    if (e.target.closest('a, button, .card, .filter-btn, .cmd-item, input, .wiki-link-btn, .player-drag-handle')) {
       cursor.classList.remove('hovered');
     }
   });
@@ -221,7 +226,7 @@ function setupSoundToggle() {
 }
 
 /* ----------------------------------------------------
-   4. Mini Music Player
+   4. Mini Music Player (播放控制 / 音量控制 / 隨意拖動)
 ---------------------------------------------------- */
 function updatePlayBtnText(isPlaying) {
   const isMobile = window.matchMedia('(max-width: 900px)').matches;
@@ -235,7 +240,9 @@ function updatePlayBtnText(isPlaying) {
 function setupMiniPlayer() {
   if (!playerPlayBtn) return;
 
-  playerPlayBtn.addEventListener('click', () => {
+  // 播放 / 暫停按鈕
+  playerPlayBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
     if (!globalAudio.src) return;
     if (globalAudio.paused) {
       globalAudio.play();
@@ -248,8 +255,23 @@ function setupMiniPlayer() {
     }
   });
 
+  // 音量滑桿控制 (預設 70%)
+  if (playerVolumeSlider && playerVolumeText) {
+    playerVolumeSlider.value = 0.7;
+    globalAudio.volume = 0.7;
+    playerVolumeText.textContent = '70%';
+
+    playerVolumeSlider.addEventListener('input', (e) => {
+      const val = parseFloat(e.target.value);
+      globalAudio.volume = val;
+      playerVolumeText.textContent = `${Math.round(val * 100)}%`;
+    });
+  }
+
+  // 手機版展開 / 收合按鈕
   if (playerDockBtn) {
-    playerDockBtn.addEventListener('click', () => {
+    playerDockBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
       miniPlayer.classList.toggle('collapsed');
       playClickSound(700, 'sine');
     });
@@ -259,8 +281,12 @@ function setupMiniPlayer() {
     miniPlayer.classList.remove('playing');
     updatePlayBtnText(false);
   });
+
+  // 設定電腦端與手機端隨意拖動功能
+  setupDraggableWidget(miniPlayer, playerDragHandle || miniPlayer);
 }
 
+// 播放音樂模組
 function playAudioTrack(fileName, trackDisplayName) {
   globalAudio.src = `assets/audio/${fileName}`;
   playerTrackName.textContent = trackDisplayName;
@@ -271,6 +297,79 @@ function playAudioTrack(fileName, trackDisplayName) {
   }).catch(() => {
     console.warn(`請確認 assets/audio/${fileName} 檔案是否存在。`);
   });
+}
+
+/* ----------------------------------------------------
+   4.1 雙端 Widget 隨意拖動邏輯 (電腦 + 手機端)
+---------------------------------------------------- */
+function setupDraggableWidget(element, handle) {
+  let isDrag = false;
+  let offsetX = 0;
+  let offsetY = 0;
+  let dragDistance = 0;
+
+  function onPointerDown(e) {
+    // 若點擊的是音量滑桿或按鈕，不觸發拖動
+    if (e.target.closest('button, input, a')) return;
+
+    isDrag = true;
+    dragDistance = 0;
+
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+    const rect = element.getBoundingClientRect();
+    offsetX = clientX - rect.left;
+    offsetY = clientY - rect.top;
+
+    // 將 CSS 定位轉為基於左頂點的 absolute/fixed 像素值
+    element.style.left = `${rect.left}px`;
+    element.style.top = `${rect.top}px`;
+    element.style.bottom = 'auto';
+    element.style.right = 'auto';
+    element.style.transform = 'none';
+
+    document.addEventListener('mousemove', onPointerMove, { passive: false });
+    document.addEventListener('mouseup', onPointerUp);
+    document.addEventListener('touchmove', onPointerMove, { passive: false });
+    document.addEventListener('touchend', onPointerUp);
+  }
+
+  function onPointerMove(e) {
+    if (!isDrag) return;
+
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+    dragDistance += 1;
+
+    // 阻止手機預設滾動行為，確保順暢拖曳
+    if (e.cancelable) e.preventDefault();
+
+    let newX = clientX - offsetX;
+    let newY = clientY - offsetY;
+
+    // 螢幕邊界安全防護
+    const maxLeft = window.innerWidth - element.offsetWidth - 10;
+    const maxTop = window.innerHeight - element.offsetHeight - 10;
+
+    newX = Math.max(10, Math.min(newX, maxLeft));
+    newY = Math.max(10, Math.min(newY, maxTop));
+
+    element.style.left = `${newX}px`;
+    element.style.top = `${newY}px`;
+  }
+
+  function onPointerUp() {
+    isDrag = false;
+    document.removeEventListener('mousemove', onPointerMove);
+    document.removeEventListener('mouseup', onPointerUp);
+    document.removeEventListener('touchmove', onPointerMove);
+    document.removeEventListener('touchend', onPointerUp);
+  }
+
+  handle.addEventListener('mousedown', onPointerDown);
+  handle.addEventListener('touchstart', onPointerDown, { passive: true });
 }
 
 /* ----------------------------------------------------
@@ -306,8 +405,8 @@ function spawnJojoMenace() {
 function handleEasterEgg(keyword) {
   const key = keyword.trim().toLowerCase();
   
-  // 💡 觸發彩蛋時，確保手機選單徹底關閉（避免遺留不可見遮罩按鍵）
-  if (mobileNavMenu) mobileNavMenu.classList.remove('active');
+  // 💡 觸發彩蛋時強制關閉手機選單與指令列
+  closeMobileNav();
 
   document.body.classList.remove('towa-theme', 'jojo-theme', 'holo-theme');
 
@@ -347,7 +446,7 @@ function handleEasterEgg(keyword) {
 }
 
 /* ----------------------------------------------------
-   6. Command Palette 命令列
+   6. Command Palette 命令列 (修正：關閉即 display:none 徹底清除遮罩)
 ---------------------------------------------------- */
 function setupCommandPalette() {
   if (!cmdPalette || !cmdInput || !cmdList) return;
@@ -367,7 +466,7 @@ function setupCommandPalette() {
   let currentFilteredCommands = [...commands];
 
   function openCmd() {
-    if (mobileNavMenu) mobileNavMenu.classList.remove('active');
+    closeMobileNav(); // 開啟指令列時確保手機導覽選單徹底關閉
     cmdPalette.classList.add('active');
     cmdPalette.setAttribute('aria-hidden', 'false');
     cmdInput.value = '';
@@ -377,7 +476,6 @@ function setupCommandPalette() {
     playClickSound(800, 'square');
     
     cmdInput.focus();
-    cmdInput.select();
   }
 
   function closeCmd() {
@@ -398,8 +496,8 @@ function setupCommandPalette() {
       li.className = `cmd-item ${i === activeCmdIndex ? 'selected' : ''}`;
       li.innerHTML = `<span>${item.label}</span><span class="cmd-tag">[ EXEC ]</span>`;
       li.addEventListener('click', () => {
-        item.action();
         closeCmd();
+        item.action();
         playClickSound(1000, 'triangle');
       });
       cmdList.appendChild(li);
@@ -447,12 +545,13 @@ function setupCommandPalette() {
         }
       } else if (e.key === 'Enter') {
         const val = cmdInput.value.trim();
-        if (handleEasterEgg(val)) {
-          closeCmd();
-        } else if (currentFilteredCommands.length > 0 && currentFilteredCommands[activeCmdIndex]) {
-          currentFilteredCommands[activeCmdIndex].action();
-          closeCmd();
-          playClickSound(1000, 'triangle');
+        // 🔥 按 Enter 後確保指令選單徹底關閉，絕不殘留無效按鈕或遮罩
+        closeCmd();
+        if (!handleEasterEgg(val)) {
+          if (currentFilteredCommands.length > 0 && currentFilteredCommands[activeCmdIndex]) {
+            currentFilteredCommands[activeCmdIndex].action();
+            playClickSound(1000, 'triangle');
+          }
         }
       }
     }
@@ -473,7 +572,7 @@ function setupCommandPalette() {
   if (cmdTriggerBtn) cmdTriggerBtn.addEventListener('click', openCmd);
   if (mobileCmdBtn) {
     mobileCmdBtn.addEventListener('click', () => {
-      if (mobileNavMenu) mobileNavMenu.classList.remove('active');
+      closeMobileNav();
       openCmd();
     });
   }
@@ -770,6 +869,15 @@ function setupBackToTop() {
   });
 }
 
+/* ----------------------------------------------------
+   9. 手機版導覽選單 (修復：關閉即 display:none 完全解除點擊遮罩)
+---------------------------------------------------- */
+function closeMobileNav() {
+  if (mobileNavMenu) {
+    mobileNavMenu.classList.remove('active');
+  }
+}
+
 function setupMobileMenu() {
   if (mobileMenuBtn && mobileNavMenu) {
     mobileMenuBtn.addEventListener('click', (e) => {
@@ -778,17 +886,19 @@ function setupMobileMenu() {
       mobileNavMenu.classList.toggle('active');
     });
 
+    // 點擊選單以外的空白區域自動徹底關閉
     document.addEventListener('click', (e) => {
       if (mobileNavMenu.classList.contains('active') && 
           !mobileNavMenu.contains(e.target) && 
           !mobileMenuBtn.contains(e.target)) {
-        mobileNavMenu.classList.remove('active');
+        closeMobileNav();
       }
     });
 
+    // 點擊選單內的任何連結，立即徹底關閉選單！
     mobileNavMenu.querySelectorAll('a, button').forEach(link => {
       link.addEventListener('click', () => {
-        mobileNavMenu.classList.remove('active');
+        closeMobileNav();
       });
     });
   }

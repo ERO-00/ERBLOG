@@ -395,103 +395,9 @@ body.modal-open {
   cursor: pointer;
 }
 
-/* ----------------------------------------------------
-   🎵 獨立懸浮 Mini Music Player Widget 樣式 (電腦左側 / 手機小白點)
----------------------------------------------------- */
-@media (min-width: 901px) {
-  .mini-player-widget {
-    position: fixed;
-    left: 24px;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 800;
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-    padding: 16px;
-    border-radius: 4px;
-    width: 200px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-  }
-
-  .mini-player-widget.playing {
-    border-color: var(--accent-red);
-    box-shadow: 0 0 20px var(--accent-glow), 0 10px 30px rgba(0, 0, 0, 0.7);
-  }
-
-  .player-dock-btn { display: none; }
-
-  .player-main-content {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    width: 100%;
-  }
-
-  .player-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-family: var(--font-mono);
-    font-size: 0.7rem;
-    color: var(--text-muted);
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 6px;
-  }
-
-  .player-status-dot {
-    width: 6px;
-    height: 6px;
-    background: var(--text-muted);
-    border-radius: 50%;
-  }
-
-  .mini-player-widget.playing .player-status-dot {
-    background: var(--accent-red);
-    box-shadow: 0 0 8px var(--accent-red);
-    animation: redDotPulse 1.2s infinite ease-in-out;
-  }
-
-  .player-track-name {
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
-    color: var(--text-main);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    background: var(--bg-secondary);
-    padding: 8px 10px;
-    border: 1px dashed var(--border-color);
-    border-radius: 2px;
-  }
-
-  .player-btn {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    color: var(--accent-red);
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    padding: 8px 12px;
-    cursor: pointer;
-    width: 100%;
-    text-align: center;
-    transition: var(--transition);
-  }
-
-  .player-btn:hover {
-    border-color: var(--accent-red);
-    background: rgba(255, 42, 42, 0.1);
-  }
-}
-
-/* 手機版下拉選單 (修復重構) */
+/* 📱 手機版下拉選單 (修正：預設 display: none 徹底消除隱形誤觸 Bug) */
 .mobile-nav-menu {
-  display: none !important;
+  display: none;
   position: absolute;
   top: 100%;
   left: 0;
@@ -499,22 +405,16 @@ body.modal-open {
   background: rgba(14, 14, 14, 0.98);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--accent-red);
+  border-bottom: 2px solid var(--accent-red);
   box-shadow: 0 15px 30px rgba(0,0,0,0.8);
   padding: 16px 20px;
+  flex-direction: column;
   gap: 12px;
   z-index: 1001;
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none !important;
-  transition: opacity 0.25s ease, visibility 0.25s ease;
 }
 
 .mobile-nav-menu.active {
   display: flex !important;
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto !important;
 }
 
 .mobile-nav-item {
@@ -543,6 +443,174 @@ body.modal-open {
   text-align: left;
   cursor: pointer;
   border-radius: 2px;
+}
+
+/* ----------------------------------------------------
+   🎵 獨立懸浮 Mini Music Player Widget (高質感 Nothing OS 風格)
+---------------------------------------------------- */
+.mini-player-widget {
+  position: fixed;
+  left: 24px;
+  top: 35%;
+  z-index: 1200;
+  background: rgba(18, 18, 18, 0.92);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  padding: 14px;
+  border-radius: 4px;
+  width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  user-select: none;
+}
+
+.mini-player-widget.playing {
+  border-color: var(--accent-red);
+  box-shadow: 0 0 20px var(--accent-glow), 0 10px 30px rgba(0, 0, 0, 0.7);
+}
+
+.player-drag-handle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: move;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 6px;
+}
+
+.drag-dots {
+  font-family: var(--font-mono);
+  color: var(--accent-red);
+  font-size: 0.8rem;
+}
+
+.player-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+}
+
+.player-status-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--text-muted);
+  border-radius: 50%;
+}
+
+.mini-player-widget.playing .player-status-dot {
+  background: var(--accent-red);
+  box-shadow: 0 0 8px var(--accent-red);
+  animation: redDotPulse 1.2s infinite ease-in-out;
+}
+
+/* 聲波 Equalizer 動畫 */
+.player-eq {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 12px;
+  margin-left: auto;
+}
+
+.player-eq span {
+  width: 2px;
+  height: 3px;
+  background: var(--text-muted);
+  transition: height 0.2s ease;
+}
+
+.mini-player-widget.playing .player-eq span {
+  background: var(--accent-red);
+  animation: eqBounce 0.8s infinite alternate ease-in-out;
+}
+
+.mini-player-widget.playing .player-eq span:nth-child(1) { animation-delay: 0.1s; }
+.mini-player-widget.playing .player-eq span:nth-child(2) { animation-delay: 0.3s; }
+.mini-player-widget.playing .player-eq span:nth-child(3) { animation-delay: 0.2s; }
+
+@keyframes eqBounce {
+  0% { height: 3px; }
+  100% { height: 12px; }
+}
+
+.player-dock-btn { display: none; }
+
+.player-main-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.player-track-name {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: var(--bg-secondary);
+  padding: 6px 8px;
+  border: 1px dashed var(--border-color);
+  border-radius: 2px;
+}
+
+.player-btn {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--accent-red);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  padding: 6px 12px;
+  cursor: pointer;
+  width: 100%;
+  text-align: center;
+  transition: var(--transition);
+}
+
+.player-btn:hover {
+  border-color: var(--accent-red);
+  background: rgba(255, 42, 42, 0.1);
+}
+
+/* 音量控制拉條樣式 */
+.player-volume-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  background: rgba(0,0,0,0.2);
+  padding: 4px 6px;
+  border-radius: 2px;
+}
+
+.vol-label { color: var(--accent-red); font-weight: bold; }
+.vol-text { font-size: 0.68rem; min-width: 30px; text-align: right; }
+
+.volume-slider {
+  flex-grow: 1;
+  height: 3px;
+  -webkit-appearance: none;
+  background: var(--border-color);
+  outline: none;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 10px;
+  height: 10px;
+  background: var(--accent-red);
+  border-radius: 50%;
+  cursor: pointer;
 }
 
 /* 5. Hero 個人簡介區塊 */
@@ -850,7 +918,7 @@ body.modal-open {
   color: var(--text-muted);
 }
 
-/* 8. Lightbox 彈窗與柔和縮放動畫 */
+/* 8. Lightbox 彈窗 */
 .lightbox {
   position: fixed;
   top: 0; left: 0; width: 100vw; height: 100vh;
@@ -1007,7 +1075,7 @@ body.modal-open {
 .back-to-top.show { opacity: 1; pointer-events: auto; }
 .back-to-top:hover { border-color: var(--accent-red); color: var(--accent-red); }
 
-/* 10. Command Palette 指令選單 */
+/* 10. Command Palette 指令選單 (修正：關閉時 display: none 徹底除錯) */
 .typing-cursor {
   display: inline-block;
   color: var(--accent-red);
@@ -1019,19 +1087,16 @@ body.modal-open {
 @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
 .cmd-palette {
+  display: none;
   position: fixed;
   top: 0; left: 0; width: 100vw; height: 100vh;
   z-index: 3000;
-  display: flex; justify-content: center; align-items: flex-start;
+  justify-content: center; align-items: flex-start;
   padding-top: 10vh;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease;
 }
 
 .cmd-palette.active {
-  opacity: 1;
-  pointer-events: auto;
+  display: flex !important;
 }
 
 .cmd-overlay {
@@ -1052,7 +1117,6 @@ body.modal-open {
   box-shadow: 0 10px 40px rgba(0,0,0,0.8), 0 0 20px var(--accent-glow);
   border-radius: 2px;
   overflow: hidden;
-  pointer-events: auto;
 }
 
 .cmd-header {
@@ -1078,10 +1142,6 @@ body.modal-open {
   color: var(--text-main);
   font-family: var(--font-mono);
   font-size: 1rem;
-  -webkit-user-select: text;
-  user-select: text;
-  pointer-events: auto;
-  touch-action: manipulation;
 }
 
 .cmd-badge {
@@ -1127,99 +1187,64 @@ body.modal-open {
 }
 
 /* ==========================================
-   📱 11. 響應式排版優化 (Mobile & Tablet)
+   📱 11. 響應式排版與手機端音樂播放器微調
    ========================================== */
 @media (max-width: 900px) {
   .desktop-nav-links { display: none; }
   .matrix-clock-widget, .cmd-trigger-btn, .sound-toggle-btn { display: none; }
   .mobile-menu-btn { display: inline-flex; align-items: center; justify-content: center; }
 
-  /* 手機版 Mini Music Player 小白點懸浮模式 */
+  /* 手機端音樂播放器特化 (精細高質感 / 支援手勢拖曳) */
   .mini-player-widget {
-    position: fixed;
-    bottom: 24px;
     left: 16px;
-    z-index: 950;
-    background: rgba(18, 18, 18, 0.92);
-    border: 1px solid var(--border-color);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
-    padding: 8px 12px;
-    border-radius: 24px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    max-width: 85vw;
-  }
-
-  .mini-player-widget.playing {
-    border-color: var(--accent-red);
-    box-shadow: 0 0 12px var(--accent-glow);
+    top: auto;
+    bottom: 24px;
+    width: 260px;
+    background: rgba(14, 14, 14, 0.95);
+    border: 1px solid var(--accent-red);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 15px var(--accent-glow);
+    padding: 12px;
   }
 
   .player-dock-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
+    background: transparent;
+    border: none;
     color: var(--accent-red);
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     cursor: pointer;
-    flex-shrink: 0;
+    margin-left: 4px;
   }
 
-  /* 小白點收合狀態 */
+  /* 收合狀態小白點模組 */
   .mini-player-widget.collapsed {
-    padding: 4px;
+    width: 44px;
+    height: 44px;
+    padding: 0;
     border-radius: 50%;
-    width: 38px;
-    height: 38px;
     overflow: hidden;
-    background: rgba(18, 18, 18, 0.85);
-    border-color: var(--border-focus);
+    justify-content: center;
+    align-items: center;
   }
 
   .mini-player-widget.collapsed .player-main-content {
     display: none !important;
   }
 
-  .mini-player-widget.collapsed .player-dock-btn {
+  .mini-player-widget.collapsed .player-drag-handle {
+    border: none;
+    padding: 0;
     width: 100%;
     height: 100%;
-    border: none;
-    background: transparent;
+    justify-content: center;
   }
 
-  .mini-player-widget:not(.collapsed) .player-main-content {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    overflow: hidden;
-  }
-
-  .mini-player-widget:not(.collapsed) .player-label {
+  .mini-player-widget.collapsed .player-label,
+  .mini-player-widget.collapsed .drag-dots,
+  .mini-player-widget.collapsed .player-eq {
     display: none;
-  }
-
-  .mini-player-widget:not(.collapsed) .player-track-name {
-    max-width: 100px;
-    font-size: 0.75rem;
-    padding: 2px 6px;
-    border: none;
-    background: transparent;
-  }
-
-  .mini-player-widget:not(.collapsed) .player-btn {
-    width: auto;
-    padding: 4px 8px;
-    font-size: 0.75rem;
-    white-space: nowrap;
   }
 }
 
