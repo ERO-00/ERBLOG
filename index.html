@@ -42,15 +42,26 @@
   <!-- 背景點陣圖層 -->
   <div class="dot-matrix-bg"></div>
 
-  <!-- 導覽列 -->
+  <!-- 優化版雙端導覽列 -->
   <header class="navbar">
     <div class="nav-container">
+      
+      <!-- LOGO 品牌 -->
       <a href="#" class="logo">
         <span class="red-dot"></span> ERBLOG
       </a>
       
-      <div class="nav-right">
-        <!-- 音樂播放器小工具 (Mini Music Player Widget) -->
+      <!-- 桌機版主要頁面連結 -->
+      <nav class="desktop-nav-links">
+        <a href="#about" class="nav-item">// 關於我</a>
+        <a href="#portfolio" class="nav-item">// 作品集</a>
+        <a href="#contact" class="nav-item">// 聯絡我</a>
+      </nav>
+
+      <!-- 右側模組化系統工具列 -->
+      <div class="nav-tools">
+        
+        <!-- 音樂播放器 Widget -->
         <div id="mini-player" class="mini-player-widget">
           <span class="player-status-dot"></span>
           <span id="player-track-name" class="player-track-name">[ NO AUDIO ]</span>
@@ -73,15 +84,18 @@
 
         <!-- 手機版選單按鈕 -->
         <button id="mobile-menu-btn" class="mobile-menu-btn" aria-label="切換選單">[ MENU ]</button>
-        
-        <nav class="nav-links" id="nav-links">
-          <a href="#about">// 關於我</a>
-          <a href="#portfolio">// 作品集</a>
-          <a href="#contact">// 聯絡我</a>
-          <button id="mobile-cmd-btn" class="nav-cmd-btn">// >_ 輸入彩蛋 / 指令</button>
-        </nav>
       </div>
+
     </div>
+
+    <!-- 手機版下拉選單 (含功能快捷鍵) -->
+    <nav class="mobile-nav-menu" id="mobile-nav-menu">
+      <a href="#about" class="mobile-nav-item">// 01. 關於我</a>
+      <a href="#portfolio" class="mobile-nav-item">// 02. 作品集</a>
+      <a href="#contact" class="mobile-nav-item">// 03. 聯絡我</a>
+      <div class="mobile-menu-divider"></div>
+      <button id="mobile-cmd-btn" class="mobile-cmd-launch-btn">// >_ 輸入彩蛋 / 執行指令</button>
+    </nav>
   </header>
 
   <!-- Hero / 個人簡介區塊 -->
@@ -153,7 +167,7 @@
     </div>
   </footer>
 
-  <!-- Lightbox 彈窗模組 (手機與桌機高相容優化版) -->
+  <!-- Lightbox 彈窗模組 -->
   <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="媒體預覽視窗">
     <div class="lightbox-overlay" id="lightbox-overlay"></div>
     <div class="lightbox-container">
@@ -187,7 +201,7 @@
     <div class="cmd-box">
       <div class="cmd-header">
         <span class="cmd-prompt">></span>
-        <input type="text" id="cmd-input" placeholder="輸入指令或彩蛋 (例: towa, jojo1~7, holo)..." autocomplete="off">
+        <input type="text" id="cmd-input" placeholder="輸入指令或彩蛋 (例: towa, jojo1~7, holo)..." autocomplete="off" autocorrect="off" autocapitalize="none">
         <span class="cmd-badge">[ ESC ]</span>
       </div>
       <ul id="cmd-list" class="cmd-list"></ul>

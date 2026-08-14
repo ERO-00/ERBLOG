@@ -1,5 +1,5 @@
 /**
- * ERBLOG // NOTHING OS STYLE - MAIN APP SCRIPT (OPTIMIZED EDITION)
+ * ERBLOG // NOTHING OS STYLE - MAIN APP SCRIPT (OPTIMIZED & FIXED)
  */
 
 // 作品集資料設定
@@ -87,8 +87,9 @@ const backToTopBtn = document.getElementById('back-to-top');
 const themeToggleBtn = document.getElementById('theme-toggle');
 const themeIcon = document.getElementById('theme-icon');
 const introCurtain = document.getElementById('intro-curtain');
+
 const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-const navLinks = document.getElementById('nav-links');
+const mobileNavMenu = document.getElementById('mobile-nav-menu');
 
 const soundToggleBtn = document.getElementById('sound-toggle');
 const cmdPalette = document.getElementById('cmd-palette');
@@ -98,7 +99,7 @@ const cmdOverlay = document.getElementById('cmd-overlay');
 const cmdTriggerBtn = document.getElementById('cmd-trigger-btn');
 const mobileCmdBtn = document.getElementById('mobile-cmd-btn');
 
-// 全域音響系統與 Mini Player
+// Mini Player
 const miniPlayer = document.getElementById('mini-player');
 const playerTrackName = document.getElementById('player-track-name');
 const playerPlayBtn = document.getElementById('player-play-btn');
@@ -110,7 +111,7 @@ let currentIndex = 0;
 let soundEnabled = true;
 let audioCtx = null;
 
-// Lightbox 縮放/拖拽與手勢觸控狀態
+// Lightbox 狀態
 let zoomScale = 1;
 let panX = 0;
 let panY = 0;
@@ -120,11 +121,10 @@ let startY = 0;
 let touchStartX = 0;
 let touchStartY = 0;
 
-// Command Palette 選擇索引
 let activeCmdIndex = 0;
 
 /* ----------------------------------------------------
-   1. 科技感自訂瞄準游標 (優化為全域 Event Delegation)
+   1. 科技感自訂瞄準游標
 ---------------------------------------------------- */
 function setupCustomCursor() {
   const cursor = document.getElementById('custom-cursor');
@@ -149,7 +149,7 @@ function setupCustomCursor() {
 }
 
 /* ----------------------------------------------------
-   2. 精細 3D Card Tilt (桌機端啟用，行動端停用)
+   2. 3D Card Tilt 傾斜效果
 ---------------------------------------------------- */
 function apply3DTiltEffect(card) {
   if (window.matchMedia('(max-width: 768px)').matches) return;
@@ -179,14 +179,12 @@ function apply3DTiltEffect(card) {
     card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
     card.style.setProperty('--glare-opacity', '0');
 
-    setTimeout(() => {
-      card.style.transition = '';
-    }, 500);
+    setTimeout(() => { card.style.transition = ''; }, 500);
   });
 }
 
 /* ----------------------------------------------------
-   3. Web Audio 系統按鍵音效 (含 AudioContext 自動解鎖)
+   3. Web Audio 系統按鍵音效
 ---------------------------------------------------- */
 function playClickSound(freq = 750, type = 'sine', duration = 0.035) {
   if (!soundEnabled) return;
@@ -222,7 +220,7 @@ function setupSoundToggle() {
 }
 
 /* ----------------------------------------------------
-   4. Mini Music Player 控制邏輯
+   4. Mini Music Player
 ---------------------------------------------------- */
 function setupMiniPlayer() {
   if (!playerPlayBtn) return;
@@ -290,7 +288,6 @@ function spawnJojoMenace() {
 
 function handleEasterEgg(keyword) {
   const key = keyword.trim().toLowerCase();
-  
   document.body.classList.remove('towa-theme', 'jojo-theme', 'holo-theme');
 
   if (key === 'towa') {
@@ -329,7 +326,7 @@ function handleEasterEgg(keyword) {
 }
 
 /* ----------------------------------------------------
-   6. Command Palette 命令列功能 (支援鍵盤方向鍵切換)
+   6. Command Palette 命令列 (手機點擊打字徹底修正)
 ---------------------------------------------------- */
 function setupCommandPalette() {
   if (!cmdPalette || !cmdInput || !cmdList) return;
@@ -350,16 +347,22 @@ function setupCommandPalette() {
 
   function openCmd() {
     cmdPalette.classList.add('active');
+    cmdPalette.setAttribute('aria-hidden', 'false');
     cmdInput.value = '';
     activeCmdIndex = 0;
     currentFilteredCommands = [...commands];
     renderCmds(currentFilteredCommands);
     playClickSound(800, 'square');
-    setTimeout(() => cmdInput.focus(), 60);
+    
+    // 💡 同步觸發聚焦，確保 iOS / Android 手機軟體鍵盤流暢彈出
+    cmdInput.focus();
+    cmdInput.select();
   }
 
   function closeCmd() {
     cmdPalette.classList.remove('active');
+    cmdPalette.setAttribute('aria-hidden', 'true');
+    cmdInput.blur();
   }
 
   function renderCmds(list) {
@@ -447,11 +450,16 @@ function setupCommandPalette() {
 
   if (cmdOverlay) cmdOverlay.addEventListener('click', closeCmd);
   if (cmdTriggerBtn) cmdTriggerBtn.addEventListener('click', openCmd);
-  if (mobileCmdBtn) mobileCmdBtn.addEventListener('click', openCmd);
+  if (mobileCmdBtn) {
+    mobileCmdBtn.addEventListener('click', () => {
+      if (mobileNavMenu) mobileNavMenu.classList.remove('active');
+      openCmd();
+    });
+  }
 }
 
 /* ----------------------------------------------------
-   7. Lightbox 高清圖片滾輪/拖拽/手機左右滑動/鍵盤導向
+   7. Lightbox 功能
 ---------------------------------------------------- */
 function resetZoom() {
   zoomScale = 1;
@@ -468,7 +476,6 @@ function updateImageTransform() {
 }
 
 function setupLightboxZoomAndDrag() {
-  // 滾輪縮放
   lightboxContent.addEventListener('wheel', (e) => {
     const img = lightboxContent.querySelector('img');
     if (!img) return;
@@ -488,7 +495,6 @@ function setupLightboxZoomAndDrag() {
     updateImageTransform();
   }, { passive: false });
 
-  // 桌機滑動拖拽
   lightboxContent.addEventListener('mousedown', (e) => {
     const img = lightboxContent.querySelector('img');
     if (!img || zoomScale <= 1) return;
@@ -506,7 +512,6 @@ function setupLightboxZoomAndDrag() {
 
   window.addEventListener('mouseup', () => { isDragging = false; });
 
-  // 📱 手機觸控手勢：左右滑動切換圖片 (Touch Swipe)
   const wrapper = document.querySelector('.lightbox-media-wrapper');
   if (wrapper) {
     wrapper.addEventListener('touchstart', (e) => {
@@ -515,7 +520,7 @@ function setupLightboxZoomAndDrag() {
     }, { passive: true });
 
     wrapper.addEventListener('touchend', (e) => {
-      if (zoomScale > 1) return; // 放大狀態下不觸發左右切換
+      if (zoomScale > 1) return;
 
       const touchEndX = e.changedTouches[0].clientX;
       const touchEndY = e.changedTouches[0].clientY;
@@ -523,26 +528,17 @@ function setupLightboxZoomAndDrag() {
       const deltaY = touchEndY - touchStartY;
 
       if (Math.abs(deltaX) > 50 && Math.abs(deltaY) < 60) {
-        if (deltaX < 0) {
-          navigateLightbox(1);
-        } else {
-          navigateLightbox(-1);
-        }
+        if (deltaX < 0) navigateLightbox(1);
+        else navigateLightbox(-1);
       }
     }, { passive: true });
   }
 
-  // ⌨️ 全域鍵盤方向鍵切換 Lightbox
   document.addEventListener('keydown', (e) => {
     if (!lightbox.classList.contains('active')) return;
-
-    if (e.key === 'ArrowLeft') {
-      navigateLightbox(-1);
-    } else if (e.key === 'ArrowRight') {
-      navigateLightbox(1);
-    } else if (e.key === 'Escape') {
-      closeLightbox();
-    }
+    if (e.key === 'ArrowLeft') navigateLightbox(-1);
+    else if (e.key === 'ArrowRight') navigateLightbox(1);
+    else if (e.key === 'Escape') closeLightbox();
   });
 
   if (lightboxFullscreenBtn) {
@@ -572,7 +568,7 @@ function navigateLightbox(direction) {
 }
 
 /* ----------------------------------------------------
-   8. 渲染與基礎功能模組
+   8. 基礎渲染與載入模組
 ---------------------------------------------------- */
 function setupMatrixClock() {
   const clockEl = document.getElementById('matrix-clock');
@@ -754,16 +750,15 @@ function setupBackToTop() {
 }
 
 function setupMobileMenu() {
-  if (mobileMenuBtn && navLinks) {
+  if (mobileMenuBtn && mobileNavMenu) {
     mobileMenuBtn.addEventListener('click', () => {
       playClickSound(600, 'square');
-      navLinks.classList.toggle('active');
+      mobileNavMenu.classList.toggle('active');
     });
 
-    // 點擊選單內連結或指令按鈕後自動收合選單
-    navLinks.querySelectorAll('a, button').forEach(link => {
+    mobileNavMenu.querySelectorAll('a').forEach(link => {
       link.addEventListener('click', () => {
-        navLinks.classList.remove('active');
+        mobileNavMenu.classList.remove('active');
       });
     });
   }
