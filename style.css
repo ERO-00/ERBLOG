@@ -1037,26 +1037,22 @@ body.modal-open {
    📱 11. 手機端全面優化 (Mobile Responsive)
    ========================================== */
 @media (max-width: 768px) {
-  /* 隱藏自訂游標，恢復原生觸控 */
   body { cursor: auto; }
   .custom-cursor { display: none !important; }
   
   .nav-container { padding: 10px 16px; }
   .nav-right { gap: 8px; }
   
-  /* 音樂播放器在手機版簡化顯示 */
   .mini-player-widget {
     padding: 3px 8px;
     font-size: 0.7rem;
   }
   .player-track-name { max-width: 80px; }
 
-  /* 隱藏桌面端次要按鈕，維持選單簡潔 */
   .matrix-clock-widget, .cmd-trigger-btn, .sound-toggle-btn { display: none; }
   
   .mobile-menu-btn { display: block; }
 
-  /* 手機版下拉導覽選單 */
   .nav-links {
     position: absolute;
     top: 100%;
@@ -1075,7 +1071,6 @@ body.modal-open {
   .nav-links.active { display: flex; }
   .nav-links a { font-size: 0.95rem; }
 
-  /* Hero 區塊優化 */
   .hero-section { padding: 40px 16px 30px; }
   .hero-container { flex-direction: column; text-align: center; gap: 20px; }
   .avatar-img { width: 110px; height: 110px; }
@@ -1083,17 +1078,14 @@ body.modal-open {
   .subtitle { font-size: 0.95rem; }
   .bio { font-size: 0.88rem; }
 
-  /* 作品網格自適應 */
   .portfolio-section { padding: 30px 16px; }
   .portfolio-grid {
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: 18px;
   }
 
-  /* 手機端停用 3D 傾斜防發熱 lag */
   .card { transform: none !important; }
 
-  /* Lightbox 彈窗手機版佈局適配 */
   .lightbox-container {
     max-width: 96vw;
     max-height: 92vh;
@@ -1116,7 +1108,6 @@ body.modal-open {
   .lightbox-nav.prev { left: 4px; }
   .lightbox-nav.next { right: 4px; }
 
-  /* 聯絡資訊與頁尾 */
   .contact-section { padding: 40px 16px; }
   .contact-links { flex-direction: column; }
   .contact-btn { width: 100%; justify-content: center; }

@@ -1,5 +1,5 @@
 /**
- * ERBLOG // NOTHING OS STYLE - MAIN APP SCRIPT
+ * ERBLOG // NOTHING OS STYLE - MAIN APP SCRIPT (OPTIMIZED EDITION)
  */
 
 // 作品集資料設定
@@ -119,8 +119,11 @@ let startY = 0;
 let touchStartX = 0;
 let touchStartY = 0;
 
+// Command Palette 選擇索引
+let activeCmdIndex = 0;
+
 /* ----------------------------------------------------
-   1. 科技感自訂瞄準游標 (桌機端自動開啟，行動端關閉)
+   1. 科技感自訂瞄準游標 (優化為全域 Event Delegation)
 ---------------------------------------------------- */
 function setupCustomCursor() {
   const cursor = document.getElementById('custom-cursor');
@@ -131,10 +134,16 @@ function setupCustomCursor() {
     cursor.style.top = `${e.clientY}px`;
   });
 
-  const hoverables = document.querySelectorAll('a, button, .card, .filter-btn, .cmd-item, input');
-  hoverables.forEach(el => {
-    el.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
-    el.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
+  document.addEventListener('mouseover', (e) => {
+    if (e.target.closest('a, button, .card, .filter-btn, .cmd-item, input, .wiki-link-btn')) {
+      cursor.classList.add('hovered');
+    }
+  });
+
+  document.addEventListener('mouseout', (e) => {
+    if (e.target.closest('a, button, .card, .filter-btn, .cmd-item, input, .wiki-link-btn')) {
+      cursor.classList.remove('hovered');
+    }
   });
 }
 
@@ -176,7 +185,7 @@ function apply3DTiltEffect(card) {
 }
 
 /* ----------------------------------------------------
-   3. Web Audio 系統按鍵音效
+   3. Web Audio 系統按鍵音效 (含 AudioContext 自動解鎖)
 ---------------------------------------------------- */
 function playClickSound(freq = 750, type = 'sine', duration = 0.035) {
   if (!soundEnabled) return;
@@ -319,7 +328,7 @@ function handleEasterEgg(keyword) {
 }
 
 /* ----------------------------------------------------
-   6. Command Palette 命令列功能
+   6. Command Palette 命令列功能 (支援鍵盤方向鍵切換)
 ---------------------------------------------------- */
 function setupCommandPalette() {
   if (!cmdPalette || !cmdInput || !cmdList) return;
@@ -336,10 +345,14 @@ function setupCommandPalette() {
     { label: "切換明暗主題 (Dark / Light)", action: () => toggleTheme() }
   ];
 
+  let currentFilteredCommands = [...commands];
+
   function openCmd() {
     cmdPalette.classList.add('active');
     cmdInput.value = '';
-    renderCmds(commands);
+    activeCmdIndex = 0;
+    currentFilteredCommands = [...commands];
+    renderCmds(currentFilteredCommands);
     playClickSound(800, 'square');
     setTimeout(() => cmdInput.focus(), 60);
   }
@@ -357,7 +370,7 @@ function setupCommandPalette() {
 
     list.forEach((item, i) => {
       const li = document.createElement('li');
-      li.className = `cmd-item ${i === 0 ? 'selected' : ''}`;
+      li.className = `cmd-item ${i === activeCmdIndex ? 'selected' : ''}`;
       li.innerHTML = `<span>${item.label}</span><span class="cmd-tag">[ EXEC ]</span>`;
       li.addEventListener('click', () => {
         item.action();
@@ -366,6 +379,9 @@ function setupCommandPalette() {
       });
       cmdList.appendChild(li);
     });
+
+    const selectedEl = cmdList.children[activeCmdIndex];
+    if (selectedEl) selectedEl.scrollIntoView({ block: 'nearest' });
   }
 
   function scrollToSection(id) {
@@ -389,22 +405,43 @@ function setupCommandPalette() {
       else openCmd();
     } else if (e.key === 'Escape' && cmdPalette.classList.contains('active')) {
       closeCmd();
-    } else if (e.key === 'Enter' && cmdPalette.classList.contains('active')) {
-      const val = cmdInput.value.trim();
-      if (handleEasterEgg(val)) {
-        closeCmd();
+    } else if (cmdPalette.classList.contains('active')) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (currentFilteredCommands.length > 0) {
+          activeCmdIndex = (activeCmdIndex + 1) % currentFilteredCommands.length;
+          renderCmds(currentFilteredCommands);
+          playClickSound(600, 'sine');
+        }
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (currentFilteredCommands.length > 0) {
+          activeCmdIndex = (activeCmdIndex - 1 + currentFilteredCommands.length) % currentFilteredCommands.length;
+          renderCmds(currentFilteredCommands);
+          playClickSound(600, 'sine');
+        }
+      } else if (e.key === 'Enter') {
+        const val = cmdInput.value.trim();
+        if (handleEasterEgg(val)) {
+          closeCmd();
+        } else if (currentFilteredCommands.length > 0 && currentFilteredCommands[activeCmdIndex]) {
+          currentFilteredCommands[activeCmdIndex].action();
+          closeCmd();
+          playClickSound(1000, 'triangle');
+        }
       }
     }
   });
 
   cmdInput.addEventListener('input', (e) => {
     const val = e.target.value.toLowerCase().trim();
+    activeCmdIndex = 0;
     if (!val) {
-      renderCmds(commands);
-      return;
+      currentFilteredCommands = [...commands];
+    } else {
+      currentFilteredCommands = commands.filter(c => c.label.toLowerCase().includes(val));
     }
-    const filtered = commands.filter(c => c.label.toLowerCase().includes(val));
-    renderCmds(filtered);
+    renderCmds(currentFilteredCommands);
   });
 
   if (cmdOverlay) cmdOverlay.addEventListener('click', closeCmd);
@@ -412,7 +449,7 @@ function setupCommandPalette() {
 }
 
 /* ----------------------------------------------------
-   7. Lightbox 高清圖片滾輪/拖拽/手機左右滑動手勢
+   7. Lightbox 高清圖片滾輪/拖拽/手機左右滑動/鍵盤導向
 ---------------------------------------------------- */
 function resetZoom() {
   zoomScale = 1;
@@ -483,29 +520,32 @@ function setupLightboxZoomAndDrag() {
       const deltaX = touchEndX - touchStartX;
       const deltaY = touchEndY - touchStartY;
 
-      // 判斷是否為水平滑動且滑動距離大於 50px
       if (Math.abs(deltaX) > 50 && Math.abs(deltaY) < 60) {
         if (deltaX < 0) {
-          // 向左滑動 -> 下一張
-          if (currentGallery.length > 1) {
-            currentIndex = (currentIndex + 1) % currentGallery.length;
-            updateLightboxContent();
-            playClickSound(800, 'sine');
-          }
+          navigateLightbox(1);
         } else {
-          // 向右滑動 -> 上一張
-          if (currentGallery.length > 1) {
-            currentIndex = (currentIndex - 1 + currentGallery.length) % currentGallery.length;
-            updateLightboxContent();
-            playClickSound(800, 'sine');
-          }
+          navigateLightbox(-1);
         }
       }
     }, { passive: true });
   }
 
+  // ⌨️ 全域鍵盤方向鍵切換 Lightbox
+  document.addEventListener('keydown', (e) => {
+    if (!lightbox.classList.contains('active')) return;
+
+    if (e.key === 'ArrowLeft') {
+      navigateLightbox(-1);
+    } else if (e.key === 'ArrowRight') {
+      navigateLightbox(1);
+    } else if (e.key === 'Escape') {
+      closeLightbox();
+    }
+  });
+
   if (lightboxFullscreenBtn) {
     lightboxFullscreenBtn.addEventListener('click', () => {
+      playClickSound(800, 'sine');
       if (!document.fullscreenElement) {
         lightboxContent.requestFullscreen().catch(err => console.log(err));
       } else {
@@ -515,8 +555,18 @@ function setupLightboxZoomAndDrag() {
   }
 
   if (lightboxResetBtn) {
-    lightboxResetBtn.addEventListener('click', resetZoom);
+    lightboxResetBtn.addEventListener('click', () => {
+      playClickSound(750, 'sine');
+      resetZoom();
+    });
   }
+}
+
+function navigateLightbox(direction) {
+  if (currentGallery.length <= 1) return;
+  currentIndex = (currentIndex + direction + currentGallery.length) % currentGallery.length;
+  updateLightboxContent();
+  playClickSound(800, 'sine');
 }
 
 /* ----------------------------------------------------
@@ -604,8 +654,6 @@ function renderPortfolio(data) {
     });
     gridContainer.appendChild(card);
   });
-
-  setupCustomCursor();
 }
 
 function openLightbox(portfolioItem) {
@@ -710,7 +758,6 @@ function setupMobileMenu() {
       navLinks.classList.toggle('active');
     });
 
-    // 點擊選單連結後自動關閉選單
     navLinks.querySelectorAll('a').forEach(link => {
       link.addEventListener('click', () => {
         navLinks.classList.remove('active');
@@ -738,6 +785,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (lightboxClose) lightboxClose.addEventListener('click', closeLightbox);
   if (lightboxOverlay) lightboxOverlay.addEventListener('click', closeLightbox);
-  if (prevBtn) prevBtn.addEventListener('click', () => { currentIndex = (currentIndex - 1 + currentGallery.length) % currentGallery.length; updateLightboxContent(); });
-  if (nextBtn) nextBtn.addEventListener('click', () => { currentIndex = (currentIndex + 1) % currentGallery.length; updateLightboxContent(); });
+  if (prevBtn) prevBtn.addEventListener('click', () => navigateLightbox(-1));
+  if (nextBtn) nextBtn.addEventListener('click', () => navigateLightbox(1));
 });
