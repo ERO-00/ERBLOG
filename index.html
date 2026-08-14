@@ -26,6 +26,9 @@
   <!-- 彩蛋特效燈光秀閃爍層 -->
   <div id="lightshow-overlay" class="lightshow-overlay"></div>
 
+  <!-- JOJO 震撼衝擊一整排字型圖層 -->
+  <div id="jojo-impact-overlay" class="jojo-impact-overlay"></div>
+
   <!-- JOJO / 99 彩蛋: 動態 ゴゴゴ (Menace) 文字容器 -->
   <div id="jojo-menace-container" class="jojo-menace-container"></div>
 
@@ -42,7 +45,7 @@
   <!-- 背景點陣圖層 -->
   <div class="dot-matrix-bg"></div>
 
-  <!-- 獨立式音樂播放器 Widget (整合高敏度頻譜視覺化 Canvas 與右側半圓 CD 唱盤) -->
+  <!-- 獨立式音樂播放器 Widget -->
   <div id="mini-player" class="mini-player-widget">
     <div class="player-left-panel">
       <div class="player-drag-handle" id="player-drag-handle" title="按住可隨意拖動播放器">
@@ -75,7 +78,7 @@
       </div>
     </div>
 
-    <!-- 右側延伸半圓形 CD Player 唱盤結構 -->
+    <!-- 右側延伸正半圓形 CD Player 唱盤結構 -->
     <div class="cd-player-bay" title="3D 科技感 CD 唱盤">
       <div class="cd-stylus-needle"></div>
       <div class="cd-disc" id="cd-disc">
@@ -89,7 +92,7 @@
     </div>
   </div>
 
-  <!-- 優化版雙端導覽列 -->
+  <!-- 導覽列 -->
   <header class="navbar">
     <div class="nav-container">
       
@@ -98,14 +101,14 @@
         <span class="red-dot"></span> ERBLOG
       </a>
       
-      <!-- 桌機版主要頁面連結 -->
+      <!-- 桌機版頁面連結 -->
       <nav class="desktop-nav-links">
         <a href="#about" class="nav-item">// 關於我</a>
         <a href="#portfolio" class="nav-item">// 作品集</a>
         <a href="#contact" class="nav-item">// 聯絡我</a>
       </nav>
 
-      <!-- 右側模組化系統工具列 -->
+      <!-- 右側系統工具列 -->
       <div class="nav-tools">
         
         <!-- 點陣數字即時時鐘 Widget -->
@@ -128,7 +131,7 @@
 
     </div>
 
-    <!-- 手機版下拉選單 (附滑順平移動畫) -->
+    <!-- 手機版下拉選單 -->
     <nav class="mobile-nav-menu" id="mobile-nav-menu">
       <a href="#about" class="mobile-nav-item">// 01. 關於我</a>
       <a href="#portfolio" class="mobile-nav-item">// 02. 作品集</a>
@@ -174,9 +177,7 @@
       </div>
 
       <!-- 作品網格 -->
-      <div class="portfolio-grid" id="portfolio-grid">
-        <!-- 由 app.js 動態渲染生成 -->
-      </div>
+      <div class="portfolio-grid" id="portfolio-grid"></div>
     </div>
   </section>
 

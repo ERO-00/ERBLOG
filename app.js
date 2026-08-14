@@ -112,17 +112,17 @@ const playerVisualizerCanvas = document.getElementById('player-visualizer');
 // 全域音訊與 Web Audio API
 let globalAudio = new Audio();
 globalAudio.crossOrigin = "anonymous";
-globalAudio.volume = 0.7; // 預設音量 70%
+globalAudio.volume = 0.7;
 
 let audioCtx = null;
 let analyserNode = null;
 let audioSourceNode = null;
 let dataArray = null;
 let bufferLength = 0;
-let peakCaps = []; // 高光頂點陣列
+let peakCaps = [];
 
 let soundEnabled = true;
-let ripplePhase = 0; // 待機波紋動畫相位
+let ripplePhase = 0;
 
 // Lightbox 狀態
 let currentGallery = [];
@@ -164,7 +164,7 @@ function setupCustomCursor() {
 }
 
 /* ----------------------------------------------------
-   2. ⚡ 極致效能最佳化：3D Card Tilt + 金屬光澤傾斜效果 (rAF 防卡頓重構)
+   2. ⚡ 極致效能最佳化：3D Card Tilt 傾斜效果
 ---------------------------------------------------- */
 function apply3DTiltEffect(card) {
   if (window.matchMedia('(max-width: 768px)').matches) return;
@@ -197,7 +197,7 @@ function apply3DTiltEffect(card) {
   }
 
   card.addEventListener('mouseenter', () => {
-    rect = card.getBoundingClientRect(); // 僅在移入時獲取一次尺寸，避免 mousemove 時不斷觸發 Reflow
+    rect = card.getBoundingClientRect();
     card.style.transition = 'transform 0.1s ease-out';
   });
 
@@ -205,7 +205,6 @@ function apply3DTiltEffect(card) {
     mouseX = e.clientX;
     mouseY = e.clientY;
     
-    // 使用 requestAnimationFrame 來讓滑鼠運算精準與顯示器 FPS (60/120Hz) 同步
     if (!rafId) {
       rafId = requestAnimationFrame(updateTilt);
     }
@@ -402,7 +401,7 @@ function setupCanvasVisualizer() {
 }
 
 /* ----------------------------------------------------
-   5. Mini Music Player 邏輯與控制模組 (連動 CD 唱盤旋轉)
+   5. Mini Music Player 邏輯控制
 ---------------------------------------------------- */
 function updatePlayBtnText(isPlaying) {
   const isMobile = window.matchMedia('(max-width: 900px)').matches;
@@ -477,9 +476,6 @@ function playAudioTrack(fileName, trackDisplayName) {
   });
 }
 
-/* ----------------------------------------------------
-   5.1 雙端 Widget 隨意拖動邏輯
----------------------------------------------------- */
 function setupDraggableWidget(element, handle) {
   let isDrag = false;
   let offsetX = 0;
@@ -543,7 +539,7 @@ function setupDraggableWidget(element, handle) {
 }
 
 /* ----------------------------------------------------
-   6. 彩蛋處理器 (Easter Eggs)
+   6. 彩蛋處理器 (升級版 JOJO 斜向巨型衝擊 + 特寫動畫)
 ---------------------------------------------------- */
 function triggerLightShow() {
   const overlay = document.getElementById('lightshow-overlay');
@@ -554,11 +550,45 @@ function triggerLightShow() {
   }
 }
 
+// 💥 JOJO 升級版：斜向對角滑動巨型衝擊
+function triggerJojoImpact(onComplete) {
+  const overlay = document.getElementById('jojo-impact-overlay');
+  if (!overlay) {
+    if (onComplete) onComplete();
+    return;
+  }
+
+  // 強烈畫面震動
+  document.body.classList.remove('jojo-shaking');
+  void document.body.offsetWidth;
+  document.body.classList.add('jojo-shaking');
+
+  overlay.innerHTML = `
+    <div class="impact-bg-lines"></div>
+    <div class="jojo-impact-row row-top">ゴゴゴゴゴゴゴゴゴ</div>
+    <div class="jojo-impact-row row-bottom">ドドドドドドドドド</div>
+    <div class="jojo-impact-row row-center">ゴ ！！</div>
+  `;
+
+  overlay.classList.add('active');
+
+  playClickSound(1200, 'sawtooth', 0.25);
+
+  // 1.25 秒動畫展示完畢後移除衝擊層
+  setTimeout(() => {
+    overlay.classList.remove('active');
+    overlay.innerHTML = '';
+    document.body.classList.remove('jojo-shaking');
+    if (onComplete) onComplete();
+  }, 1250);
+}
+
+// JOJO 後續漂浮散落字型特效
 function spawnJojoMenace() {
   const container = document.getElementById('jojo-menace-container');
   if (!container) return;
 
-  for (let i = 0; i < 7; i++) {
+  for (let i = 0; i < 9; i++) {
     setTimeout(() => {
       const el = document.createElement('div');
       el.className = 'jojo-menace-text';
@@ -567,8 +597,8 @@ function spawnJojoMenace() {
       el.style.top = `${Math.random() * 70 + 15}vh`;
       container.appendChild(el);
 
-      setTimeout(() => el.remove(), 2000);
-    }, i * 200);
+      setTimeout(() => el.remove(), 2200);
+    }, i * 180);
   }
 }
 
@@ -589,8 +619,10 @@ function handleEasterEgg(keyword) {
   if (key === '99') {
     document.body.classList.add('jojo-theme');
     triggerLightShow();
-    spawnJojoMenace();
-    playAudioTrack('il vento doro.mp3', 'il vento doro (99 Egg)');
+    triggerJojoImpact(() => {
+      spawnJojoMenace();
+      playAudioTrack('il vento doro.mp3', 'il vento doro (99 Egg)');
+    });
     return true;
   }
 
@@ -607,8 +639,10 @@ function handleEasterEgg(keyword) {
   if (jojoMap[key]) {
     document.body.classList.add('jojo-theme');
     triggerLightShow();
-    spawnJojoMenace();
-    playAudioTrack(jojoMap[key].file, jojoMap[key].name);
+    triggerJojoImpact(() => {
+      spawnJojoMenace();
+      playAudioTrack(jojoMap[key].file, jojoMap[key].name);
+    });
     return true;
   }
 
@@ -629,9 +663,9 @@ function setupCommandPalette() {
   if (!cmdPalette || !cmdInput || !cmdList) return;
 
   const commands = [
-    { label: "[ 彩蛋 ] 輸入 '99' 觸發 JOJO 經典 99 特效主題", action: () => handleEasterEgg('99') },
+    { label: "[ 彩蛋 ] 輸入 '99' 觸發 JOJO 經典 99 震撼衝擊主題", action: () => handleEasterEgg('99') },
     { label: "[ 彩蛋 ] 輸入 'towa' 觸發常闇永遠專屬主題", action: () => handleEasterEgg('towa') },
-    { label: "[ 彩蛋 ] 輸入 'jojo1' ~ 'jojo7' 觸發 JOJO 奇妙冒險", action: () => handleEasterEgg('jojo1') },
+    { label: "[ 彩蛋 ] 輸入 'jojo1' ~ 'jojo7' 觸發 JOJO 奇妙冒險特寫", action: () => handleEasterEgg('jojo1') },
     { label: "[ 彩蛋 ] 輸入 'holo' 觸發 Hololive 藍色科技風", action: () => handleEasterEgg('holo') },
     { label: "前往 // 關於我", action: () => scrollToSection('about') },
     { label: "前往 // 作品集", action: () => scrollToSection('portfolio') },
