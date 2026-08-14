@@ -1,5 +1,5 @@
 /**
- * ERBLOG // NOTHING OS STYLE - MAIN APP SCRIPT (OPTIMIZED & BUG FIXED)
+ * ERBLOG // NOTHING OS STYLE - MAIN APP SCRIPT WITH ENHANCED WEB AUDIO VISUALIZER
  */
 
 // 作品集資料設定
@@ -99,7 +99,7 @@ const cmdOverlay = document.getElementById('cmd-overlay');
 const cmdTriggerBtn = document.getElementById('cmd-trigger-btn');
 const mobileCmdBtn = document.getElementById('mobile-cmd-btn');
 
-// Mini Player
+// Mini Player DOM
 const miniPlayer = document.getElementById('mini-player');
 const playerTrackName = document.getElementById('player-track-name');
 const playerPlayBtn = document.getElementById('player-play-btn');
@@ -107,17 +107,26 @@ const playerDockBtn = document.getElementById('player-dock-btn');
 const playerVolumeSlider = document.getElementById('player-volume-slider');
 const playerVolumeText = document.getElementById('player-volume-text');
 const playerDragHandle = document.getElementById('player-drag-handle');
+const playerVisualizerCanvas = document.getElementById('player-visualizer');
 
+// 全域音訊與 Web Audio API
 let globalAudio = new Audio();
+globalAudio.crossOrigin = "anonymous";
 globalAudio.volume = 0.7; // 預設音量 70%
 
-// 狀態變數
-let currentGallery = [];
-let currentIndex = 0;
-let soundEnabled = true;
 let audioCtx = null;
+let analyserNode = null;
+let audioSourceNode = null;
+let dataArray = null;
+let bufferLength = 0;
+let peakCaps = []; // 高光頂點降落點陣列
+
+let soundEnabled = true;
+let ripplePhase = 0; // 待機波紋動畫相位
 
 // Lightbox 狀態
+let currentGallery = [];
+let currentIndex = 0;
 let zoomScale = 1;
 let panX = 0;
 let panY = 0;
@@ -190,29 +199,37 @@ function apply3DTiltEffect(card) {
 }
 
 /* ----------------------------------------------------
-   3. Web Audio 系統按鍵音效
+   3. Web Audio 核心初始化與 UI 按鍵音效
 ---------------------------------------------------- */
+function getAudioContext() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+  return audioCtx;
+}
+
 function playClickSound(freq = 750, type = 'sine', duration = 0.035) {
   if (!soundEnabled) return;
   try {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
+    const ctx = getAudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
 
     osc.type = type;
-    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + duration);
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + duration);
 
-    gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+    gain.gain.setValueAtTime(0.12, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
 
     osc.connect(gain);
-    gain.connect(audioCtx.destination);
+    gain.connect(ctx.destination);
 
     osc.start();
-    osc.stop(audioCtx.currentTime + duration);
+    osc.stop(ctx.currentTime + duration);
   } catch (e) {}
 }
 
@@ -226,7 +243,141 @@ function setupSoundToggle() {
 }
 
 /* ----------------------------------------------------
-   4. Mini Music Player (播放控制 / 音量控制 / 隨意拖動)
+   4. 重寫 Web Audio API 頻譜分析模組 (高敏度 64 Bins + Canvas 視覺化)
+---------------------------------------------------- */
+function initWebAudioAnalyser() {
+  const ctx = getAudioContext();
+
+  if (!analyserNode) {
+    analyserNode = ctx.createAnalyser();
+    analyserNode.fftSize = 128; // FFT 128 -> 產生精確的 64 Bins 頻率數據
+    analyserNode.smoothingTimeConstant = 0.82; // 高敏度平滑係數
+
+    bufferLength = analyserNode.frequencyBinCount; // 64
+    dataArray = new Uint8Array(bufferLength);
+    peakCaps = new Array(bufferLength).fill(0);
+  }
+
+  // 避免重複綁定 AudioSourceNode
+  if (!audioSourceNode && globalAudio) {
+    try {
+      audioSourceNode = ctx.createMediaElementSource(globalAudio);
+      audioSourceNode.connect(analyserNode);
+      analyserNode.connect(ctx.destination);
+    } catch (err) {
+      console.warn("AudioSource direct connection notice:", err);
+    }
+  }
+}
+
+function setupCanvasVisualizer() {
+  if (!playerVisualizerCanvas) return;
+  const ctx = playerVisualizerCanvas.getContext('2d');
+
+  // 防模糊：動態調整 Canvas 解析度與容器縮放相符
+  function resizeCanvas() {
+    const rect = playerVisualizerCanvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    playerVisualizerCanvas.width = (rect.width || 202) * dpr;
+    playerVisualizerCanvas.height = (rect.height || 52) * dpr;
+  }
+
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  // Canvas 渲染主迴圈
+  function renderFrame() {
+    requestAnimationFrame(renderFrame);
+
+    const w = playerVisualizerCanvas.width;
+    const h = playerVisualizerCanvas.height;
+    const dpr = window.devicePixelRatio || 1;
+
+    ctx.clearRect(0, 0, w, h);
+
+    const isPlaying = globalAudio && !globalAudio.paused && globalAudio.currentTime > 0;
+
+    if (isPlaying && analyserNode) {
+      // 擷取實時頻譜數據
+      analyserNode.getByteFrequencyData(dataArray);
+
+      const numBins = bufferLength; // 64 Bins
+      const barWidth = w / numBins;
+      const capHeight = 2 * dpr;
+      const gravity = 0.65 * dpr;
+
+      for (let i = 0; i < numBins; i++) {
+        const value = dataArray[i];
+        const percent = value / 255;
+        const barHeight = Math.max(2 * dpr, percent * (h - 6 * dpr));
+
+        // 計算高光頂點 (Peak Cap) 降落與重力下落機制
+        if (barHeight > peakCaps[i]) {
+          peakCaps[i] = barHeight;
+        } else {
+          peakCaps[i] = Math.max(0, peakCaps[i] - gravity);
+        }
+
+        const x = i * barWidth;
+        const y = h - barHeight;
+
+        // 霓虹漸層（紅色至白色）
+        const gradient = ctx.createLinearGradient(0, h, 0, 0);
+        gradient.addColorStop(0, '#ff2a2a');
+        gradient.addColorStop(0.65, '#ff7777');
+        gradient.addColorStop(1, '#ffffff');
+
+        // 繪製動態頻譜柱
+        ctx.fillStyle = gradient;
+        ctx.shadowColor = 'rgba(255, 42, 42, 0.75)';
+        ctx.shadowBlur = 6 * dpr;
+        ctx.fillRect(x + 0.5 * dpr, y, Math.max(1 * dpr, barWidth - 1 * dpr), barHeight);
+
+        // 繪製高光頂點降落點 (Peak Cap)
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowColor = '#ffffff';
+        ctx.shadowBlur = 8 * dpr;
+        const capY = h - peakCaps[i] - capHeight;
+        ctx.fillRect(x + 0.5 * dpr, Math.max(0, capY), Math.max(1 * dpr, barWidth - 1 * dpr), capHeight);
+      }
+    } else {
+      // 無音訊/暫停時的動態波紋待機效果 (Idle Wave Ripples)
+      ripplePhase += 0.04;
+      const centerX = w / 2;
+      const centerY = h / 2;
+      const maxRadius = Math.min(w, h) * 0.42;
+
+      ctx.shadowColor = 'rgba(255, 42, 42, 0.6)';
+      ctx.shadowBlur = 8 * dpr;
+
+      // 繪製擴散雙同心圓波紋
+      for (let r = 1; r <= 2; r++) {
+        const currentRadius = ((ripplePhase * 16 * dpr + r * 18 * dpr) % maxRadius);
+        const alpha = Math.max(0, 1 - (currentRadius / maxRadius));
+
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, currentRadius, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(255, 42, 42, ${alpha * 0.65})`;
+        ctx.lineWidth = 1.2 * dpr;
+        ctx.stroke();
+      }
+
+      // 中心點科技感微光呼吸
+      const pulseRadius = (Math.sin(ripplePhase * 2.5) * 1.5 + 3) * dpr;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, pulseRadius, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.shadowColor = '#ffffff';
+      ctx.shadowBlur = 10 * dpr;
+      ctx.fill();
+    }
+  }
+
+  renderFrame();
+}
+
+/* ----------------------------------------------------
+   5. Mini Music Player 邏輯與控制模組
 ---------------------------------------------------- */
 function updatePlayBtnText(isPlaying) {
   const isMobile = window.matchMedia('(max-width: 900px)').matches;
@@ -240,11 +391,15 @@ function updatePlayBtnText(isPlaying) {
 function setupMiniPlayer() {
   if (!playerPlayBtn) return;
 
-  // 播放 / 暫停按鈕
+  // 播放 / 暫停按鈕點擊
   playerPlayBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     if (!globalAudio.src) return;
+
+    initWebAudioAnalyser();
+
     if (globalAudio.paused) {
+      getAudioContext();
       globalAudio.play();
       miniPlayer.classList.add('playing');
       updatePlayBtnText(true);
@@ -288,6 +443,9 @@ function setupMiniPlayer() {
 
 // 播放音樂模組
 function playAudioTrack(fileName, trackDisplayName) {
+  initWebAudioAnalyser();
+  getAudioContext();
+
   globalAudio.src = `assets/audio/${fileName}`;
   playerTrackName.textContent = trackDisplayName;
   
@@ -295,25 +453,22 @@ function playAudioTrack(fileName, trackDisplayName) {
     miniPlayer.classList.add('playing');
     updatePlayBtnText(true);
   }).catch(() => {
-    console.warn(`請確認 assets/audio/${fileName} 檔案是否存在。`);
+    console.warn(`請確認 assets/audio/${fileName} 音訊檔案是否存在。`);
   });
 }
 
 /* ----------------------------------------------------
-   4.1 雙端 Widget 隨意拖動邏輯 (電腦 + 手機端)
+   5.1 雙端 Widget 隨意拖動邏輯 (電腦 + 手機端)
 ---------------------------------------------------- */
 function setupDraggableWidget(element, handle) {
   let isDrag = false;
   let offsetX = 0;
   let offsetY = 0;
-  let dragDistance = 0;
 
   function onPointerDown(e) {
-    // 若點擊的是音量滑桿或按鈕，不觸發拖動
-    if (e.target.closest('button, input, a')) return;
+    if (e.target.closest('button, input, a, canvas')) return;
 
     isDrag = true;
-    dragDistance = 0;
 
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
@@ -322,7 +477,6 @@ function setupDraggableWidget(element, handle) {
     offsetX = clientX - rect.left;
     offsetY = clientY - rect.top;
 
-    // 將 CSS 定位轉為基於左頂點的 absolute/fixed 像素值
     element.style.left = `${rect.left}px`;
     element.style.top = `${rect.top}px`;
     element.style.bottom = 'auto';
@@ -341,15 +495,11 @@ function setupDraggableWidget(element, handle) {
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
-    dragDistance += 1;
-
-    // 阻止手機預設滾動行為，確保順暢拖曳
     if (e.cancelable) e.preventDefault();
 
     let newX = clientX - offsetX;
     let newY = clientY - offsetY;
 
-    // 螢幕邊界安全防護
     const maxLeft = window.innerWidth - element.offsetWidth - 10;
     const maxTop = window.innerHeight - element.offsetHeight - 10;
 
@@ -373,7 +523,7 @@ function setupDraggableWidget(element, handle) {
 }
 
 /* ----------------------------------------------------
-   5. 彩蛋處理器 (Easter Eggs)
+   6. 彩蛋處理器 (Easter Eggs)
 ---------------------------------------------------- */
 function triggerLightShow() {
   const overlay = document.getElementById('lightshow-overlay');
@@ -405,7 +555,6 @@ function spawnJojoMenace() {
 function handleEasterEgg(keyword) {
   const key = keyword.trim().toLowerCase();
   
-  // 💡 觸發彩蛋時強制關閉手機選單與指令列
   closeMobileNav();
 
   document.body.classList.remove('towa-theme', 'jojo-theme', 'holo-theme');
@@ -446,7 +595,7 @@ function handleEasterEgg(keyword) {
 }
 
 /* ----------------------------------------------------
-   6. Command Palette 命令列 (修正：關閉即 display:none 徹底清除遮罩)
+   7. Command Palette 命令列
 ---------------------------------------------------- */
 function setupCommandPalette() {
   if (!cmdPalette || !cmdInput || !cmdList) return;
@@ -466,7 +615,7 @@ function setupCommandPalette() {
   let currentFilteredCommands = [...commands];
 
   function openCmd() {
-    closeMobileNav(); // 開啟指令列時確保手機導覽選單徹底關閉
+    closeMobileNav();
     cmdPalette.classList.add('active');
     cmdPalette.setAttribute('aria-hidden', 'false');
     cmdInput.value = '';
@@ -545,7 +694,6 @@ function setupCommandPalette() {
         }
       } else if (e.key === 'Enter') {
         const val = cmdInput.value.trim();
-        // 🔥 按 Enter 後確保指令選單徹底關閉，絕不殘留無效按鈕或遮罩
         closeCmd();
         if (!handleEasterEgg(val)) {
           if (currentFilteredCommands.length > 0 && currentFilteredCommands[activeCmdIndex]) {
@@ -579,7 +727,7 @@ function setupCommandPalette() {
 }
 
 /* ----------------------------------------------------
-   7. Lightbox 功能
+   8. Lightbox 功能
 ---------------------------------------------------- */
 function resetZoom() {
   zoomScale = 1;
@@ -688,7 +836,7 @@ function navigateLightbox(direction) {
 }
 
 /* ----------------------------------------------------
-   8. 基礎渲染與載入模組
+   9. 基礎渲染與載入模組
 ---------------------------------------------------- */
 function setupMatrixClock() {
   const clockEl = document.getElementById('matrix-clock');
@@ -870,7 +1018,7 @@ function setupBackToTop() {
 }
 
 /* ----------------------------------------------------
-   9. 手機版導覽選單 (修復：關閉即 display:none 完全解除點擊遮罩)
+   10. 手機版導覽選單
 ---------------------------------------------------- */
 function closeMobileNav() {
   if (mobileNavMenu) {
@@ -886,7 +1034,6 @@ function setupMobileMenu() {
       mobileNavMenu.classList.toggle('active');
     });
 
-    // 點擊選單以外的空白區域自動徹底關閉
     document.addEventListener('click', (e) => {
       if (mobileNavMenu.classList.contains('active') && 
           !mobileNavMenu.contains(e.target) && 
@@ -895,7 +1042,6 @@ function setupMobileMenu() {
       }
     });
 
-    // 點擊選單內的任何連結，立即徹底關閉選單！
     mobileNavMenu.querySelectorAll('a, button').forEach(link => {
       link.addEventListener('click', () => {
         closeMobileNav();
@@ -904,6 +1050,9 @@ function setupMobileMenu() {
   }
 }
 
+/* ----------------------------------------------------
+   DOM 載入完成初始化
+---------------------------------------------------- */
 document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => introCurtain && introCurtain.classList.add('loaded'), 600);
   
@@ -914,6 +1063,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupTypewriter();
   setupCommandPalette();
   setupMiniPlayer();
+  setupCanvasVisualizer(); // 啟動 Canvas 視覺化繪製
   setupLightboxZoomAndDrag();
   
   renderPortfolio(portfolioData);

@@ -42,7 +42,7 @@
   <!-- 背景點陣圖層 -->
   <div class="dot-matrix-bg"></div>
 
-  <!-- 獨立式音樂播放器 Widget (可隨意拖動 / 內建音量控制 / 高級 Nothing OS 精細質感) -->
+  <!-- 獨立式音樂播放器 Widget (整合 64 Bins 音訊視覺化 Canvas) -->
   <div id="mini-player" class="mini-player-widget">
     <div class="player-drag-handle" id="player-drag-handle" title="按住可隨意拖動播放器">
       <span class="drag-dots">⋮⋮</span>
@@ -56,6 +56,9 @@
     </div>
 
     <div class="player-main-content">
+      <!-- 真實音訊視覺化 Canvas 畫面 -->
+      <canvas id="player-visualizer" class="player-visualizer"></canvas>
+
       <div id="player-track-name" class="player-track-name">[ NO AUDIO ]</div>
       
       <div class="player-controls">
