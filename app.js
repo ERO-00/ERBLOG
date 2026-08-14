@@ -1,6 +1,8 @@
 /**
- * 作品集資料設定 (已補齊日常隨筆記錄 11 張照片)
+ * ERBLOG // NOTHING OS STYLE - MAIN APP SCRIPT
  */
+
+// 作品集資料設定
 const portfolioData = [
   {
     id: 1,
@@ -63,10 +65,9 @@ const portfolioData = [
   }
 ];
 
-// 預設 SVG / Nothing OS 風格圖片缺失替代圖
-const FALLBACK_IMG = "data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22400%22%20height%3D%22300%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20style%3D%22background%3A%23121212%3B%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22none%22%20stroke%3D%22%23262626%22%20stroke-width%3D%222%22%2F%3E%3Ccircle%20cx%3D%22200%22%20cy%3D%22130%22%20r%3D%224%22%20fill%3D%22%23ff2a2a%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2255%25%22%20fill%3D%22%23888888%22%20font-family%3D%22Space%20Mono%2C%20monospace%22%20font-size%3D%2212%22%20text-anchor%3D%22middle%22%3E%5B%20IMAGE%20NOT%20FOUND%20%5D%3C%2Ftext%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2268%25%22%20fill%3D%22%23404040%22%20font-family%3D%22Space%20Mono%2C%20monospace%22%20font-size%3D%2210%22%20text-anchor%3D%22middle%22%3E請確認%20assets%2F%20圖檔路徑%3C%2Ftext%3E%3C%2Fsvg%3E";
+const FALLBACK_IMG = "data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22400%22%20height%3D%22300%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20style%3D%22background%3A%23121212%3B%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22none%22%20stroke%3D%22%23262626%22%20stroke-width%3D%222%22%2F%3E%3Ccircle%20cx%3D%22200%22%20cy%3D%22130%22%20r%3D%224%22%20fill%3D%22%23ff2a2a%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2255%25%22%20fill%3D%22%23888888%22%20font-family%3D%22Space%20Mono%2C%20monospace%22%20font-size%3D%2212%22%20text-anchor%3D%22middle%22%3E%5B%20IMAGE%20NOT%20FOUND%20%5D%3C%2Ftext%3E%3C%2Fsvg%3E";
 
-// DOM 元素引用
+// DOM 引用
 const gridContainer = document.getElementById('portfolio-grid');
 const filterBtns = document.querySelectorAll('.filter-btn');
 
@@ -79,6 +80,8 @@ const lightboxDesc = document.getElementById('lightbox-desc');
 const lightboxCounter = document.getElementById('lightbox-counter');
 const prevBtn = document.getElementById('lightbox-prev');
 const nextBtn = document.getElementById('lightbox-next');
+const lightboxFullscreenBtn = document.getElementById('lightbox-fullscreen');
+const lightboxResetBtn = document.getElementById('lightbox-zoom-reset');
 
 const backToTopBtn = document.getElementById('back-to-top');
 const themeToggleBtn = document.getElementById('theme-toggle');
@@ -87,7 +90,6 @@ const introCurtain = document.getElementById('intro-curtain');
 const mobileMenuBtn = document.getElementById('mobile-menu-btn');
 const navLinks = document.getElementById('nav-links');
 
-// 音效、時鐘與命令列相關引用
 const soundToggleBtn = document.getElementById('sound-toggle');
 const cmdPalette = document.getElementById('cmd-palette');
 const cmdInput = document.getElementById('cmd-input');
@@ -95,22 +97,93 @@ const cmdList = document.getElementById('cmd-list');
 const cmdOverlay = document.getElementById('cmd-overlay');
 const cmdTriggerBtn = document.getElementById('cmd-trigger-btn');
 
-// 狀態管理
+// 全域音響系統與 Mini Player
+const miniPlayer = document.getElementById('mini-player');
+const playerTrackName = document.getElementById('player-track-name');
+const playerPlayBtn = document.getElementById('player-play-btn');
+let globalAudio = new Audio();
+
+// 狀態變數
 let currentGallery = [];
 let currentIndex = 0;
-let slideshowIntervals = [];
 let soundEnabled = true;
 let audioCtx = null;
 
+// Lightbox 縮放/拖拽與手勢觸控狀態
+let zoomScale = 1;
+let panX = 0;
+let panY = 0;
+let isDragging = false;
+let startX = 0;
+let startY = 0;
+let touchStartX = 0;
+let touchStartY = 0;
+
+/* ----------------------------------------------------
+   1. 科技感自訂瞄準游標 (桌機端自動開啟，行動端關閉)
+---------------------------------------------------- */
+function setupCustomCursor() {
+  const cursor = document.getElementById('custom-cursor');
+  if (!cursor || window.matchMedia('(max-width: 768px)').matches) return;
+
+  document.addEventListener('mousemove', (e) => {
+    cursor.style.left = `${e.clientX}px`;
+    cursor.style.top = `${e.clientY}px`;
+  });
+
+  const hoverables = document.querySelectorAll('a, button, .card, .filter-btn, .cmd-item, input');
+  hoverables.forEach(el => {
+    el.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
+    el.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
+  });
+}
+
+/* ----------------------------------------------------
+   2. 精細 3D Card Tilt (桌機端啟用，行動端停用)
+---------------------------------------------------- */
+function apply3DTiltEffect(card) {
+  if (window.matchMedia('(max-width: 768px)').matches) return;
+
+  card.addEventListener('mousemove', (e) => {
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    const rotateX = ((y - centerY) / centerY) * -10;
+    const rotateY = ((x - centerX) / centerX) * 10;
+
+    const glareX = (x / rect.width) * 100;
+    const glareY = (y / rect.height) * 100;
+
+    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+    card.style.setProperty('--glare-x', `${glareX}%`);
+    card.style.setProperty('--glare-y', `${glareY}%`);
+    card.style.setProperty('--glare-opacity', '1');
+  });
+
+  card.addEventListener('mouseleave', () => {
+    card.style.transition = 'transform 0.5s ease';
+    card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+    card.style.setProperty('--glare-opacity', '0');
+
+    setTimeout(() => {
+      card.style.transition = '';
+    }, 500);
+  });
+}
+
+/* ----------------------------------------------------
+   3. Web Audio 系統按鍵音效
+---------------------------------------------------- */
 function playClickSound(freq = 750, type = 'sine', duration = 0.035) {
   if (!soundEnabled) return;
   try {
-    if (!audioCtx) {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    if (audioCtx.state === 'suspended') {
-      audioCtx.resume();
-    }
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
 
@@ -138,75 +211,129 @@ function setupSoundToggle() {
   });
 }
 
-function setupMatrixClock() {
-  const clockEl = document.getElementById('matrix-clock');
-  if (!clockEl) return;
+/* ----------------------------------------------------
+   4. Mini Music Player 控制邏輯
+---------------------------------------------------- */
+function setupMiniPlayer() {
+  if (!playerPlayBtn) return;
 
-  function update() {
-    const now = new Date();
-    const hrs = String(now.getHours()).padStart(2, '0');
-    const mins = String(now.getMinutes()).padStart(2, '0');
-    const secs = String(now.getSeconds()).padStart(2, '0');
-    clockEl.textContent = `[ ${hrs}:${mins}:${secs} CST ]`;
-  }
-  setInterval(update, 1000);
-  update();
-}
-
-function setupTypewriter() {
-  const typewriterEl = document.getElementById('typewriter');
-  if (!typewriterEl) return;
-
-  const phrases = [
-    "> 數位內容創作者",
-    "> AI 應用探索",
-    "> 視覺設計"
-  ];
-
-  let phraseIdx = 0;
-  let charIdx = 0;
-  let isDeleting = false;
-
-  function type() {
-    const current = phrases[phraseIdx];
-    if (isDeleting) {
-      typewriterEl.textContent = current.substring(0, charIdx - 1);
-      charIdx--;
+  playerPlayBtn.addEventListener('click', () => {
+    if (!globalAudio.src) return;
+    if (globalAudio.paused) {
+      globalAudio.play();
+      miniPlayer.classList.add('playing');
+      playerPlayBtn.textContent = '[ ⏸ ]';
     } else {
-      typewriterEl.textContent = current.substring(0, charIdx + 1);
-      charIdx++;
+      globalAudio.pause();
+      miniPlayer.classList.remove('playing');
+      playerPlayBtn.textContent = '[ ▶ ]';
     }
+  });
 
-    let speed = isDeleting ? 35 : 75;
-
-    if (!isDeleting && charIdx === current.length) {
-      speed = 2200;
-      isDeleting = true;
-    } else if (isDeleting && charIdx === 0) {
-      isDeleting = false;
-      phraseIdx = (phraseIdx + 1) % phrases.length;
-      speed = 400;
-    }
-
-    setTimeout(type, speed);
-  }
-  type();
+  globalAudio.addEventListener('ended', () => {
+    miniPlayer.classList.remove('playing');
+    playerPlayBtn.textContent = '[ ▶ ]';
+  });
 }
 
+function playAudioTrack(fileName, trackDisplayName) {
+  globalAudio.src = `assets/audio/${fileName}`;
+  playerTrackName.textContent = trackDisplayName;
+  
+  globalAudio.play().then(() => {
+    miniPlayer.classList.add('playing');
+    playerPlayBtn.textContent = '[ ⏸ ]';
+  }).catch(() => {
+    console.warn(`請確認 assets/audio/${fileName} 檔案是否存在。`);
+  });
+}
+
+/* ----------------------------------------------------
+   5. 彩蛋處理器 (Easter Eggs)
+---------------------------------------------------- */
+function triggerLightShow() {
+  const overlay = document.getElementById('lightshow-overlay');
+  if (overlay) {
+    overlay.classList.remove('active');
+    void overlay.offsetWidth;
+    overlay.classList.add('active');
+  }
+}
+
+function spawnJojoMenace() {
+  const container = document.getElementById('jojo-menace-container');
+  if (!container) return;
+
+  for (let i = 0; i < 7; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'jojo-menace-text';
+      el.textContent = 'ゴ';
+      el.style.left = `${Math.random() * 80 + 10}vw`;
+      el.style.top = `${Math.random() * 70 + 15}vh`;
+      container.appendChild(el);
+
+      setTimeout(() => el.remove(), 2000);
+    }, i * 200);
+  }
+}
+
+function handleEasterEgg(keyword) {
+  const key = keyword.trim().toLowerCase();
+  
+  document.body.classList.remove('towa-theme', 'jojo-theme', 'holo-theme');
+
+  if (key === 'towa') {
+    document.body.classList.add('towa-theme');
+    triggerLightShow();
+    playAudioTrack('FACT_常闇トワ.mp3', 'FACT_常闇トワ');
+    return true;
+  }
+
+  const jojoMap = {
+    'jojo1': { file: 'JOJO SONO CHINO SADAME.mp3', name: 'JOJO SONO CHINO SADAME' },
+    'jojo2': { file: 'BLOODY STREAM.mp3', name: 'BLOODY STREAM' },
+    'jojo3': { file: 'STAND PROUD.mp3', name: 'STAND PROUD' },
+    'jojo4': { file: 'Great Days.mp3', name: 'Great Days' },
+    'jojo5': { file: 'il vento doro.mp3', name: 'il vento doro' },
+    'jojo6': { file: 'STONE OCEAN.mp3', name: 'STONE OCEAN' },
+    'jojo7': { file: 'Dance with STEEL BALL RUN.mp3', name: 'Dance with STEEL BALL RUN' }
+  };
+
+  if (jojoMap[key]) {
+    document.body.classList.add('jojo-theme');
+    triggerLightShow();
+    spawnJojoMenace();
+    playAudioTrack(jojoMap[key].file, jojoMap[key].name);
+    return true;
+  }
+
+  if (key === 'holo') {
+    document.body.classList.add('holo-theme');
+    triggerLightShow();
+    playAudioTrack('holo_remix.mp3', 'holo_remix');
+    return true;
+  }
+
+  return false;
+}
+
+/* ----------------------------------------------------
+   6. Command Palette 命令列功能
+---------------------------------------------------- */
 function setupCommandPalette() {
   if (!cmdPalette || !cmdInput || !cmdList) return;
 
   const commands = [
+    { label: "[ 彩蛋 ] 輸入 'towa' 觸發常闇永遠專屬主題", action: () => handleEasterEgg('towa') },
+    { label: "[ 彩蛋 ] 輸入 'jojo1' ~ 'jojo7' 觸發 JOJO 奇妙冒險", action: () => handleEasterEgg('jojo1') },
+    { label: "[ 彩蛋 ] 輸入 'holo' 觸發 Hololive 藍色科技風", action: () => handleEasterEgg('holo') },
     { label: "前往 // 關於我", action: () => scrollToSection('about') },
     { label: "前往 // 作品集", action: () => scrollToSection('portfolio') },
     { label: "前往 // 聯絡我", action: () => scrollToSection('contact') },
     { label: "開啟常闇永遠維基百科", action: () => window.open('https://zh.wikipedia.org/zh-tw/%E5%B8%B8%E9%97%87%E6%B0%B8%E9%81%A0', '_blank') },
     { label: "篩選：全部作品 (ALL)", action: () => triggerFilter('all') },
-    { label: "篩選：精選插畫 (ILLUST)", action: () => triggerFilter('image') },
-    { label: "篩選：相片集錦 (GALLERY)", action: () => triggerFilter('gallery') },
-    { label: "篩選：動態影像 (VIDEO)", action: () => triggerFilter('video') },
-    { label: "切換明暗主題 (Dark / Light)", action: () => toggleTheme() },
-    { label: "切換系統音效 (On / Off)", action: () => soundToggleBtn && soundToggleBtn.click() }
+    { label: "切換明暗主題 (Dark / Light)", action: () => toggleTheme() }
   ];
 
   function openCmd() {
@@ -224,7 +351,7 @@ function setupCommandPalette() {
   function renderCmds(list) {
     cmdList.innerHTML = '';
     if (list.length === 0) {
-      cmdList.innerHTML = '<li class="cmd-empty">[ 無對應指令或作品 ]</li>';
+      cmdList.innerHTML = '<li class="cmd-empty">[ 按 Enter 執行關鍵字指令 ]</li>';
       return;
     }
 
@@ -258,13 +385,15 @@ function setupCommandPalette() {
   document.addEventListener('keydown', (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
       e.preventDefault();
-      if (cmdPalette.classList.contains('active')) {
-        closeCmd();
-      } else {
-        openCmd();
-      }
+      if (cmdPalette.classList.contains('active')) closeCmd();
+      else openCmd();
     } else if (e.key === 'Escape' && cmdPalette.classList.contains('active')) {
       closeCmd();
+    } else if (e.key === 'Enter' && cmdPalette.classList.contains('active')) {
+      const val = cmdInput.value.trim();
+      if (handleEasterEgg(val)) {
+        closeCmd();
+      }
     }
   });
 
@@ -282,70 +411,158 @@ function setupCommandPalette() {
   if (cmdTriggerBtn) cmdTriggerBtn.addEventListener('click', openCmd);
 }
 
-function handleIntroAnimation() {
-  setTimeout(() => {
-    if (introCurtain) {
-      introCurtain.classList.add('loaded');
-    }
-  }, 600);
+/* ----------------------------------------------------
+   7. Lightbox 高清圖片滾輪/拖拽/手機左右滑動手勢
+---------------------------------------------------- */
+function resetZoom() {
+  zoomScale = 1;
+  panX = 0;
+  panY = 0;
+  updateImageTransform();
 }
 
-function setupThemeToggle() {
-  const savedTheme = localStorage.getItem('erblog_theme');
-  if (savedTheme === 'light') {
-    document.body.classList.add('light-theme');
-    if (themeIcon) themeIcon.textContent = '[ LIGHT ]';
+function updateImageTransform() {
+  const img = lightboxContent.querySelector('img');
+  if (img) {
+    img.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomScale})`;
+  }
+}
+
+function setupLightboxZoomAndDrag() {
+  // 滾輪縮放
+  lightboxContent.addEventListener('wheel', (e) => {
+    const img = lightboxContent.querySelector('img');
+    if (!img) return;
+    e.preventDefault();
+
+    const zoomFactor = 0.15;
+    if (e.deltaY < 0) {
+      zoomScale = Math.min(zoomScale + zoomFactor, 4);
+    } else {
+      zoomScale = Math.max(zoomScale - zoomFactor, 1);
+    }
+
+    if (zoomScale === 1) {
+      panX = 0;
+      panY = 0;
+    }
+    updateImageTransform();
+  }, { passive: false });
+
+  // 桌機滑動拖拽
+  lightboxContent.addEventListener('mousedown', (e) => {
+    const img = lightboxContent.querySelector('img');
+    if (!img || zoomScale <= 1) return;
+    isDragging = true;
+    startX = e.clientX - panX;
+    startY = e.clientY - panY;
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    panX = e.clientX - startX;
+    panY = e.clientY - startY;
+    updateImageTransform();
+  });
+
+  window.addEventListener('mouseup', () => { isDragging = false; });
+
+  // 📱 手機觸控手勢：左右滑動切換圖片 (Touch Swipe)
+  const wrapper = document.querySelector('.lightbox-media-wrapper');
+  if (wrapper) {
+    wrapper.addEventListener('touchstart', (e) => {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+
+    wrapper.addEventListener('touchend', (e) => {
+      if (zoomScale > 1) return; // 放大狀態下不觸發左右切換
+
+      const touchEndX = e.changedTouches[0].clientX;
+      const touchEndY = e.changedTouches[0].clientY;
+      const deltaX = touchEndX - touchStartX;
+      const deltaY = touchEndY - touchStartY;
+
+      // 判斷是否為水平滑動且滑動距離大於 50px
+      if (Math.abs(deltaX) > 50 && Math.abs(deltaY) < 60) {
+        if (deltaX < 0) {
+          // 向左滑動 -> 下一張
+          if (currentGallery.length > 1) {
+            currentIndex = (currentIndex + 1) % currentGallery.length;
+            updateLightboxContent();
+            playClickSound(800, 'sine');
+          }
+        } else {
+          // 向右滑動 -> 上一張
+          if (currentGallery.length > 1) {
+            currentIndex = (currentIndex - 1 + currentGallery.length) % currentGallery.length;
+            updateLightboxContent();
+            playClickSound(800, 'sine');
+          }
+        }
+      }
+    }, { passive: true });
   }
 
-  if (themeToggleBtn) {
-    themeToggleBtn.addEventListener('click', () => {
-      playClickSound(650, 'sine');
-      document.body.classList.toggle('light-theme');
-      const isLight = document.body.classList.contains('light-theme');
-      
-      if (themeIcon) {
-        themeIcon.textContent = isLight ? '[ LIGHT ]' : '[ DARK ]';
+  if (lightboxFullscreenBtn) {
+    lightboxFullscreenBtn.addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        lightboxContent.requestFullscreen().catch(err => console.log(err));
+      } else {
+        document.exitFullscreen();
       }
-      localStorage.setItem('erblog_theme', isLight ? 'light' : 'dark');
     });
   }
+
+  if (lightboxResetBtn) {
+    lightboxResetBtn.addEventListener('click', resetZoom);
+  }
 }
 
-function clearSlideshows() {
-  slideshowIntervals.forEach(interval => clearInterval(interval));
-  slideshowIntervals = [];
+/* ----------------------------------------------------
+   8. 渲染與基礎功能模組
+---------------------------------------------------- */
+function setupMatrixClock() {
+  const clockEl = document.getElementById('matrix-clock');
+  if (!clockEl) return;
+
+  function update() {
+    const now = new Date();
+    const hrs = String(now.getHours()).padStart(2, '0');
+    const mins = String(now.getMinutes()).padStart(2, '0');
+    const secs = String(now.getSeconds()).padStart(2, '0');
+    clockEl.textContent = `[ ${hrs}:${mins}:${secs} CST ]`;
+  }
+  setInterval(update, 1000);
+  update();
 }
 
-function startCardSlideshows(data) {
-  clearSlideshows();
+function setupTypewriter() {
+  const typewriterEl = document.getElementById('typewriter');
+  if (!typewriterEl) return;
 
-  data.forEach(item => {
-    if (item.items && item.items.length > 1) {
-      const cardImg = document.querySelector(`.card[data-id="${item.id}"] .card-media-wrapper img`);
-      const indicator = document.querySelector(`.card[data-id="${item.id}"] .card-slideshow-indicator`);
-      if (!cardImg) return;
+  const phrases = ["> 數位內容創作者", "> AI 應用探索", "> 視覺設計"];
+  let phraseIdx = 0, charIdx = 0, isDeleting = false;
 
-      let imgIndex = 0;
-      const interval = setInterval(() => {
-        if (lightbox && lightbox.classList.contains('active')) return;
+  function type() {
+    const current = phrases[phraseIdx];
+    typewriterEl.textContent = isDeleting ? current.substring(0, charIdx - 1) : current.substring(0, charIdx + 1);
+    charIdx = isDeleting ? charIdx - 1 : charIdx + 1;
 
-        imgIndex = (imgIndex + 1) % item.items.length;
-        const nextMedia = item.items[imgIndex];
-        if (nextMedia && nextMedia.type === 'image') {
-          cardImg.style.opacity = '0.3';
-          setTimeout(() => {
-            cardImg.src = nextMedia.src;
-            cardImg.style.opacity = '1';
-            if (indicator) {
-              indicator.textContent = `SLIDESHOW [${imgIndex + 1}/${item.items.length}]`;
-            }
-          }, 300);
-        }
-      }, 3500);
+    let speed = isDeleting ? 35 : 75;
 
-      slideshowIntervals.push(interval);
+    if (!isDeleting && charIdx === current.length) {
+      speed = 2200;
+      isDeleting = true;
+    } else if (isDeleting && charIdx === 0) {
+      isDeleting = false;
+      phraseIdx = (phraseIdx + 1) % phrases.length;
+      speed = 400;
     }
-  });
+
+    setTimeout(type, speed);
+  }
+  type();
 }
 
 function renderPortfolio(data) {
@@ -364,20 +581,22 @@ function renderPortfolio(data) {
       <div class="card-media-wrapper">
         <img src="${item.cover}" alt="${item.title}" onerror="this.onerror=null; this.src='${FALLBACK_IMG}';">
         <span class="card-badge">${item.categoryLabel}</span>
-        ${hasSlideshow ? `<span class="card-slideshow-indicator">SLIDESHOW [1/${item.items.length}]</span>` : ''}
+        ${hasSlideshow ? `<span class="card-slideshow-indicator">GALLERY [1/${item.items.length}]</span>` : ''}
       </div>
       <div class="card-info">
         <h3 class="card-title">${item.title}</h3>
         <p class="card-desc">${item.desc}</p>
         ${isTowaCard ? `
           <div class="card-actions" style="margin-top: 12px;">
-            <a href="https://zh.wikipedia.org/zh-tw/%E5%B8%B8%E9%97%87%E6%B0%B8%E9%81%A0" target="_blank" rel="noopener noreferrer" class="wiki-link-btn" style="display: inline-block; font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent-red); border: 1px dashed var(--accent-red); padding: 4px 10px; background: rgba(255,42,42,0.05); transition: var(--transition);" onclick="event.stopPropagation();">
+            <a href="https://zh.wikipedia.org/zh-tw/%E5%B8%B8%E9%97%87%E6%B0%B8%E9%81%A0" target="_blank" rel="noopener noreferrer" class="wiki-link-btn" style="display: inline-block; font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent-red); border: 1px dashed var(--accent-red); padding: 4px 10px; background: rgba(255,42,42,0.05);" onclick="event.stopPropagation();">
               [ ↗ 維基百科：常闇永遠 ]
             </a>
           </div>
         ` : ''}
       </div>
     `;
+
+    apply3DTiltEffect(card);
 
     card.addEventListener('click', () => {
       playClickSound(850, 'sine');
@@ -386,30 +605,13 @@ function renderPortfolio(data) {
     gridContainer.appendChild(card);
   });
 
-  startCardSlideshows(data);
-}
-
-function setupFilters() {
-  filterBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      playClickSound(700, 'triangle');
-      filterBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      const filter = btn.getAttribute('data-filter');
-      if (filter === 'all') {
-        renderPortfolio(portfolioData);
-      } else {
-        const filteredData = portfolioData.filter(item => item.category === filter);
-        renderPortfolio(filteredData);
-      }
-    });
-  });
+  setupCustomCursor();
 }
 
 function openLightbox(portfolioItem) {
   currentGallery = portfolioItem.items;
   currentIndex = 0;
+  resetZoom();
   
   updateLightboxContent();
   lightbox.classList.add('active');
@@ -422,11 +624,9 @@ function closeLightbox() {
   document.body.classList.remove('modal-open');
   
   const video = lightboxContent.querySelector('video');
-  if (video) {
-    video.pause();
-    video.currentTime = 0;
-  }
+  if (video) video.pause();
   lightboxContent.innerHTML = '';
+  resetZoom();
 }
 
 function updateLightboxContent() {
@@ -434,13 +634,13 @@ function updateLightboxContent() {
   if (!media) return;
 
   lightboxContent.innerHTML = '';
+  resetZoom();
 
   if (media.type === 'video') {
     const video = document.createElement('video');
     video.src = media.src;
     video.controls = true;
     video.autoplay = true;
-    video.playsInline = true;
     lightboxContent.appendChild(video);
   } else {
     const img = document.createElement('img');
@@ -465,30 +665,38 @@ function updateLightboxContent() {
   }
 }
 
-function navigateLightbox(direction) {
-  playClickSound(750, 'sine');
-  const video = lightboxContent.querySelector('video');
-  if (video) video.pause();
+function setupFilters() {
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      playClickSound(700, 'triangle');
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
 
-  if (direction === 'next') {
-    currentIndex = (currentIndex + 1) % currentGallery.length;
-  } else {
-    currentIndex = (currentIndex - 1 + currentGallery.length) % currentGallery.length;
+      const filter = btn.getAttribute('data-filter');
+      if (filter === 'all') renderPortfolio(portfolioData);
+      else renderPortfolio(portfolioData.filter(item => item.category === filter));
+    });
+  });
+}
+
+function setupThemeToggle() {
+  if (themeToggleBtn) {
+    themeToggleBtn.addEventListener('click', () => {
+      playClickSound(650, 'sine');
+      document.body.classList.remove('towa-theme', 'jojo-theme', 'holo-theme');
+      document.body.classList.toggle('light-theme');
+      const isLight = document.body.classList.contains('light-theme');
+      if (themeIcon) themeIcon.textContent = isLight ? '[ LIGHT ]' : '[ DARK ]';
+    });
   }
-  updateLightboxContent();
 }
 
 function setupBackToTop() {
   if (!backToTopBtn) return;
-
   window.addEventListener('scroll', () => {
-    if (window.scrollY > 200) {
-      backToTopBtn.classList.add('show');
-    } else {
-      backToTopBtn.classList.remove('show');
-    }
+    if (window.scrollY > 200) backToTopBtn.classList.add('show');
+    else backToTopBtn.classList.remove('show');
   });
-
   backToTopBtn.addEventListener('click', () => {
     playClickSound(950, 'sine');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -502,6 +710,7 @@ function setupMobileMenu() {
       navLinks.classList.toggle('active');
     });
 
+    // 點擊選單連結後自動關閉選單
     navLinks.querySelectorAll('a').forEach(link => {
       link.addEventListener('click', () => {
         navLinks.classList.remove('active');
@@ -511,28 +720,24 @@ function setupMobileMenu() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  handleIntroAnimation();
+  setTimeout(() => introCurtain && introCurtain.classList.add('loaded'), 600);
+  
+  setupCustomCursor();
   setupThemeToggle();
   setupSoundToggle();
   setupMatrixClock();
   setupTypewriter();
   setupCommandPalette();
+  setupMiniPlayer();
+  setupLightboxZoomAndDrag();
   
   renderPortfolio(portfolioData);
   setupFilters();
   setupMobileMenu();
-  
+  setupBackToTop();
+
   if (lightboxClose) lightboxClose.addEventListener('click', closeLightbox);
   if (lightboxOverlay) lightboxOverlay.addEventListener('click', closeLightbox);
-  if (prevBtn) prevBtn.addEventListener('click', () => navigateLightbox('prev'));
-  if (nextBtn) nextBtn.addEventListener('click', () => navigateLightbox('next'));
-
-  document.addEventListener('keydown', (e) => {
-    if (!lightbox || !lightbox.classList.contains('active')) return;
-    if (e.key === 'Escape') closeLightbox();
-    if (e.key === 'ArrowLeft' && currentGallery.length > 1) navigateLightbox('prev');
-    if (e.key === 'ArrowRight' && currentGallery.length > 1) navigateLightbox('next');
-  });
-
-  setupBackToTop();
+  if (prevBtn) prevBtn.addEventListener('click', () => { currentIndex = (currentIndex - 1 + currentGallery.length) % currentGallery.length; updateLightboxContent(); });
+  if (nextBtn) nextBtn.addEventListener('click', () => { currentIndex = (currentIndex + 1) % currentGallery.length; updateLightboxContent(); });
 });

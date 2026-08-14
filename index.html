@@ -2,17 +2,34 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>ERBLOG // NOTHING OS STYLE</title>
+  <!-- Google Fonts: Space Mono, Noto Sans TC, Dela Gothic One -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Noto+Sans+TC:wght@300;400;500;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="base.css">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- 1. 開場中間展開動畫 -->
+  <!-- 科技感自訂瞄準游標 (桌機端顯示) -->
+  <div id="custom-cursor" class="custom-cursor">
+    <div class="cursor-dot"></div>
+    <div class="cursor-ring"></div>
+    <div class="cursor-crosshair ch-top"></div>
+    <div class="cursor-crosshair ch-bottom"></div>
+    <div class="cursor-crosshair ch-left"></div>
+    <div class="cursor-crosshair ch-right"></div>
+  </div>
+
+  <!-- 彩蛋特效燈光秀閃爍層 -->
+  <div id="lightshow-overlay" class="lightshow-overlay"></div>
+
+  <!-- JOJO 彩蛋: 動態 ゴゴゴ (Menace) 文字容器 -->
+  <div id="jojo-menace-container" class="jojo-menace-container"></div>
+
+  <!-- 開場中間展開動畫 -->
   <div id="intro-curtain" class="intro-curtain" aria-hidden="true">
     <div class="curtain-panel curtain-top">
       <span class="intro-text"><span class="red-dot"></span> ERBLOG_OS</span>
@@ -33,6 +50,13 @@
       </a>
       
       <div class="nav-right">
+        <!-- 音樂播放器小工具 (Mini Music Player Widget) -->
+        <div id="mini-player" class="mini-player-widget">
+          <span class="player-status-dot"></span>
+          <span id="player-track-name" class="player-track-name">[ NO AUDIO ]</span>
+          <button id="player-play-btn" class="player-btn" title="播放/暫停">[ ▶ ]</button>
+        </div>
+
         <!-- 點陣數字即時時鐘 Widget -->
         <div id="matrix-clock" class="matrix-clock-widget">[ 00:00:00 CST ]</div>
 
@@ -64,11 +88,11 @@
     <div class="hero-container">
       <div class="avatar-wrapper">
         <img src="assets/avatar.jpg" alt="個人頭像" class="avatar-img" onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22150%22%20height%3D%22150%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20style%3D%22background%3A%23111%3B%22%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20fill%3D%22%23fff%22%20font-family%3D%22monospace%22%20font-size%3D%2212%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%3EAVATAR%3C%2Ftext%3E%3C%2Fsvg%3E';">
-        <span class="avatar-badge">ONLINE</span>
+        <span class="avatar-badge"><span class="red-dot"></span>ONLINE</span>
       </div>
       <div class="hero-content">
         <div class="sys-tag">[ SYS_USER: PO_YI ]</div>
-        <h1>HELLO, 我是 <span class="highlight">柏頤</span></h1>
+        <h1 class="hero-title">HELLO, 我是 <span class="highlight">柏頤</span></h1>
         
         <!-- 極簡打字機輪播字幕效果 -->
         <p class="subtitle"><span id="typewriter"></span><span class="typing-cursor">_</span></p>
@@ -128,11 +152,17 @@
     </div>
   </footer>
 
-  <!-- Lightbox 彈窗模組 -->
+  <!-- Lightbox 彈窗模組 (手機與桌機高相容優化版) -->
   <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="媒體預覽視窗">
     <div class="lightbox-overlay" id="lightbox-overlay"></div>
     <div class="lightbox-container">
-      <button class="lightbox-close" id="lightbox-close" aria-label="關閉">[ ✕ ]</button>
+      
+      <!-- 控制按鈕群組 -->
+      <div class="lightbox-top-tools">
+        <button id="lightbox-zoom-reset" class="lightbox-tool-btn" title="重置縮放">[ 100% ]</button>
+        <button id="lightbox-fullscreen" class="lightbox-tool-btn" title="全螢幕展示">[ ⛶ ]</button>
+        <button class="lightbox-close" id="lightbox-close" aria-label="關閉">[ ✕ ]</button>
+      </div>
       
       <div class="lightbox-media-wrapper">
         <button class="lightbox-nav prev" id="lightbox-prev" aria-label="上一張">◄</button>
@@ -144,7 +174,9 @@
         <h3 id="lightbox-title"></h3>
         <p id="lightbox-desc"></p>
         <span class="lightbox-counter" id="lightbox-counter"></span>
+        <div class="lightbox-zoom-hint">[ 支援滑鼠滾輪/拖拽，手機可左右滑動切換 ]</div>
       </div>
+
     </div>
   </div>
 
@@ -154,7 +186,7 @@
     <div class="cmd-box">
       <div class="cmd-header">
         <span class="cmd-prompt">></span>
-        <input type="text" id="cmd-input" placeholder="輸入指令或搜尋 (例: 關於我, 暗色, 插畫)..." autocomplete="off">
+        <input type="text" id="cmd-input" placeholder="輸入指令或彩蛋 (例: towa, jojo1~7, holo)..." autocomplete="off">
         <span class="cmd-badge">[ ESC ]</span>
       </div>
       <ul id="cmd-list" class="cmd-list"></ul>
