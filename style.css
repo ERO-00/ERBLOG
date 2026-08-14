@@ -45,7 +45,7 @@ body.towa-theme {
   --accent-glow: rgba(177, 66, 255, 0.4);
 }
 
-/* 彩蛋 2：JOJO / 99 奇妙冒險主題 (已針對中文模糊進行字型優化) */
+/* 彩蛋 2：JOJO / 99 奇妙冒險主題 */
 body.jojo-theme {
   --bg-primary: #0d0118;
   --bg-secondary: #19022e;
@@ -58,16 +58,14 @@ body.jojo-theme {
   --accent-glow: rgba(255, 0, 127, 0.4);
 }
 
-/* 🎯 修正：徹底解決 99/JOJO 彩蛋字體過粗與糊在一起的問題 */
 body.jojo-theme h1, 
 body.jojo-theme h2, 
 body.jojo-theme .card-title,
 body.jojo-theme .section-title {
   font-family: var(--font-jojo) !important;
-  font-weight: 400 !important; /* 取消重複加粗，避免字體重疊 */
-  letter-spacing: 0.5px !important; /* 適度緊湊，避免繁體字邊緣打架 */
+  font-weight: 400 !important;
+  letter-spacing: 0.5px !important;
   line-height: 1.35;
-  /* 精簡單向黑影，移除造成糊在一起的多重強光暈與紅影 */
   text-shadow: 2px 2px 0px #000000 !important;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -220,7 +218,7 @@ body.modal-open {
   z-index: -1;
 }
 
-/* ✨ 紅點呼吸燈特效 */
+/* 紅點呼吸燈特效 */
 .red-dot {
   display: inline-block;
   width: 8px;
@@ -331,9 +329,7 @@ body.modal-open {
   transition: transform 0.25s ease;
 }
 
-.logo:hover {
-  transform: scale(1.03);
-}
+.logo:hover { transform: scale(1.03); }
 
 .desktop-nav-links {
   display: flex;
@@ -422,11 +418,8 @@ body.modal-open {
   transition: var(--transition);
 }
 
-.mobile-menu-btn:active {
-  transform: scale(0.92);
-}
+.mobile-menu-btn:active { transform: scale(0.92); }
 
-/* 🎯 修正：加強手機選單 Menu 開啟/關閉滑順動畫 */
 .mobile-nav-menu {
   display: flex;
   position: absolute;
@@ -494,28 +487,34 @@ body.modal-open {
   color: #ffffff;
 }
 
-/* 🎵 懸浮 Mini Music Player Widget */
+/* 🎵 懸浮 Mini Music Player Widget + 右側半圓形 CD 唱盤面板 */
 .mini-player-widget {
   position: fixed;
   left: 24px;
   top: 30%;
   z-index: 1200;
-  background: rgba(18, 18, 18, 0.92);
+  display: flex;
+  align-items: center;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  user-select: none;
+}
+
+.player-left-panel {
+  background: rgba(18, 18, 18, 0.94);
   border: 1px solid var(--border-color);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
   padding: 14px;
-  border-radius: 4px;
+  border-radius: 4px 0 0 4px;
   width: 230px;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
-  user-select: none;
+  z-index: 2;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.mini-player-widget.playing {
+.mini-player-widget.playing .player-left-panel {
   border-color: var(--accent-red);
   box-shadow: 0 0 20px var(--accent-glow), 0 10px 30px rgba(0, 0, 0, 0.7);
 }
@@ -593,7 +592,6 @@ body.modal-open {
   width: 100%;
 }
 
-/* 音訊視覺化 Canvas 畫面 */
 .player-visualizer {
   width: 100%;
   height: 52px;
@@ -674,7 +672,157 @@ body.modal-open {
   cursor: pointer;
 }
 
-/* 5. Hero 個人簡介區塊 */
+/* 💿 5. 半圓形 CD Player 唱盤外觀與旋轉動畫 */
+.cd-player-bay {
+  position: relative;
+  width: 65px;
+  height: 130px;
+  background: rgba(14, 14, 14, 0.95);
+  border: 1px solid var(--border-color);
+  border-left: none;
+  border-radius: 0 70px 70px 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  z-index: 1;
+  box-shadow: 6px 0 20px rgba(0,0,0,0.5);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.mini-player-widget.playing .cd-player-bay {
+  border-color: var(--accent-red);
+  box-shadow: 10px 0 25px var(--accent-glow);
+}
+
+/* 擬真讀取唱針 */
+.cd-stylus-needle {
+  position: absolute;
+  top: 14px;
+  left: 12px;
+  width: 20px;
+  height: 2px;
+  background: var(--text-muted);
+  transform: rotate(25deg);
+  transform-origin: left center;
+  transition: transform 0.4s ease, background-color 0.3s ease;
+  z-index: 10;
+}
+
+.cd-stylus-needle::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: -2px;
+  width: 5px;
+  height: 6px;
+  background: var(--accent-red);
+  border-radius: 1px;
+}
+
+.mini-player-widget.playing .cd-stylus-needle {
+  transform: rotate(40deg);
+  background: var(--accent-red);
+}
+
+/* 圓形唱片本體 (左側切平留在艙內，右側露半圓) */
+.cd-disc {
+  position: absolute;
+  left: -55px;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #2a2a2a 0%, #111111 70%, #050505 100%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.8), 0 0 12px rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: spinCD 4s linear infinite;
+  animation-play-state: paused;
+  will-change: transform;
+}
+
+.mini-player-widget.playing .cd-disc {
+  animation-play-state: running;
+}
+
+@keyframes spinCD {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* CD 黑膠同心圓紋理 */
+.cd-grooves {
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  background: repeating-radial-gradient(
+    circle,
+    transparent,
+    transparent 2px,
+    rgba(255, 255, 255, 0.04) 3px,
+    rgba(0, 0, 0, 0.5) 4px
+  );
+  pointer-events: none;
+}
+
+/* CD 鐳射炫光特徵 (Conic Gradient) */
+.cd-hologram-shine {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg at 50% 50%,
+    rgba(255, 255, 255, 0) 0deg,
+    rgba(255, 42, 42, 0.18) 45deg,
+    rgba(255, 255, 255, 0) 90deg,
+    rgba(0, 210, 255, 0.15) 135deg,
+    rgba(255, 255, 255, 0) 180deg,
+    rgba(255, 42, 42, 0.18) 225deg,
+    rgba(255, 255, 255, 0) 270deg,
+    rgba(0, 210, 255, 0.15) 315deg,
+    rgba(255, 255, 255, 0) 360deg
+  );
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+/* CD 中心標籤圓環 */
+.cd-center-label {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--bg-secondary);
+  border: 1px solid var(--accent-red);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 6px rgba(0,0,0,0.8);
+  z-index: 2;
+}
+
+.cd-brand {
+  font-family: var(--font-mono);
+  font-size: 0.42rem;
+  color: var(--accent-red);
+  letter-spacing: 0.5px;
+  font-weight: bold;
+}
+
+.cd-center-hole {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #000000;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: inset 0 0 4px rgba(0,0,0,0.9);
+  margin-top: 1px;
+}
+
+/* 6. Hero 個人簡介區塊 */
 .hero-section {
   padding: 80px 24px 60px;
   max-width: 1200px;
@@ -756,7 +904,7 @@ body.modal-open {
   line-height: 1.7;
 }
 
-/* 6. 作品集區塊 */
+/* 7. 作品集區塊 */
 .portfolio-section {
   padding: 60px 24px;
   max-width: 1200px;
@@ -823,10 +971,10 @@ body.modal-open {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 28px;
-  perspective: 1200px;
+  perspective: 1000px;
 }
 
-/* 3D Card 卡片與動畫 */
+/* ⚡ 3D Card 卡片與動畫 (已硬體加速優化，防止 lag) */
 .card {
   position: relative;
   background: var(--bg-card);
@@ -837,7 +985,8 @@ body.modal-open {
   flex-direction: column;
   transform-style: preserve-3d;
   will-change: transform;
-  transition: border-color 0.35s ease, box-shadow 0.35s ease, transform 0.35s ease;
+  backface-visibility: hidden;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
   animation: cardFadeIn 0.5s ease backwards;
 }
 
@@ -852,12 +1001,12 @@ body.modal-open {
   top: 0; left: 0; width: 100%; height: 100%;
   background: radial-gradient(
     circle at var(--glare-x, 50%) var(--glare-y, 50%), 
-    rgba(255, 255, 255, 0.15) 0%, 
+    rgba(255, 255, 255, 0.18) 0%, 
     rgba(255, 255, 255, 0) 70%
   );
   opacity: var(--glare-opacity, 0);
   pointer-events: none;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.25s ease;
   z-index: 5;
 }
 
@@ -872,18 +1021,18 @@ body.modal-open {
   aspect-ratio: 4 / 3;
   background: var(--bg-secondary);
   overflow: hidden;
-  transform: translateZ(25px);
+  transform: translateZ(20px);
 }
 
 .card-media-wrapper img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: opacity 0.3s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .card:hover .card-media-wrapper img {
-  transform: scale(1.06);
+  transform: scale(1.05);
 }
 
 .card-badge {
@@ -896,7 +1045,7 @@ body.modal-open {
   padding: 4px 8px;
   border-left: 2px solid var(--accent-red);
   backdrop-filter: blur(4px);
-  transform: translateZ(35px);
+  transform: translateZ(30px);
 }
 
 .card-slideshow-indicator {
@@ -908,7 +1057,7 @@ body.modal-open {
   font-size: 0.65rem;
   padding: 3px 6px;
   border-radius: 2px;
-  transform: translateZ(35px);
+  transform: translateZ(30px);
 }
 
 .card-info {
@@ -916,7 +1065,7 @@ body.modal-open {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  transform: translateZ(20px);
+  transform: translateZ(15px);
 }
 
 .card-title {
@@ -936,7 +1085,7 @@ body.modal-open {
   line-height: 1.5;
 }
 
-/* 7. 聯絡資訊與頁尾 */
+/* 8. 聯絡資訊與頁尾 */
 .contact-section {
   padding: 60px 24px;
   max-width: 1200px;
@@ -1001,7 +1150,7 @@ body.modal-open {
   color: var(--text-muted);
 }
 
-/* 8. Lightbox 彈窗與動態展演 */
+/* 9. Lightbox 彈窗與動態展演 */
 .lightbox {
   position: fixed;
   top: 0; left: 0; width: 100vw; height: 100vh;
@@ -1139,7 +1288,7 @@ body.modal-open {
   margin-top: 4px;
 }
 
-/* 9. 返回頂部按鈕 */
+/* 10. 返回頂部按鈕 */
 .back-to-top {
   position: fixed;
   bottom: 24px; right: 24px;
@@ -1165,7 +1314,7 @@ body.modal-open {
   box-shadow: 0 4px 15px var(--accent-glow);
 }
 
-/* 10. Command Palette 指令選單 (滑順降落動畫) */
+/* 11. Command Palette 指令選單 */
 .typing-cursor {
   display: inline-block;
   color: var(--accent-red);
@@ -1290,7 +1439,7 @@ body.modal-open {
 }
 
 /* ==========================================
-   📱 11. 響應式排版微調
+   📱 12. 響應式排版微調
    ========================================== */
 @media (max-width: 900px) {
   .desktop-nav-links { display: none; }
@@ -1299,14 +1448,25 @@ body.modal-open {
 
   /* 手機端音樂播放器特化 */
   .mini-player-widget {
-    left: 16px;
+    left: 12px;
     top: auto;
-    bottom: 24px;
-    width: 260px;
-    background: rgba(14, 14, 14, 0.95);
-    border: 1px solid var(--accent-red);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 15px var(--accent-glow);
-    padding: 12px;
+    bottom: 20px;
+  }
+
+  .player-left-panel {
+    width: 220px;
+    padding: 10px;
+  }
+
+  .cd-player-bay {
+    width: 50px;
+    height: 115px;
+  }
+
+  .cd-disc {
+    left: -48px;
+    width: 96px;
+    height: 96px;
   }
 
   .player-dock-btn {
@@ -1321,18 +1481,18 @@ body.modal-open {
     margin-left: 4px;
   }
 
-  .mini-player-widget.collapsed {
+  .mini-player-widget.collapsed .player-main-content,
+  .mini-player-widget.collapsed .cd-player-bay {
+    display: none !important;
+  }
+
+  .mini-player-widget.collapsed .player-left-panel {
     width: 44px;
     height: 44px;
     padding: 0;
     border-radius: 50%;
-    overflow: hidden;
     justify-content: center;
     align-items: center;
-  }
-
-  .mini-player-widget.collapsed .player-main-content {
-    display: none !important;
   }
 
   .mini-player-widget.collapsed .player-drag-handle {

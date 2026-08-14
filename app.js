@@ -1,5 +1,5 @@
 /**
- * ERBLOG // NOTHING OS STYLE - MAIN APP SCRIPT WITH ENHANCED AUDIO ANALYSER
+ * ERBLOG // NOTHING OS STYLE - MAIN APP SCRIPT WITH HIGH-PERFORMANCE 3D TILT & CD PLAYER
  */
 
 // 作品集資料設定
@@ -164,21 +164,26 @@ function setupCustomCursor() {
 }
 
 /* ----------------------------------------------------
-   2. 3D Card Tilt 傾斜效果
+   2. ⚡ 極致效能最佳化：3D Card Tilt + 金屬光澤傾斜效果 (rAF 防卡頓重構)
 ---------------------------------------------------- */
 function apply3DTiltEffect(card) {
   if (window.matchMedia('(max-width: 768px)').matches) return;
 
-  card.addEventListener('mousemove', (e) => {
-    const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+  let rect = null;
+  let rafId = null;
+  let mouseX = 0;
+  let mouseY = 0;
+
+  function updateTilt() {
+    if (!rect) return;
+    const x = mouseX - rect.left;
+    const y = mouseY - rect.top;
 
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
 
-    const rotateX = ((y - centerY) / centerY) * -10;
-    const rotateY = ((x - centerX) / centerX) * 10;
+    const rotateX = ((y - centerY) / centerY) * -9;
+    const rotateY = ((x - centerX) / centerX) * 9;
 
     const glareX = (x / rect.width) * 100;
     const glareY = (y / rect.height) * 100;
@@ -187,14 +192,34 @@ function apply3DTiltEffect(card) {
     card.style.setProperty('--glare-x', `${glareX}%`);
     card.style.setProperty('--glare-y', `${glareY}%`);
     card.style.setProperty('--glare-opacity', '1');
+
+    rafId = null;
+  }
+
+  card.addEventListener('mouseenter', () => {
+    rect = card.getBoundingClientRect(); // 僅在移入時獲取一次尺寸，避免 mousemove 時不斷觸發 Reflow
+    card.style.transition = 'transform 0.1s ease-out';
+  });
+
+  card.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    
+    // 使用 requestAnimationFrame 來讓滑鼠運算精準與顯示器 FPS (60/120Hz) 同步
+    if (!rafId) {
+      rafId = requestAnimationFrame(updateTilt);
+    }
   });
 
   card.addEventListener('mouseleave', () => {
-    card.style.transition = 'transform 0.5s ease';
+    if (rafId) {
+      cancelAnimationFrame(rafId);
+      rafId = null;
+    }
+    rect = null;
+    card.style.transition = 'transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)';
     card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
     card.style.setProperty('--glare-opacity', '0');
-
-    setTimeout(() => { card.style.transition = ''; }, 500);
   });
 }
 
@@ -243,19 +268,19 @@ function setupSoundToggle() {
 }
 
 /* ----------------------------------------------------
-   4. 🎯 重寫 Web Audio API 頻譜分析模組 (高敏度對數分配 + Canvas 視覺化)
+   4. Web Audio 頻譜分析模組
 ---------------------------------------------------- */
 function initWebAudioAnalyser() {
   const ctx = getAudioContext();
 
   if (!analyserNode) {
     analyserNode = ctx.createAnalyser();
-    analyserNode.fftSize = 256; // 提高 FFT 分辨率以精細計算對數頻段
-    analyserNode.smoothingTimeConstant = 0.80; // 平滑度
+    analyserNode.fftSize = 256;
+    analyserNode.smoothingTimeConstant = 0.80;
 
-    bufferLength = analyserNode.frequencyBinCount; // 128 Bins
+    bufferLength = analyserNode.frequencyBinCount;
     dataArray = new Uint8Array(bufferLength);
-    peakCaps = new Array(40).fill(0); // 呈現 40 根音波柱
+    peakCaps = new Array(40).fill(0);
   }
 
   if (!audioSourceNode && globalAudio) {
@@ -297,24 +322,20 @@ function setupCanvasVisualizer() {
     if (isPlaying && analyserNode) {
       analyserNode.getByteFrequencyData(dataArray);
 
-      const numBars = 40; // 繪製 40 根均勻分佈的音波柱
+      const numBars = 40;
       const barWidth = w / numBars;
       const capHeight = 2 * dpr;
       const gravity = 0.55 * dpr;
       
-      // 截斷高頻完全空置的段落 (16kHz 以上)
       const activeLength = Math.floor(bufferLength * 0.72);
 
       for (let i = 0; i < numBars; i++) {
-        // 🎯 1. 對數採樣索引：低頻緊密採樣、高頻寬廣採樣
         const logRatio = Math.pow(i / (numBars - 1), 1.65);
         const binIndex = Math.min(bufferLength - 1, Math.floor(logRatio * activeLength));
 
-        // 🎯 2. 高頻增益補償Multiplier (自然衰減修復機制)
         const freqGain = 1 + (i / numBars) * 1.85;
         let rawVal = dataArray[binIndex] * freqGain;
 
-        // 🎯 3. 低頻軟限幅，防止重低音卡滿頂部
         if (i < numBars * 0.15) {
           rawVal = rawVal * 0.82;
         }
@@ -322,7 +343,6 @@ function setupCanvasVisualizer() {
         const percent = Math.min(1, Math.max(0, rawVal / 255));
         const barHeight = Math.max(2 * dpr, percent * (h - 8 * dpr));
 
-        // 高光頂點降落機制
         if (barHeight > peakCaps[i]) {
           peakCaps[i] = barHeight;
         } else {
@@ -332,19 +352,16 @@ function setupCanvasVisualizer() {
         const x = i * barWidth;
         const y = h - barHeight;
 
-        // 霓虹漸層
         const gradient = ctx.createLinearGradient(0, h, 0, 0);
         gradient.addColorStop(0, '#ff2a2a');
         gradient.addColorStop(0.65, '#ff7777');
         gradient.addColorStop(1, '#ffffff');
 
-        // 繪製動態頻譜柱
         ctx.fillStyle = gradient;
         ctx.shadowColor = 'rgba(255, 42, 42, 0.75)';
         ctx.shadowBlur = 5 * dpr;
         ctx.fillRect(x + 0.5 * dpr, y, Math.max(1 * dpr, barWidth - 1 * dpr), barHeight);
 
-        // 繪製頂點 (Peak Cap)
         ctx.fillStyle = '#ffffff';
         ctx.shadowColor = '#ffffff';
         ctx.shadowBlur = 6 * dpr;
@@ -352,7 +369,6 @@ function setupCanvasVisualizer() {
         ctx.fillRect(x + 0.5 * dpr, Math.max(0, capY), Math.max(1 * dpr, barWidth - 1 * dpr), capHeight);
       }
     } else {
-      // 無音訊/暫停時的波紋待機效果
       ripplePhase += 0.04;
       const centerX = w / 2;
       const centerY = h / 2;
@@ -386,7 +402,7 @@ function setupCanvasVisualizer() {
 }
 
 /* ----------------------------------------------------
-   5. Mini Music Player 邏輯與控制模組
+   5. Mini Music Player 邏輯與控制模組 (連動 CD 唱盤旋轉)
 ---------------------------------------------------- */
 function updatePlayBtnText(isPlaying) {
   const isMobile = window.matchMedia('(max-width: 900px)').matches;
@@ -527,7 +543,7 @@ function setupDraggableWidget(element, handle) {
 }
 
 /* ----------------------------------------------------
-   6. 彩蛋處理器 (Easter Eggs - 支援 99 / JOJO / Towa / Holo)
+   6. 彩蛋處理器 (Easter Eggs)
 ---------------------------------------------------- */
 function triggerLightShow() {
   const overlay = document.getElementById('lightshow-overlay');
@@ -570,7 +586,6 @@ function handleEasterEgg(keyword) {
     return true;
   }
 
-  // 🎯 支援輸入 '99' 直接進入經典 JOJO 彩蛋
   if (key === '99') {
     document.body.classList.add('jojo-theme');
     triggerLightShow();
