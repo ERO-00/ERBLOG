@@ -1,5 +1,5 @@
 /**
- * ERBLOG // NOTHING OS STYLE - MAIN APP SCRIPT WITH OPTIMIZED EASTER EGGS & PERFORMANCE
+ * ERBLOG // NOTHING OS STYLE - MAIN APP SCRIPT WITH ENHANCED EASTER EGGS & PERFORMANCE
  */
 
 // 作品集資料設定
@@ -65,7 +65,7 @@ const portfolioData = [
   }
 ];
 
-const FALLBACK_IMG = "data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22400%22%20height%3D%22300%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20style%3D%22background%3A%23121212%3B%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22none%22%20stroke%3D%22%23262626%22%20stroke-width%3D%222%22%2F%3E%3Ccircle%20cx%3D%22200%22%20cy%3D%22130%22%20r%3D%224%22%20fill%3D%22%23ff2a2a%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2255%25%22%20fill%3D%22%23888888%22%20font-family%3D%22Space%20Mono%2C%20monospace%22%20font-size%3D%2212%22%20text-anchor%3D%22middle%22%3E%5B%20IMAGE%20NOT%20FOUND%20%5D%3C%2Ftext%3E%3C%2Fsvg%3E";
+const FALLBACK_IMG = "data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22400%22%20height%3D%22300%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20style%3D%22background%3A%23121212%3B%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22none%22%20stroke%3D%22%23262626%22%20stroke-width%3D%222%22%2F%3E%3Ccircle%20cx%3D%22200%22%20cy%3D%22130%22%20r%3D%224%22%20fill%3D%22%23ff2a2a%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2255%25%22%20fill%3D%22%23888888%22%20font-family%3D%22Space%20Mono%2C%20monospace%22%20font-size%3D%2212%22%20text-anchor%3D%22middle%22%3EIMAGE%20NOT%20FOUND%3C%2Ftext%3E%3C%2Fsvg%3E";
 
 // DOM 引用
 const gridContainer = document.getElementById('portfolio-grid');
@@ -163,7 +163,7 @@ function setupCustomCursor() {
 }
 
 /* ----------------------------------------------------
-   2. 高階 3D Card Tilt 傾斜與動態金屬光澤效果 (桌機端觸發)
+   2. 高階 3D Card Tilt 傾斜與動態金屬光澤效果
 ---------------------------------------------------- */
 function apply3DTiltEffect(card) {
   if (window.matchMedia('(max-width: 768px)').matches) return;
@@ -173,7 +173,6 @@ function apply3DTiltEffect(card) {
   let mouseX = 0;
   let mouseY = 0;
 
-  // 動態建立金屬光澤層 (Metal Glare Overlay)
   let glare = card.querySelector('.card-glare');
   if (!glare) {
     glare = document.createElement('div');
@@ -189,16 +188,14 @@ function apply3DTiltEffect(card) {
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
 
-    // 將傾斜角度提升至約 22 度，顯著增加視覺震撼度
-    const rotateX = ((y - centerY) / centerY) * -22;
-    const rotateY = ((x - centerX) / centerX) * 22;
+    const rotateX = ((y - centerY) / centerY) * -18;
+    const rotateY = ((x - centerX) / centerX) * 18;
 
-    card.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) scale3d(1.04, 1.04, 1.04)`;
+    card.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) scale3d(1.03, 1.03, 1.03)`;
 
-    // 動態計算金屬光澤 SpotLight 位置與透明度
     const percentX = (x / rect.width) * 100;
     const percentY = (y / rect.height) * 100;
-    glare.style.background = `radial-gradient(circle at ${percentX.toFixed(1)}% ${percentY.toFixed(1)}%, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(0, 0, 0, 0.6) 90%)`;
+    glare.style.background = `radial-gradient(circle at ${percentX.toFixed(1)}% ${percentY.toFixed(1)}%, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(0, 0, 0, 0.6) 90%)`;
 
     rafId = null;
   }
@@ -264,7 +261,7 @@ function setupSoundToggle() {
   if (!soundToggleBtn) return;
   soundToggleBtn.addEventListener('click', () => {
     soundEnabled = !soundEnabled;
-    soundToggleBtn.textContent = soundEnabled ? '[ SOUND: ON ]' : '[ SOUND: OFF ]';
+    soundToggleBtn.textContent = soundEnabled ? 'SOUND: ON' : 'SOUND: OFF';
     if (soundEnabled) playClickSound(900, 'square');
   });
 }
@@ -303,7 +300,7 @@ function setupCanvasVisualizer() {
     const rect = playerVisualizerCanvas.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
     playerVisualizerCanvas.width = (rect.width || 200) * dpr;
-    playerVisualizerCanvas.height = (rect.height || 48) * dpr;
+    playerVisualizerCanvas.height = (rect.height || 44) * dpr;
   }
 
   resizeCanvas();
@@ -323,7 +320,7 @@ function setupCanvasVisualizer() {
     if (isPlaying && analyserNode) {
       analyserNode.getByteFrequencyData(dataArray);
 
-      const numBars = 30;
+      const numBars = 28;
       const barWidth = w / numBars;
       const activeLength = Math.floor(bufferLength * 0.7);
 
@@ -347,7 +344,7 @@ function setupCanvasVisualizer() {
       
       ctx.beginPath();
       ctx.arc(centerX, centerY, pulseRadius, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
       ctx.fill();
     }
   }
@@ -356,14 +353,18 @@ function setupCanvasVisualizer() {
 }
 
 /* ----------------------------------------------------
-   5. Mini Music Player 邏輯控制與收合功能
+   5. Mini Music Player 邏輯控制
 ---------------------------------------------------- */
 function updatePlayBtnText(isPlaying) {
   const isMobile = window.matchMedia('(max-width: 768px)').matches;
-  if (isPlaying) {
-    playerPlayBtn.textContent = isMobile ? '[ ⏸ ]' : '[ ⏸ PAUSE ]';
+  const playIcon = playerPlayBtn.querySelector('.play-icon');
+  const playText = playerPlayBtn.querySelector('.play-text');
+
+  if (playIcon && playText) {
+    playIcon.textContent = isPlaying ? '⏸' : '▶';
+    playText.textContent = isPlaying ? (isMobile ? '' : 'PAUSE') : (isMobile ? '' : 'PLAY');
   } else {
-    playerPlayBtn.textContent = isMobile ? '[ ▶ ]' : '[ ▶ PLAY ]';
+    playerPlayBtn.textContent = isPlaying ? (isMobile ? '⏸' : '⏸ PAUSE') : (isMobile ? '▶' : '▶ PLAY');
   }
 }
 
@@ -503,7 +504,7 @@ function setupDraggableWidget(element, handle) {
 }
 
 /* ----------------------------------------------------
-   6. 彩蛋處理器 (JOJO, Towa, Holo 專屬極致強化動態特效 - 高效能不卡頓)
+   6. 彩蛋處理器 (JOJO, Towa, Holo 加強粒子與時間)
 ---------------------------------------------------- */
 function triggerLightShow() {
   const overlay = document.getElementById('lightshow-overlay');
@@ -514,7 +515,6 @@ function triggerLightShow() {
   }
 }
 
-// 💥 JOJO 衝擊特效
 function triggerJojoImpact(onComplete) {
   const overlay = document.getElementById('jojo-impact-overlay');
   if (!overlay) {
@@ -561,21 +561,19 @@ function spawnJojoMenace() {
   }
 }
 
-// 💜 常闇永遠 Towa 超華麗紫色神聖羽翼彩蛋動畫
+// 💜 Towa 特效加強版 (42個粒子, 3.8秒持續時間)
 function triggerTowaImpact() {
   const overlay = document.getElementById('towa-impact-overlay');
   const container = document.getElementById('towa-particles-container');
   if (!overlay) return;
 
-  // 清空舊節點
   overlay.innerHTML = '';
   if (container) container.innerHTML = '';
 
-  // 動態插入多層次光雕元素
   overlay.innerHTML = `
     <div class="towa-devil-aura"></div>
     <div class="towa-halo"></div>
-    <div class="towa-impact-row row-sub">[ DEVIL OR ANGEL? ]</div>
+    <div class="towa-impact-row row-sub">DEVIL OR ANGEL?</div>
     <div class="towa-impact-row row-main">TOWA MAJI TENSHI</div>
   `;
 
@@ -583,16 +581,19 @@ function triggerTowaImpact() {
   void overlay.offsetWidth;
   overlay.classList.add('active');
 
-  // 生成高性能飄落天使黑紫羽毛與惡魔幾何碎片 (控制數量 16 個以保證流暢度)
   if (container) {
     const fragment = document.createDocumentFragment();
-    for (let i = 0; i < 16; i++) {
+    const particleCount = 42; // 大幅增加粒子數量
+    for (let i = 0; i < particleCount; i++) {
       const feather = document.createElement('div');
-      feather.className = (i % 2 === 0) ? 'towa-feather' : 'towa-crystal';
-      feather.style.left = `${Math.random() * 92 + 4}vw`;
-      feather.style.top = `${Math.random() * -20 - 10}vh`;
-      feather.style.animationDelay = `${(Math.random() * 0.6).toFixed(2)}s`;
-      feather.style.animationDuration = `${(2.0 + Math.random() * 1.0).toFixed(2)}s`;
+      const isCrystal = i % 2 === 0;
+      feather.className = isCrystal ? 'towa-feather' : 'towa-crystal';
+      feather.style.left = `${Math.random() * 94 + 3}vw`;
+      feather.style.top = `${Math.random() * -25 - 10}vh`;
+      feather.style.animationDelay = `${(Math.random() * 1.2).toFixed(2)}s`;
+      feather.style.animationDuration = `${(2.8 + Math.random() * 1.2).toFixed(2)}s`;
+      const scale = (0.7 + Math.random() * 0.8).toFixed(2);
+      feather.style.transform = `scale(${scale})`;
       fragment.appendChild(feather);
     }
     container.appendChild(fragment);
@@ -600,14 +601,15 @@ function triggerTowaImpact() {
 
   playClickSound(1200, 'sine', 0.4);
 
+  // 延長至 3800ms
   setTimeout(() => {
     overlay.classList.remove('active');
     overlay.innerHTML = '';
     if (container) container.innerHTML = '';
-  }, 2400);
+  }, 3800);
 }
 
-// 💙 Holo 專屬高科技全息藍爆發彩蛋動畫
+// 💙 Holo 特效加強版 (45個粒子, 3.8秒持續時間)
 function triggerHoloImpact() {
   const overlay = document.getElementById('holo-impact-overlay');
   const container = document.getElementById('holo-cyber-container');
@@ -627,15 +629,17 @@ function triggerHoloImpact() {
   void overlay.offsetWidth;
   overlay.classList.add('active');
 
-  // 生成全息六角形與三稜鏡粒子 (控制數量在 18 個內，完全硬體加速)
   if (container) {
     const fragment = document.createDocumentFragment();
-    for (let i = 0; i < 18; i++) {
+    const particleCount = 45; // 大幅增加全息粒子
+    for (let i = 0; i < particleCount; i++) {
       const p = document.createElement('div');
-      p.className = (i % 3 === 0) ? 'holo-hex-particle' : 'holo-particle';
-      p.style.left = `${Math.random() * 88 + 6}vw`;
-      p.style.top = `${Math.random() * 70 + 15}vh`;
-      p.style.animationDelay = `${(Math.random() * 0.5).toFixed(2)}s`;
+      const type = i % 3;
+      p.className = type === 0 ? 'holo-hex-particle' : (type === 1 ? 'holo-particle' : 'holo-ring-particle');
+      p.style.left = `${Math.random() * 92 + 4}vw`;
+      p.style.top = `${Math.random() * 75 + 10}vh`;
+      p.style.animationDelay = `${(Math.random() * 1.0).toFixed(2)}s`;
+      p.style.animationDuration = `${(2.6 + Math.random() * 1.2).toFixed(2)}s`;
       fragment.appendChild(p);
     }
     container.appendChild(fragment);
@@ -643,11 +647,12 @@ function triggerHoloImpact() {
 
   playClickSound(1400, 'triangle', 0.35);
 
+  // 延長至 3800ms
   setTimeout(() => {
     overlay.classList.remove('active');
     overlay.innerHTML = '';
     if (container) container.innerHTML = '';
-  }, 2400);
+  }, 3800);
 }
 
 function handleEasterEgg(keyword) {
@@ -712,10 +717,10 @@ function setupCommandPalette() {
   if (!cmdPalette || !cmdInput || !cmdList) return;
 
   const commands = [
-    { label: "[ 彩蛋 ] 輸入 '99' 觸發 JOJO 經典 99 震撼衝擊主題", action: () => handleEasterEgg('99') },
-    { label: "[ 彩蛋 ] 輸入 'towa' 觸發常闇永遠天使/惡魔極致紫光主題", action: () => handleEasterEgg('towa') },
-    { label: "[ 彩蛋 ] 輸入 'jojo1' ~ 'jojo7' 觸發 JOJO 奇妙冒險特寫", action: () => handleEasterEgg('jojo1') },
-    { label: "[ 彩蛋 ] 輸入 'holo' 觸發 Hololive 高科技全息藍主題", action: () => handleEasterEgg('holo') },
+    { label: "彩蛋：輸入 '99' 觸發 JOJO 經典 99 震撼衝擊主題", action: () => handleEasterEgg('99') },
+    { label: "彩蛋：輸入 'towa' 觸發常闇永遠天使/惡魔極致紫光主題", action: () => handleEasterEgg('towa') },
+    { label: "彩蛋：輸入 'jojo1' ~ 'jojo7' 觸發 JOJO 奇妙冒險特寫", action: () => handleEasterEgg('jojo1') },
+    { label: "彩蛋：輸入 'holo' 觸發 Hololive 高科技全息藍主題", action: () => handleEasterEgg('holo') },
     { label: "前往 // 關於我", action: () => scrollToSection('about') },
     { label: "前往 // 作品集", action: () => scrollToSection('portfolio') },
     { label: "前往 // 聯絡我", action: () => scrollToSection('contact') },
@@ -747,14 +752,14 @@ function setupCommandPalette() {
   function renderCmds(list) {
     cmdList.innerHTML = '';
     if (list.length === 0) {
-      cmdList.innerHTML = '<li class="cmd-empty">[ 按 Enter 執行關鍵字指令 ]</li>';
+      cmdList.innerHTML = '<li class="cmd-empty">按 Enter 執行關鍵字指令</li>';
       return;
     }
 
     list.forEach((item, i) => {
       const li = document.createElement('li');
       li.className = `cmd-item ${i === activeCmdIndex ? 'selected' : ''}`;
-      li.innerHTML = `<span>${item.label}</span><span class="cmd-tag">[ EXEC ]</span>`;
+      li.innerHTML = `<span>${item.label}</span><span class="cmd-tag">EXEC</span>`;
       li.addEventListener('click', () => {
         closeCmd();
         item.action();
@@ -918,7 +923,7 @@ function setupMatrixClock() {
     const hrs = String(now.getHours()).padStart(2, '0');
     const mins = String(now.getMinutes()).padStart(2, '0');
     const secs = String(now.getSeconds()).padStart(2, '0');
-    clockEl.textContent = `[ ${hrs}:${mins}:${secs} CST ]`;
+    clockEl.textContent = `${hrs}:${mins}:${secs} CST`;
   }
   setInterval(update, 1000); update();
 }
@@ -948,7 +953,7 @@ function renderPortfolio(data) {
 
   data.forEach((item) => {
     const card = document.createElement('div');
-    card.className = 'card';
+    card.className = 'card reveal-on-scroll';
     card.setAttribute('data-id', item.id);
 
     const hasSlideshow = item.items && item.items.length > 1;
@@ -958,15 +963,15 @@ function renderPortfolio(data) {
       <div class="card-media-wrapper">
         <img src="${item.cover}" alt="${item.title}" onerror="this.onerror=null; this.src='${FALLBACK_IMG}';">
         <span class="card-badge">${item.categoryLabel}</span>
-        ${hasSlideshow ? `<span class="card-slideshow-indicator">GALLERY [1/${item.items.length}]</span>` : ''}
+        ${hasSlideshow ? `<span class="card-slideshow-indicator">GALLERY 1/${item.items.length}</span>` : ''}
       </div>
       <div class="card-info">
         <h3 class="card-title">${item.title}</h3>
         <p class="card-desc">${item.desc}</p>
         ${isTowaCard ? `
           <div class="card-actions" style="margin-top: 10px;">
-            <a href="https://zh.wikipedia.org/zh-tw/%E5%B8%B8%E9%97%87%E6%B0%B8%E9%81%A0" target="_blank" rel="noopener noreferrer" class="wiki-link-btn" style="display: inline-block; font-family: var(--font-mono); font-size: 0.72rem; color: var(--accent-red); border: 1px dashed var(--accent-red); padding: 3px 8px;" onclick="event.stopPropagation();">
-              [ ↗ 維基百科：常闇永遠 ]
+            <a href="https://zh.wikipedia.org/zh-tw/%E5%B8%B8%E9%97%87%E6%B0%B8%E9%81%A0" target="_blank" rel="noopener noreferrer" class="wiki-link-btn" style="display: inline-block; font-family: var(--font-mono); font-size: 0.72rem; color: var(--accent-red); border: 1px dashed var(--accent-red); padding: 3px 8px; border-radius: 3px;" onclick="event.stopPropagation();">
+              ↗ 維基百科：常闇永遠
             </a>
           </div>
         ` : ''}
@@ -980,6 +985,8 @@ function renderPortfolio(data) {
     });
     gridContainer.appendChild(card);
   });
+
+  setupScrollReveal();
 }
 
 function openLightbox(portfolioItem) {
@@ -1028,7 +1035,7 @@ function updateLightboxContent() {
   if (currentGallery.length > 1) {
     prevBtn.style.display = 'block'; nextBtn.style.display = 'block';
     lightboxCounter.style.display = 'block';
-    lightboxCounter.textContent = `[ ${currentIndex + 1} / ${currentGallery.length} ]`;
+    lightboxCounter.textContent = `${currentIndex + 1} / ${currentGallery.length}`;
   } else {
     prevBtn.style.display = 'none'; nextBtn.style.display = 'none';
     lightboxCounter.style.display = 'none';
@@ -1056,7 +1063,7 @@ function setupThemeToggle() {
       document.body.classList.remove('towa-theme', 'jojo-theme', 'holo-theme');
       document.body.classList.toggle('light-theme');
       const isLight = document.body.classList.contains('light-theme');
-      if (themeIcon) themeIcon.textContent = isLight ? '[ LIGHT ]' : '[ DARK ]';
+      if (themeIcon) themeIcon.textContent = isLight ? 'LIGHT' : 'DARK';
     });
   }
 }
@@ -1075,7 +1082,7 @@ function setupBackToTop() {
 }
 
 /* ----------------------------------------------------
-   10. 手機版導覽選單
+   10. 手機版導覽選單與滾動顯現特效
 ---------------------------------------------------- */
 function closeMobileNav() {
   if (mobileNavMenu) mobileNavMenu.classList.remove('active');
@@ -1100,6 +1107,23 @@ function setupMobileMenu() {
     mobileNavMenu.querySelectorAll('a, button').forEach(link => {
       link.addEventListener('click', closeMobileNav);
     });
+  }
+}
+
+function setupScrollReveal() {
+  const elements = document.querySelectorAll('.reveal-on-scroll');
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+        }
+      });
+    }, { threshold: 0.1 });
+
+    elements.forEach(el => observer.observe(el));
+  } else {
+    elements.forEach(el => el.classList.add('is-visible'));
   }
 }
 
