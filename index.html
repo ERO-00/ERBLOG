@@ -26,11 +26,17 @@
   <!-- 彩蛋特效燈光秀閃爍層 -->
   <div id="lightshow-overlay" class="lightshow-overlay"></div>
 
-  <!-- JOJO 震撼衝擊一整排字型圖層 -->
+  <!-- JOJO 震撼衝擊圖層 -->
   <div id="jojo-impact-overlay" class="jojo-impact-overlay"></div>
-
-  <!-- JOJO / 99 彩蛋: 動態 ゴゴゴ (Menace) 文字容器 -->
   <div id="jojo-menace-container" class="jojo-menace-container"></div>
+
+  <!-- Towa 專屬紫光衝擊圖層 -->
+  <div id="towa-impact-overlay" class="towa-impact-overlay"></div>
+  <div id="towa-particles-container" class="towa-particles-container"></div>
+
+  <!-- Holo 專屬全息藍衝擊圖層 -->
+  <div id="holo-impact-overlay" class="holo-impact-overlay"></div>
+  <div id="holo-cyber-container" class="holo-cyber-container"></div>
 
   <!-- 開場中間展開動畫 -->
   <div id="intro-curtain" class="intro-curtain" aria-hidden="true">
@@ -48,7 +54,7 @@
   <!-- 獨立式音樂播放器 Widget -->
   <div id="mini-player" class="mini-player-widget">
     <div class="player-left-panel">
-      <div class="player-drag-handle" id="player-drag-handle" title="按住可隨意拖動播放器">
+      <div class="player-drag-handle" id="player-drag-handle" title="按住可拖動 / 點擊按鈕收合">
         <span class="drag-dots">⋮⋮</span>
         <span class="player-status-dot"></span>
         <span class="player-label">AUDIO_PLAYER</span>
@@ -56,7 +62,7 @@
         <div class="player-eq">
           <span></span><span></span><span></span>
         </div>
-        <button id="player-dock-btn" class="player-dock-btn" title="收合/展開" aria-label="收合/展開">[ 🎵 ]</button>
+        <button id="player-dock-btn" class="player-dock-btn" title="收合/展開播放器" aria-label="收合/展開">[ 🎵 ]</button>
       </div>
 
       <div class="player-main-content">
@@ -69,7 +75,7 @@
           <button id="player-play-btn" class="player-btn" title="播放/暫停">[ ▶ PLAY ]</button>
         </div>
 
-        <!-- 音量控制區域 (預設 70%) -->
+        <!-- 音量控制區域 -->
         <div class="player-volume-box">
           <span class="vol-label">VOL</span>
           <input type="range" id="player-volume-slider" class="volume-slider" min="0" max="1" step="0.01" value="0.7" aria-label="音量控制">
@@ -137,7 +143,7 @@
       <a href="#portfolio" class="mobile-nav-item">// 02. 作品集</a>
       <a href="#contact" class="mobile-nav-item">// 03. 聯絡我</a>
       <div class="mobile-menu-divider"></div>
-      <button id="mobile-cmd-btn" class="mobile-cmd-launch-btn">// >_ 輸入彩蛋 (99, towa...) / 執行指令</button>
+      <button id="mobile-cmd-btn" class="mobile-cmd-launch-btn">// >_ 輸入彩蛋 (99, towa, holo...) / 執行指令</button>
     </nav>
   </header>
 

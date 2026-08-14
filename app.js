@@ -1,5 +1,5 @@
 /**
- * ERBLOG // NOTHING OS STYLE - MAIN APP SCRIPT WITH HIGH-PERFORMANCE 3D TILT & CD PLAYER
+ * ERBLOG // NOTHING OS STYLE - MAIN APP SCRIPT WITH OPTIMIZED EASTER EGGS & PERFORMANCE
  */
 
 // 作品集資料設定
@@ -119,7 +119,6 @@ let analyserNode = null;
 let audioSourceNode = null;
 let dataArray = null;
 let bufferLength = 0;
-let peakCaps = [];
 
 let soundEnabled = true;
 let ripplePhase = 0;
@@ -139,7 +138,7 @@ let touchStartY = 0;
 let activeCmdIndex = 0;
 
 /* ----------------------------------------------------
-   1. 科技感自訂瞄準游標
+   1. 科技感自訂瞄準游標 (僅桌機版)
 ---------------------------------------------------- */
 function setupCustomCursor() {
   const cursor = document.getElementById('custom-cursor');
@@ -148,7 +147,7 @@ function setupCustomCursor() {
   document.addEventListener('mousemove', (e) => {
     cursor.style.left = `${e.clientX}px`;
     cursor.style.top = `${e.clientY}px`;
-  });
+  }, { passive: true });
 
   document.addEventListener('mouseover', (e) => {
     if (e.target.closest('a, button, .card, .filter-btn, .cmd-item, input, .wiki-link-btn, .player-drag-handle')) {
@@ -164,7 +163,7 @@ function setupCustomCursor() {
 }
 
 /* ----------------------------------------------------
-   2. ⚡ 極致效能最佳化：3D Card Tilt 傾斜效果
+   2. 高階 3D Card Tilt 傾斜與動態金屬光澤效果 (桌機端觸發)
 ---------------------------------------------------- */
 function apply3DTiltEffect(card) {
   if (window.matchMedia('(max-width: 768px)').matches) return;
@@ -174,6 +173,14 @@ function apply3DTiltEffect(card) {
   let mouseX = 0;
   let mouseY = 0;
 
+  // 動態建立金屬光澤層 (Metal Glare Overlay)
+  let glare = card.querySelector('.card-glare');
+  if (!glare) {
+    glare = document.createElement('div');
+    glare.className = 'card-glare';
+    card.appendChild(glare);
+  }
+
   function updateTilt() {
     if (!rect) return;
     const x = mouseX - rect.left;
@@ -182,32 +189,29 @@ function apply3DTiltEffect(card) {
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
 
-    const rotateX = ((y - centerY) / centerY) * -9;
-    const rotateY = ((x - centerX) / centerX) * 9;
+    // 將傾斜角度提升至約 22 度，顯著增加視覺震撼度
+    const rotateX = ((y - centerY) / centerY) * -22;
+    const rotateY = ((x - centerX) / centerX) * 22;
 
-    const glareX = (x / rect.width) * 100;
-    const glareY = (y / rect.height) * 100;
+    card.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) scale3d(1.04, 1.04, 1.04)`;
 
-    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
-    card.style.setProperty('--glare-x', `${glareX}%`);
-    card.style.setProperty('--glare-y', `${glareY}%`);
-    card.style.setProperty('--glare-opacity', '1');
+    // 動態計算金屬光澤 SpotLight 位置與透明度
+    const percentX = (x / rect.width) * 100;
+    const percentY = (y / rect.height) * 100;
+    glare.style.background = `radial-gradient(circle at ${percentX.toFixed(1)}% ${percentY.toFixed(1)}%, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(0, 0, 0, 0.6) 90%)`;
 
     rafId = null;
   }
 
   card.addEventListener('mouseenter', () => {
     rect = card.getBoundingClientRect();
-    card.style.transition = 'transform 0.1s ease-out';
+    card.style.transition = 'transform 0.12s cubic-bezier(0.2, 0.8, 0.2, 1)';
   });
 
   card.addEventListener('mousemove', (e) => {
     mouseX = e.clientX;
     mouseY = e.clientY;
-    
-    if (!rafId) {
-      rafId = requestAnimationFrame(updateTilt);
-    }
+    if (!rafId) rafId = requestAnimationFrame(updateTilt);
   });
 
   card.addEventListener('mouseleave', () => {
@@ -218,7 +222,6 @@ function apply3DTiltEffect(card) {
     rect = null;
     card.style.transition = 'transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)';
     card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
-    card.style.setProperty('--glare-opacity', '0');
   });
 }
 
@@ -279,7 +282,6 @@ function initWebAudioAnalyser() {
 
     bufferLength = analyserNode.frequencyBinCount;
     dataArray = new Uint8Array(bufferLength);
-    peakCaps = new Array(40).fill(0);
   }
 
   if (!audioSourceNode && globalAudio) {
@@ -288,7 +290,7 @@ function initWebAudioAnalyser() {
       audioSourceNode.connect(analyserNode);
       analyserNode.connect(ctx.destination);
     } catch (err) {
-      console.warn("AudioSource direct connection notice:", err);
+      console.warn("AudioSource notice:", err);
     }
   }
 }
@@ -300,8 +302,8 @@ function setupCanvasVisualizer() {
   function resizeCanvas() {
     const rect = playerVisualizerCanvas.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
-    playerVisualizerCanvas.width = (rect.width || 202) * dpr;
-    playerVisualizerCanvas.height = (rect.height || 52) * dpr;
+    playerVisualizerCanvas.width = (rect.width || 200) * dpr;
+    playerVisualizerCanvas.height = (rect.height || 48) * dpr;
   }
 
   resizeCanvas();
@@ -321,78 +323,31 @@ function setupCanvasVisualizer() {
     if (isPlaying && analyserNode) {
       analyserNode.getByteFrequencyData(dataArray);
 
-      const numBars = 40;
+      const numBars = 30;
       const barWidth = w / numBars;
-      const capHeight = 2 * dpr;
-      const gravity = 0.55 * dpr;
-      
-      const activeLength = Math.floor(bufferLength * 0.72);
+      const activeLength = Math.floor(bufferLength * 0.7);
 
       for (let i = 0; i < numBars; i++) {
-        const logRatio = Math.pow(i / (numBars - 1), 1.65);
-        const binIndex = Math.min(bufferLength - 1, Math.floor(logRatio * activeLength));
-
-        const freqGain = 1 + (i / numBars) * 1.85;
-        let rawVal = dataArray[binIndex] * freqGain;
-
-        if (i < numBars * 0.15) {
-          rawVal = rawVal * 0.82;
-        }
-
+        const binIndex = Math.min(bufferLength - 1, Math.floor((i / numBars) * activeLength));
+        let rawVal = dataArray[binIndex];
         const percent = Math.min(1, Math.max(0, rawVal / 255));
-        const barHeight = Math.max(2 * dpr, percent * (h - 8 * dpr));
-
-        if (barHeight > peakCaps[i]) {
-          peakCaps[i] = barHeight;
-        } else {
-          peakCaps[i] = Math.max(0, peakCaps[i] - gravity);
-        }
+        const barHeight = Math.max(2 * dpr, percent * (h - 6 * dpr));
 
         const x = i * barWidth;
         const y = h - barHeight;
 
-        const gradient = ctx.createLinearGradient(0, h, 0, 0);
-        gradient.addColorStop(0, '#ff2a2a');
-        gradient.addColorStop(0.65, '#ff7777');
-        gradient.addColorStop(1, '#ffffff');
-
-        ctx.fillStyle = gradient;
-        ctx.shadowColor = 'rgba(255, 42, 42, 0.75)';
-        ctx.shadowBlur = 5 * dpr;
+        ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--accent-red').trim() || '#ff2a2a';
         ctx.fillRect(x + 0.5 * dpr, y, Math.max(1 * dpr, barWidth - 1 * dpr), barHeight);
-
-        ctx.fillStyle = '#ffffff';
-        ctx.shadowColor = '#ffffff';
-        ctx.shadowBlur = 6 * dpr;
-        const capY = h - peakCaps[i] - capHeight;
-        ctx.fillRect(x + 0.5 * dpr, Math.max(0, capY), Math.max(1 * dpr, barWidth - 1 * dpr), capHeight);
       }
     } else {
       ripplePhase += 0.04;
       const centerX = w / 2;
       const centerY = h / 2;
-      const maxRadius = Math.min(w, h) * 0.42;
-
-      ctx.shadowColor = 'rgba(255, 42, 42, 0.6)';
-      ctx.shadowBlur = 8 * dpr;
-
-      for (let r = 1; r <= 2; r++) {
-        const currentRadius = ((ripplePhase * 16 * dpr + r * 18 * dpr) % maxRadius);
-        const alpha = Math.max(0, 1 - (currentRadius / maxRadius));
-
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, currentRadius, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(255, 42, 42, ${alpha * 0.65})`;
-        ctx.lineWidth = 1.2 * dpr;
-        ctx.stroke();
-      }
-
-      const pulseRadius = (Math.sin(ripplePhase * 2.5) * 1.5 + 3) * dpr;
+      const pulseRadius = (Math.sin(ripplePhase * 2) * 1.5 + 3) * dpr;
+      
       ctx.beginPath();
       ctx.arc(centerX, centerY, pulseRadius, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-      ctx.shadowColor = '#ffffff';
-      ctx.shadowBlur = 10 * dpr;
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
       ctx.fill();
     }
   }
@@ -401,10 +356,10 @@ function setupCanvasVisualizer() {
 }
 
 /* ----------------------------------------------------
-   5. Mini Music Player 邏輯控制
+   5. Mini Music Player 邏輯控制與收合功能
 ---------------------------------------------------- */
 function updatePlayBtnText(isPlaying) {
-  const isMobile = window.matchMedia('(max-width: 900px)').matches;
+  const isMobile = window.matchMedia('(max-width: 768px)').matches;
   if (isPlaying) {
     playerPlayBtn.textContent = isMobile ? '[ ⏸ ]' : '[ ⏸ PAUSE ]';
   } else {
@@ -448,10 +403,15 @@ function setupMiniPlayer() {
   if (playerDockBtn) {
     playerDockBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      miniPlayer.classList.toggle('collapsed');
-      playClickSound(700, 'sine');
+      togglePlayerCollapse();
     });
   }
+
+  miniPlayer.addEventListener('click', (e) => {
+    if (miniPlayer.classList.contains('collapsed')) {
+      togglePlayerCollapse();
+    }
+  });
 
   globalAudio.addEventListener('ended', () => {
     miniPlayer.classList.remove('playing');
@@ -459,6 +419,11 @@ function setupMiniPlayer() {
   });
 
   setupDraggableWidget(miniPlayer, playerDragHandle || miniPlayer);
+}
+
+function togglePlayerCollapse() {
+  miniPlayer.classList.toggle('collapsed');
+  playClickSound(700, 'sine');
 }
 
 function playAudioTrack(fileName, trackDisplayName) {
@@ -483,9 +448,9 @@ function setupDraggableWidget(element, handle) {
 
   function onPointerDown(e) {
     if (e.target.closest('button, input, a, canvas')) return;
+    if (element.classList.contains('collapsed')) return;
 
     isDrag = true;
-
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
@@ -497,7 +462,6 @@ function setupDraggableWidget(element, handle) {
     element.style.top = `${rect.top}px`;
     element.style.bottom = 'auto';
     element.style.right = 'auto';
-    element.style.transform = 'none';
 
     document.addEventListener('mousemove', onPointerMove, { passive: false });
     document.addEventListener('mouseup', onPointerUp);
@@ -539,7 +503,7 @@ function setupDraggableWidget(element, handle) {
 }
 
 /* ----------------------------------------------------
-   6. 彩蛋處理器 (升級版 JOJO 斜向巨型衝擊 + 特寫動畫)
+   6. 彩蛋處理器 (JOJO, Towa, Holo 專屬極致強化動態特效 - 高效能不卡頓)
 ---------------------------------------------------- */
 function triggerLightShow() {
   const overlay = document.getElementById('lightshow-overlay');
@@ -550,18 +514,13 @@ function triggerLightShow() {
   }
 }
 
-// 💥 JOJO 升級版：斜向對角滑動巨型衝擊
+// 💥 JOJO 衝擊特效
 function triggerJojoImpact(onComplete) {
   const overlay = document.getElementById('jojo-impact-overlay');
   if (!overlay) {
     if (onComplete) onComplete();
     return;
   }
-
-  // 強烈畫面震動
-  document.body.classList.remove('jojo-shaking');
-  void document.body.offsetWidth;
-  document.body.classList.add('jojo-shaking');
 
   overlay.innerHTML = `
     <div class="impact-bg-lines"></div>
@@ -570,41 +529,129 @@ function triggerJojoImpact(onComplete) {
     <div class="jojo-impact-row row-center">ゴ ！！</div>
   `;
 
+  overlay.classList.remove('active');
+  void overlay.offsetWidth;
   overlay.classList.add('active');
 
-  playClickSound(1200, 'sawtooth', 0.25);
+  playClickSound(1100, 'sawtooth', 0.25);
 
-  // 1.25 秒動畫展示完畢後移除衝擊層
   setTimeout(() => {
     overlay.classList.remove('active');
     overlay.innerHTML = '';
-    document.body.classList.remove('jojo-shaking');
     if (onComplete) onComplete();
-  }, 1250);
+  }, 1600);
 }
 
-// JOJO 後續漂浮散落字型特效
 function spawnJojoMenace() {
   const container = document.getElementById('jojo-menace-container');
   if (!container) return;
+  container.innerHTML = '';
 
-  for (let i = 0; i < 9; i++) {
+  for (let i = 0; i < 7; i++) {
     setTimeout(() => {
       const el = document.createElement('div');
       el.className = 'jojo-menace-text';
       el.textContent = 'ゴ';
       el.style.left = `${Math.random() * 80 + 10}vw`;
-      el.style.top = `${Math.random() * 70 + 15}vh`;
+      el.style.top = `${Math.random() * 60 + 20}vh`;
       container.appendChild(el);
 
       setTimeout(() => el.remove(), 2200);
-    }, i * 180);
+    }, i * 200);
   }
+}
+
+// 💜 常闇永遠 Towa 超華麗紫色神聖羽翼彩蛋動畫
+function triggerTowaImpact() {
+  const overlay = document.getElementById('towa-impact-overlay');
+  const container = document.getElementById('towa-particles-container');
+  if (!overlay) return;
+
+  // 清空舊節點
+  overlay.innerHTML = '';
+  if (container) container.innerHTML = '';
+
+  // 動態插入多層次光雕元素
+  overlay.innerHTML = `
+    <div class="towa-devil-aura"></div>
+    <div class="towa-halo"></div>
+    <div class="towa-impact-row row-sub">[ DEVIL OR ANGEL? ]</div>
+    <div class="towa-impact-row row-main">TOWA MAJI TENSHI</div>
+  `;
+
+  overlay.classList.remove('active');
+  void overlay.offsetWidth;
+  overlay.classList.add('active');
+
+  // 生成高性能飄落天使黑紫羽毛與惡魔幾何碎片 (控制數量 16 個以保證流暢度)
+  if (container) {
+    const fragment = document.createDocumentFragment();
+    for (let i = 0; i < 16; i++) {
+      const feather = document.createElement('div');
+      feather.className = (i % 2 === 0) ? 'towa-feather' : 'towa-crystal';
+      feather.style.left = `${Math.random() * 92 + 4}vw`;
+      feather.style.top = `${Math.random() * -20 - 10}vh`;
+      feather.style.animationDelay = `${(Math.random() * 0.6).toFixed(2)}s`;
+      feather.style.animationDuration = `${(2.0 + Math.random() * 1.0).toFixed(2)}s`;
+      fragment.appendChild(feather);
+    }
+    container.appendChild(fragment);
+  }
+
+  playClickSound(1200, 'sine', 0.4);
+
+  setTimeout(() => {
+    overlay.classList.remove('active');
+    overlay.innerHTML = '';
+    if (container) container.innerHTML = '';
+  }, 2400);
+}
+
+// 💙 Holo 專屬高科技全息藍爆發彩蛋動畫
+function triggerHoloImpact() {
+  const overlay = document.getElementById('holo-impact-overlay');
+  const container = document.getElementById('holo-cyber-container');
+  if (!overlay) return;
+
+  overlay.innerHTML = '';
+  if (container) container.innerHTML = '';
+
+  overlay.innerHTML = `
+    <div class="holo-cyber-grid"></div>
+    <div class="holo-scanline"></div>
+    <div class="holo-impact-row row-sub">// VIRTUAL TALENT AGENCY //</div>
+    <div class="holo-impact-row row-main">HOLOLIVE PRODUCTION</div>
+  `;
+
+  overlay.classList.remove('active');
+  void overlay.offsetWidth;
+  overlay.classList.add('active');
+
+  // 生成全息六角形與三稜鏡粒子 (控制數量在 18 個內，完全硬體加速)
+  if (container) {
+    const fragment = document.createDocumentFragment();
+    for (let i = 0; i < 18; i++) {
+      const p = document.createElement('div');
+      p.className = (i % 3 === 0) ? 'holo-hex-particle' : 'holo-particle';
+      p.style.left = `${Math.random() * 88 + 6}vw`;
+      p.style.top = `${Math.random() * 70 + 15}vh`;
+      p.style.animationDelay = `${(Math.random() * 0.5).toFixed(2)}s`;
+      fragment.appendChild(p);
+    }
+    container.appendChild(fragment);
+  }
+
+  playClickSound(1400, 'triangle', 0.35);
+
+  setTimeout(() => {
+    overlay.classList.remove('active');
+    overlay.innerHTML = '';
+    if (container) container.innerHTML = '';
+  }, 2400);
 }
 
 function handleEasterEgg(keyword) {
   const key = keyword.trim().toLowerCase();
-  
   closeMobileNav();
 
   document.body.classList.remove('towa-theme', 'jojo-theme', 'holo-theme');
@@ -612,6 +659,7 @@ function handleEasterEgg(keyword) {
   if (key === 'towa') {
     document.body.classList.add('towa-theme');
     triggerLightShow();
+    triggerTowaImpact();
     playAudioTrack('FACT_常闇トワ.mp3', 'FACT_常闇トワ');
     return true;
   }
@@ -649,6 +697,7 @@ function handleEasterEgg(keyword) {
   if (key === 'holo') {
     document.body.classList.add('holo-theme');
     triggerLightShow();
+    triggerHoloImpact();
     playAudioTrack('holo_remix.mp3', 'holo_remix');
     return true;
   }
@@ -664,9 +713,9 @@ function setupCommandPalette() {
 
   const commands = [
     { label: "[ 彩蛋 ] 輸入 '99' 觸發 JOJO 經典 99 震撼衝擊主題", action: () => handleEasterEgg('99') },
-    { label: "[ 彩蛋 ] 輸入 'towa' 觸發常闇永遠專屬主題", action: () => handleEasterEgg('towa') },
+    { label: "[ 彩蛋 ] 輸入 'towa' 觸發常闇永遠天使/惡魔極致紫光主題", action: () => handleEasterEgg('towa') },
     { label: "[ 彩蛋 ] 輸入 'jojo1' ~ 'jojo7' 觸發 JOJO 奇妙冒險特寫", action: () => handleEasterEgg('jojo1') },
-    { label: "[ 彩蛋 ] 輸入 'holo' 觸發 Hololive 藍色科技風", action: () => handleEasterEgg('holo') },
+    { label: "[ 彩蛋 ] 輸入 'holo' 觸發 Hololive 高科技全息藍主題", action: () => handleEasterEgg('holo') },
     { label: "前往 // 關於我", action: () => scrollToSection('about') },
     { label: "前往 // 作品集", action: () => scrollToSection('portfolio') },
     { label: "前往 // 聯絡我", action: () => scrollToSection('contact') },
@@ -686,7 +735,6 @@ function setupCommandPalette() {
     currentFilteredCommands = [...commands];
     renderCmds(currentFilteredCommands);
     playClickSound(800, 'square');
-    
     setTimeout(() => cmdInput.focus(), 50);
   }
 
@@ -714,9 +762,6 @@ function setupCommandPalette() {
       });
       cmdList.appendChild(li);
     });
-
-    const selectedEl = cmdList.children[activeCmdIndex];
-    if (selectedEl) selectedEl.scrollIntoView({ block: 'nearest' });
   }
 
   function scrollToSection(id) {
@@ -746,14 +791,12 @@ function setupCommandPalette() {
         if (currentFilteredCommands.length > 0) {
           activeCmdIndex = (activeCmdIndex + 1) % currentFilteredCommands.length;
           renderCmds(currentFilteredCommands);
-          playClickSound(600, 'sine');
         }
       } else if (e.key === 'ArrowUp') {
         e.preventDefault();
         if (currentFilteredCommands.length > 0) {
           activeCmdIndex = (activeCmdIndex - 1 + currentFilteredCommands.length) % currentFilteredCommands.length;
           renderCmds(currentFilteredCommands);
-          playClickSound(600, 'sine');
         }
       } else if (e.key === 'Enter') {
         const val = cmdInput.value.trim();
@@ -761,7 +804,6 @@ function setupCommandPalette() {
         if (!handleEasterEgg(val)) {
           if (currentFilteredCommands.length > 0 && currentFilteredCommands[activeCmdIndex]) {
             currentFilteredCommands[activeCmdIndex].action();
-            playClickSound(1000, 'triangle');
           }
         }
       }
@@ -771,11 +813,7 @@ function setupCommandPalette() {
   cmdInput.addEventListener('input', (e) => {
     const val = e.target.value.toLowerCase().trim();
     activeCmdIndex = 0;
-    if (!val) {
-      currentFilteredCommands = [...commands];
-    } else {
-      currentFilteredCommands = commands.filter(c => c.label.toLowerCase().includes(val));
-    }
+    currentFilteredCommands = val ? commands.filter(c => c.label.toLowerCase().includes(val)) : [...commands];
     renderCmds(currentFilteredCommands);
   });
 
@@ -793,17 +831,13 @@ function setupCommandPalette() {
    8. Lightbox 功能
 ---------------------------------------------------- */
 function resetZoom() {
-  zoomScale = 1;
-  panX = 0;
-  panY = 0;
+  zoomScale = 1; panX = 0; panY = 0;
   updateImageTransform();
 }
 
 function updateImageTransform() {
   const img = lightboxContent.querySelector('img');
-  if (img) {
-    img.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomScale})`;
-  }
+  if (img) img.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomScale})`;
 }
 
 function setupLightboxZoomAndDrag() {
@@ -811,18 +845,8 @@ function setupLightboxZoomAndDrag() {
     const img = lightboxContent.querySelector('img');
     if (!img) return;
     e.preventDefault();
-
-    const zoomFactor = 0.15;
-    if (e.deltaY < 0) {
-      zoomScale = Math.min(zoomScale + zoomFactor, 4);
-    } else {
-      zoomScale = Math.max(zoomScale - zoomFactor, 1);
-    }
-
-    if (zoomScale === 1) {
-      panX = 0;
-      panY = 0;
-    }
+    zoomScale = e.deltaY < 0 ? Math.min(zoomScale + 0.15, 4) : Math.max(zoomScale - 0.15, 1);
+    if (zoomScale === 1) { panX = 0; panY = 0; }
     updateImageTransform();
   }, { passive: false });
 
@@ -852,15 +876,10 @@ function setupLightboxZoomAndDrag() {
 
     wrapper.addEventListener('touchend', (e) => {
       if (zoomScale > 1) return;
-
-      const touchEndX = e.changedTouches[0].clientX;
-      const touchEndY = e.changedTouches[0].clientY;
-      const deltaX = touchEndX - touchStartX;
-      const deltaY = touchEndY - touchStartY;
-
+      const deltaX = e.changedTouches[0].clientX - touchStartX;
+      const deltaY = e.changedTouches[0].clientY - touchStartY;
       if (Math.abs(deltaX) > 50 && Math.abs(deltaY) < 60) {
-        if (deltaX < 0) navigateLightbox(1);
-        else navigateLightbox(-1);
+        navigateLightbox(deltaX < 0 ? 1 : -1);
       }
     }, { passive: true });
   }
@@ -874,28 +893,18 @@ function setupLightboxZoomAndDrag() {
 
   if (lightboxFullscreenBtn) {
     lightboxFullscreenBtn.addEventListener('click', () => {
-      playClickSound(800, 'sine');
-      if (!document.fullscreenElement) {
-        lightboxContent.requestFullscreen().catch(err => console.log(err));
-      } else {
-        document.exitFullscreen();
-      }
+      if (!document.fullscreenElement) lightboxContent.requestFullscreen().catch(() => {});
+      else document.exitFullscreen();
     });
   }
 
-  if (lightboxResetBtn) {
-    lightboxResetBtn.addEventListener('click', () => {
-      playClickSound(750, 'sine');
-      resetZoom();
-    });
-  }
+  if (lightboxResetBtn) lightboxResetBtn.addEventListener('click', resetZoom);
 }
 
 function navigateLightbox(direction) {
   if (currentGallery.length <= 1) return;
   currentIndex = (currentIndex + direction + currentGallery.length) % currentGallery.length;
   updateLightboxContent();
-  playClickSound(800, 'sine');
 }
 
 /* ----------------------------------------------------
@@ -904,7 +913,6 @@ function navigateLightbox(direction) {
 function setupMatrixClock() {
   const clockEl = document.getElementById('matrix-clock');
   if (!clockEl) return;
-
   function update() {
     const now = new Date();
     const hrs = String(now.getHours()).padStart(2, '0');
@@ -912,14 +920,12 @@ function setupMatrixClock() {
     const secs = String(now.getSeconds()).padStart(2, '0');
     clockEl.textContent = `[ ${hrs}:${mins}:${secs} CST ]`;
   }
-  setInterval(update, 1000);
-  update();
+  setInterval(update, 1000); update();
 }
 
 function setupTypewriter() {
   const typewriterEl = document.getElementById('typewriter');
   if (!typewriterEl) return;
-
   const phrases = ["> 數位內容創作者", "> AI 應用探索", "> 視覺設計"];
   let phraseIdx = 0, charIdx = 0, isDeleting = false;
 
@@ -929,16 +935,8 @@ function setupTypewriter() {
     charIdx = isDeleting ? charIdx - 1 : charIdx + 1;
 
     let speed = isDeleting ? 35 : 75;
-
-    if (!isDeleting && charIdx === current.length) {
-      speed = 2200;
-      isDeleting = true;
-    } else if (isDeleting && charIdx === 0) {
-      isDeleting = false;
-      phraseIdx = (phraseIdx + 1) % phrases.length;
-      speed = 400;
-    }
-
+    if (!isDeleting && charIdx === current.length) { speed = 2000; isDeleting = true; }
+    else if (isDeleting && charIdx === 0) { isDeleting = false; phraseIdx = (phraseIdx + 1) % phrases.length; speed = 400; }
     setTimeout(type, speed);
   }
   type();
@@ -948,11 +946,10 @@ function renderPortfolio(data) {
   if (!gridContainer) return;
   gridContainer.innerHTML = '';
 
-  data.forEach((item, index) => {
+  data.forEach((item) => {
     const card = document.createElement('div');
     card.className = 'card';
     card.setAttribute('data-id', item.id);
-    card.style.animationDelay = `${index * 0.08}s`;
 
     const hasSlideshow = item.items && item.items.length > 1;
     const isTowaCard = (item.id === 1);
@@ -967,8 +964,8 @@ function renderPortfolio(data) {
         <h3 class="card-title">${item.title}</h3>
         <p class="card-desc">${item.desc}</p>
         ${isTowaCard ? `
-          <div class="card-actions" style="margin-top: 12px;">
-            <a href="https://zh.wikipedia.org/zh-tw/%E5%B8%B8%E9%97%87%E6%B0%B8%E9%81%A0" target="_blank" rel="noopener noreferrer" class="wiki-link-btn" style="display: inline-block; font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent-red); border: 1px dashed var(--accent-red); padding: 4px 10px; background: rgba(255,42,42,0.05);" onclick="event.stopPropagation();">
+          <div class="card-actions" style="margin-top: 10px;">
+            <a href="https://zh.wikipedia.org/zh-tw/%E5%B8%B8%E9%97%87%E6%B0%B8%E9%81%A0" target="_blank" rel="noopener noreferrer" class="wiki-link-btn" style="display: inline-block; font-family: var(--font-mono); font-size: 0.72rem; color: var(--accent-red); border: 1px dashed var(--accent-red); padding: 3px 8px;" onclick="event.stopPropagation();">
               [ ↗ 維基百科：常闇永遠 ]
             </a>
           </div>
@@ -977,7 +974,6 @@ function renderPortfolio(data) {
     `;
 
     apply3DTiltEffect(card);
-
     card.addEventListener('click', () => {
       playClickSound(850, 'sine');
       openLightbox(item);
@@ -990,7 +986,6 @@ function openLightbox(portfolioItem) {
   currentGallery = portfolioItem.items;
   currentIndex = 0;
   resetZoom();
-  
   updateLightboxContent();
   lightbox.classList.add('active');
   document.body.classList.add('modal-open');
@@ -1000,7 +995,6 @@ function closeLightbox() {
   playClickSound(500, 'sine');
   lightbox.classList.remove('active');
   document.body.classList.remove('modal-open');
-  
   const video = lightboxContent.querySelector('video');
   if (video) video.pause();
   lightboxContent.innerHTML = '';
@@ -1032,13 +1026,11 @@ function updateLightboxContent() {
   lightboxDesc.textContent = media.desc || '';
 
   if (currentGallery.length > 1) {
-    prevBtn.style.display = 'block';
-    nextBtn.style.display = 'block';
+    prevBtn.style.display = 'block'; nextBtn.style.display = 'block';
     lightboxCounter.style.display = 'block';
     lightboxCounter.textContent = `[ ${currentIndex + 1} / ${currentGallery.length} ]`;
   } else {
-    prevBtn.style.display = 'none';
-    nextBtn.style.display = 'none';
+    prevBtn.style.display = 'none'; nextBtn.style.display = 'none';
     lightboxCounter.style.display = 'none';
   }
 }
@@ -1074,7 +1066,8 @@ function setupBackToTop() {
   window.addEventListener('scroll', () => {
     if (window.scrollY > 200) backToTopBtn.classList.add('show');
     else backToTopBtn.classList.remove('show');
-  });
+  }, { passive: true });
+
   backToTopBtn.addEventListener('click', () => {
     playClickSound(950, 'sine');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1085,9 +1078,7 @@ function setupBackToTop() {
    10. 手機版導覽選單
 ---------------------------------------------------- */
 function closeMobileNav() {
-  if (mobileNavMenu) {
-    mobileNavMenu.classList.remove('active');
-  }
+  if (mobileNavMenu) mobileNavMenu.classList.remove('active');
 }
 
 function setupMobileMenu() {
@@ -1107,9 +1098,7 @@ function setupMobileMenu() {
     });
 
     mobileNavMenu.querySelectorAll('a, button').forEach(link => {
-      link.addEventListener('click', () => {
-        closeMobileNav();
-      });
+      link.addEventListener('click', closeMobileNav);
     });
   }
 }
