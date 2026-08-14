@@ -96,6 +96,7 @@ const cmdInput = document.getElementById('cmd-input');
 const cmdList = document.getElementById('cmd-list');
 const cmdOverlay = document.getElementById('cmd-overlay');
 const cmdTriggerBtn = document.getElementById('cmd-trigger-btn');
+const mobileCmdBtn = document.getElementById('mobile-cmd-btn');
 
 // 全域音響系統與 Mini Player
 const miniPlayer = document.getElementById('mini-player');
@@ -446,6 +447,7 @@ function setupCommandPalette() {
 
   if (cmdOverlay) cmdOverlay.addEventListener('click', closeCmd);
   if (cmdTriggerBtn) cmdTriggerBtn.addEventListener('click', openCmd);
+  if (mobileCmdBtn) mobileCmdBtn.addEventListener('click', openCmd);
 }
 
 /* ----------------------------------------------------
@@ -758,7 +760,8 @@ function setupMobileMenu() {
       navLinks.classList.toggle('active');
     });
 
-    navLinks.querySelectorAll('a').forEach(link => {
+    // 點擊選單內連結或指令按鈕後自動收合選單
+    navLinks.querySelectorAll('a, button').forEach(link => {
       link.addEventListener('click', () => {
         navLinks.classList.remove('active');
       });
