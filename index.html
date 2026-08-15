@@ -54,7 +54,7 @@
   <!-- 獨立式 NOTHING OS 科技感 CD 音樂播放器 Widget -->
   <div id="mini-player" class="mini-player-widget">
     <div class="player-left-panel">
-      <div class="player-drag-handle" id="player-drag-handle" title="按住可拖動 / 點擊圓鈕收合">
+      <div class="player-drag-handle" id="player-drag-handle" title="按住可拖動 / 點擊按鈕收合">
         <span class="drag-dots">⋮⋮</span>
         <span class="player-status-dot"></span>
         <span class="player-label">AUDIO_PLAYER</span>
@@ -62,8 +62,9 @@
         <div class="player-eq">
           <span></span><span></span><span></span>
         </div>
-        <button id="player-dock-btn" class="player-dock-btn" title="收合/展開播放器" aria-label="收合/展開">
-          <span class="dock-icon">🎵</span>
+        <!-- 縮小/隱藏音樂播放器按鈕 -->
+        <button id="player-dock-btn" class="player-dock-btn" title="縮小/展開播放器" aria-label="縮小/展開">
+          <span class="dock-icon">−</span>
         </button>
       </div>
 
@@ -97,7 +98,7 @@
       </div>
     </div>
 
-    <!-- 右側延伸 3D CD 唱盤與唱針結構 -->
+    <!-- 右側延伸 3D CD 唱盤與唱針結構 (精確對齊與重疊設計) -->
     <div class="cd-player-bay" title="3D 科技感 CD 唱盤">
       <div class="cd-stylus-arm">
         <div class="cd-stylus-pivot"></div>

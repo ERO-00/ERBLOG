@@ -1,6 +1,6 @@
 /**
  * ERBLOG // NOTHING OS STYLE - MAIN APP SCRIPT
- * ENHANCED WITH 3 VISUALIZER STYLES, SMOOTH TRANSITIONS & LOW LATENCY EASTER EGGS
+ * ENHANCED WITH MINIMIZABLE PLAYER, MOBILE CD DISC SUPPORT & INTENSE EASTER EGGS
  */
 
 // Towa 彩蛋隨機圖片清單
@@ -127,14 +127,14 @@ let audioCtx = null;
 let analyserNode = null;
 let audioSourceNode = null;
 let dataArray = null;
-let smoothDataArray = null; // 平滑平退衰減陣列
+let smoothDataArray = null;
 let bufferLength = 0;
 let peakArray = [];
 
 let soundEnabled = true;
 let ripplePhase = 0;
 
-// 音波條樣式控制: 0: BARS (頻譜條), 1: WAVE (調幅正弦波), 2: MATRIX (數位矩陣柱狀圖)
+// 音波樣式控制: 0: BARS, 1: WAVE, 2: MATRIX
 let vizStyle = 0;
 const VIZ_STYLES = [
   { name: 'BARS', label: 'STYLE: BARS' },
@@ -142,25 +142,21 @@ const VIZ_STYLES = [
   { name: 'MATRIX', label: 'STYLE: MATRIX' }
 ];
 
-// 平滑過渡因子 (當暫停時漸變為 0)
 let activeAlpha = 0;
 
 // Lightbox 狀態
 let currentGallery = [];
 let currentIndex = 0;
 let zoomScale = 1;
-let panX = 0;
-let panY = 0;
+let panX = 0; panY = 0;
 let isDragging = false;
-let startX = 0;
-let startY = 0;
-let touchStartX = 0;
-let touchStartY = 0;
+let startX = 0; startY = 0;
+let touchStartX = 0; touchStartY = 0;
 
 let activeCmdIndex = 0;
 
 /* ----------------------------------------------------
-   1. 科技感自訂瞄準游標 (僅桌機版)
+   1. 科技感自訂瞄準游標 (桌機版)
 ---------------------------------------------------- */
 function setupCustomCursor() {
   const cursor = document.getElementById('custom-cursor');
@@ -185,15 +181,14 @@ function setupCustomCursor() {
 }
 
 /* ----------------------------------------------------
-   2. 高階 3D Card Tilt 傾斜與動態金屬光澤效果
+   2. 3D Card Tilt 傾斜與光澤效果
 ---------------------------------------------------- */
 function apply3DTiltEffect(card) {
   if (window.matchMedia('(max-width: 768px)').matches) return;
 
   let rect = null;
   let rafId = null;
-  let mouseX = 0;
-  let mouseY = 0;
+  let mouseX = 0, mouseY = 0;
 
   let glare = card.querySelector('.card-glare');
   if (!glare) {
@@ -210,14 +205,14 @@ function apply3DTiltEffect(card) {
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
 
-    const rotateX = ((y - centerY) / centerY) * -16;
-    const rotateY = ((x - centerX) / centerX) * 16;
+    const rotateX = ((y - centerY) / centerY) * -14;
+    const rotateY = ((x - centerX) / centerX) * 14;
 
-    card.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) scale3d(1.03, 1.03, 1.03)`;
+    card.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) scale3d(1.02, 1.02, 1.02)`;
 
     const percentX = (x / rect.width) * 100;
     const percentY = (y / rect.height) * 100;
-    glare.style.background = `radial-gradient(circle at ${percentX.toFixed(1)}% ${percentY.toFixed(1)}%, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.08) 50%, rgba(0, 0, 0, 0.6) 90%)`;
+    glare.style.background = `radial-gradient(circle at ${percentX.toFixed(1)}% ${percentY.toFixed(1)}%, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(0, 0, 0, 0.5) 90%)`;
     glare.style.opacity = '1';
 
     rafId = null;
@@ -230,16 +225,12 @@ function apply3DTiltEffect(card) {
   });
 
   card.addEventListener('mousemove', (e) => {
-    mouseX = e.clientX;
-    mouseY = e.clientY;
+    mouseX = e.clientX; mouseY = e.clientY;
     if (!rafId) rafId = requestAnimationFrame(updateTilt);
   });
 
   card.addEventListener('mouseleave', () => {
-    if (rafId) {
-      cancelAnimationFrame(rafId);
-      rafId = null;
-    }
+    if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
     rect = null;
     card.style.transition = 'transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)';
     card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
@@ -248,7 +239,7 @@ function apply3DTiltEffect(card) {
 }
 
 /* ----------------------------------------------------
-   3. Web Audio 核心初始化與 UI 按鍵音效
+   3. Web Audio 初始化與 UI 按鍵音效
 ---------------------------------------------------- */
 function getAudioContext() {
   if (!audioCtx) {
@@ -260,7 +251,6 @@ function getAudioContext() {
   return audioCtx;
 }
 
-// 預先註冊點擊事件解鎖 AudioContext 防止延遲
 window.addEventListener('click', () => {
   try { getAudioContext(); } catch(e){}
 }, { once: true });
@@ -297,7 +287,7 @@ function setupSoundToggle() {
 }
 
 /* ----------------------------------------------------
-   4. Web Audio 頻譜分析模組與多樣化過渡 Canvas 視覺化
+   4. Web Audio 頻譜分析模組與 Canvas 繪製
 ---------------------------------------------------- */
 function initWebAudioAnalyser() {
   const ctx = getAudioContext();
@@ -332,7 +322,7 @@ function setupCanvasVisualizer() {
     const rect = playerVisualizerCanvas.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
     playerVisualizerCanvas.width = (rect.width || 200) * dpr;
-    playerVisualizerCanvas.height = (rect.height || 48) * dpr;
+    playerVisualizerCanvas.height = (rect.height || 38) * dpr;
   }
 
   resizeCanvas();
@@ -355,8 +345,6 @@ function setupCanvasVisualizer() {
     ctx.clearRect(0, 0, w, h);
 
     const isPlaying = globalAudio && !globalAudio.paused && globalAudio.currentTime > 0;
-
-    // 平滑過渡因子 (0 ~ 1)
     const targetAlpha = isPlaying ? 1.0 : 0.0;
     activeAlpha += (targetAlpha - activeAlpha) * 0.1;
 
@@ -364,21 +352,17 @@ function setupCanvasVisualizer() {
       if (isPlaying) {
         analyserNode.getByteFrequencyData(dataArray);
       }
-      
-      // 無論播放與否，均對平滑數據做平滑衰減衰退，防止突兀卡住
       for (let i = 0; i < bufferLength; i++) {
         const raw = isPlaying ? dataArray[i] : 0;
         smoothDataArray[i] += (raw - smoothDataArray[i]) * 0.18;
       }
     }
 
-    // 1. 繪製動態音樂波形 (3 種樣式)
     if (activeAlpha > 0.02 && smoothDataArray) {
       ctx.save();
       ctx.globalAlpha = activeAlpha;
 
       if (vizStyle === 0) {
-        // === 樣式 1: STYLE: BARS (經典頻譜條 + 頂部 Drop Dots + 鏡面) ===
         const numBars = 26;
         const barGap = 2 * dpr;
         const barWidth = (w - (numBars - 1) * barGap) / numBars;
@@ -407,7 +391,6 @@ function setupCanvasVisualizer() {
           }
           ctx.fill();
 
-          // Peak drop dots
           if (!peakArray[i] || barHeight > peakArray[i]) {
             peakArray[i] = barHeight;
           } else {
@@ -417,16 +400,9 @@ function setupCanvasVisualizer() {
           const peakY = mainHeight - peakArray[i] - 2 * dpr;
           ctx.fillStyle = '#ffffff';
           ctx.fillRect(x, Math.max(0, peakY), barWidth, 1.5 * dpr);
-
-          // 倒影
-          ctx.fillStyle = cachedAccentColor;
-          ctx.globalAlpha = activeAlpha * 0.2;
-          ctx.fillRect(x, mainHeight + 2 * dpr, barWidth, barHeight * 0.3);
-          ctx.globalAlpha = activeAlpha;
         }
 
       } else if (vizStyle === 1) {
-        // === 樣式 2: STYLE: WAVE (正弦連續震盪波形) ===
         const centerY = h / 2;
         ctx.lineWidth = 2 * dpr;
         ctx.strokeStyle = cachedAccentColor;
@@ -444,25 +420,8 @@ function setupCanvasVisualizer() {
         }
         ctx.stroke();
 
-        // 螢光輔助波形
-        ctx.lineWidth = 1 * dpr;
-        ctx.strokeStyle = '#ffffff';
-        ctx.beginPath();
-        for (let i = 0; i < 32; i++) {
-          const binIndex = Math.floor((i / 32) * (bufferLength * 0.6));
-          const val = (smoothDataArray[binIndex] / 255) * (h * 0.28);
-          const x = i * sliceWidth;
-          const y = centerY + (i % 2 === 0 ? val : -val);
-
-          if (i === 0) ctx.moveTo(x, y);
-          else ctx.lineTo(x, y);
-        }
-        ctx.stroke();
-
       } else if (vizStyle === 2) {
-        // === 樣式 3: STYLE: MATRIX (數位點陣 VU 表格) ===
-        const cols = 20;
-        const rows = 6;
+        const cols = 20; const rows = 6;
         const gap = 2 * dpr;
         const cellW = (w - (cols - 1) * gap) / cols;
         const cellH = (h - (rows - 1) * gap) / rows;
@@ -485,11 +444,9 @@ function setupCanvasVisualizer() {
           }
         }
       }
-
       ctx.restore();
     }
 
-    // 2. 待機/過渡狀態（當 activeAlpha 降至 0 或低於 1 時平滑疊加科技待機微波）
     if (activeAlpha < 0.98) {
       ripplePhase += 0.04;
       const centerY = h / 2;
@@ -502,20 +459,7 @@ function setupCanvasVisualizer() {
       ctx.strokeStyle = cachedAccentColor;
 
       for (let x = 0; x < w; x += 2 * dpr) {
-        const y = centerY + Math.sin(x * 0.03 + ripplePhase) * 5 * dpr;
-        if (x === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
-      ctx.stroke();
-
-      // 次波形
-      ctx.beginPath();
-      ctx.lineWidth = 1 * dpr;
-      ctx.strokeStyle = '#ffffff';
-      ctx.globalAlpha = idleAlpha * 0.5;
-
-      for (let x = 0; x < w; x += 2 * dpr) {
-        const y = centerY + Math.cos(x * 0.02 - ripplePhase * 1.2) * 3 * dpr;
+        const y = centerY + Math.sin(x * 0.03 + ripplePhase) * 4 * dpr;
         if (x === 0) ctx.moveTo(x, y);
         else ctx.lineTo(x, y);
       }
@@ -528,7 +472,7 @@ function setupCanvasVisualizer() {
 }
 
 /* ----------------------------------------------------
-   5. Mini Music Player 邏輯控制與音量/樣式切換
+   5. Mini Music Player 邏輯控制與收合狀態
 ---------------------------------------------------- */
 function updatePlayBtnText(isPlaying) {
   if (!playerPlayBtn) return;
@@ -549,6 +493,18 @@ function updateVolumeSliderBackground(val) {
   const pct = Math.round(val * 100);
   const accentColor = getComputedStyle(document.body).getPropertyValue('--accent-red').trim() || '#ff2a2a';
   playerVolumeSlider.style.background = `linear-gradient(to right, ${accentColor} 0%, ${accentColor} ${pct}%, var(--border-color) ${pct}%, var(--border-color) 100%)`;
+}
+
+function togglePlayerCollapse() {
+  if (!miniPlayer) return;
+  miniPlayer.classList.toggle('collapsed');
+  
+  const dockIcon = playerDockBtn ? playerDockBtn.querySelector('.dock-icon') : null;
+  if (dockIcon) {
+    dockIcon.textContent = miniPlayer.classList.contains('collapsed') ? '+' : '−';
+  }
+  
+  playClickSound(700, 'sine');
 }
 
 function setupMiniPlayer() {
@@ -572,7 +528,6 @@ function setupMiniPlayer() {
     }
   });
 
-  // 音波樣式切換事件
   if (playerVizStyleBtn) {
     playerVizStyleBtn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -616,19 +571,10 @@ function setupMiniPlayer() {
   setupDraggableWidget(miniPlayer, playerDragHandle || miniPlayer);
 }
 
-function togglePlayerCollapse() {
-  miniPlayer.classList.toggle('collapsed');
-  playClickSound(700, 'sine');
-}
-
-/**
- * 播放音軌 (針對彩蛋加入 isEasterEgg 參數，預設 initial volume 為 20%)
- */
 function playAudioTrack(fileName, trackDisplayName, isEasterEgg = false) {
   initWebAudioAnalyser();
   getAudioContext();
 
-  // 若為彩蛋音樂，強制設為 20% 音量 (0.2)
   if (isEasterEgg) {
     globalAudio.volume = 0.2;
     if (playerVolumeSlider) playerVolumeSlider.value = 0.2;
@@ -637,7 +583,7 @@ function playAudioTrack(fileName, trackDisplayName, isEasterEgg = false) {
   }
 
   globalAudio.src = `assets/audio/${fileName}`;
-  globalAudio.load(); // 預先加載防止延遲
+  globalAudio.load();
   playerTrackName.textContent = trackDisplayName;
   
   const playPromise = globalAudio.play();
@@ -653,8 +599,7 @@ function playAudioTrack(fileName, trackDisplayName, isEasterEgg = false) {
 
 function setupDraggableWidget(element, handle) {
   let isDrag = false;
-  let offsetX = 0;
-  let offsetY = 0;
+  let offsetX = 0, offsetY = 0;
 
   function onPointerDown(e) {
     if (e.target.closest('button, input, a, canvas')) return;
@@ -713,7 +658,7 @@ function setupDraggableWidget(element, handle) {
 }
 
 /* ----------------------------------------------------
-   6. 彩蛋處理器 (JOJO, Towa, Holo 特效加強與即時播放)
+   6. 彩蛋與動畫特效加強
 ---------------------------------------------------- */
 function triggerLightShow() {
   const overlay = document.getElementById('lightshow-overlay');
@@ -757,13 +702,13 @@ function spawnJojoMenace() {
   container.innerHTML = '';
 
   const fragment = document.createDocumentFragment();
-  for (let i = 0; i < 7; i++) {
+  for (let i = 0; i < 9; i++) {
     const el = document.createElement('div');
     el.className = 'jojo-menace-text';
     el.textContent = 'ゴ';
     el.style.left = `${Math.random() * 80 + 10}vw`;
     el.style.top = `${Math.random() * 60 + 20}vh`;
-    el.style.animationDelay = `${i * 0.18}s`;
+    el.style.animationDelay = `${i * 0.15}s`;
     fragment.appendChild(el);
 
     setTimeout(() => el.remove(), 2200 + i * 180);
@@ -795,11 +740,10 @@ function triggerTowaImpact() {
   void overlay.offsetWidth;
   overlay.classList.add('active');
 
-  // 使用 requestAnimationFrame 異步生成粒子，避免卡住音訊起播
   requestAnimationFrame(() => {
     if (!container) return;
     const fragment = document.createDocumentFragment();
-    const particleCount = 30;
+    const particleCount = 35;
     for (let i = 0; i < particleCount; i++) {
       const particle = document.createElement('div');
       const type = i % 3;
@@ -849,7 +793,7 @@ function triggerHoloImpact() {
   requestAnimationFrame(() => {
     if (!container) return;
     const fragment = document.createDocumentFragment();
-    const particleCount = 36;
+    const particleCount = 40;
     for (let i = 0; i < particleCount; i++) {
       const p = document.createElement('div');
       const type = i % 3;
@@ -880,7 +824,6 @@ function handleEasterEgg(keyword) {
 
   if (key === 'towa') {
     document.body.classList.add('towa-theme');
-    // 優先調用音訊起播，解決延遲
     playAudioTrack('FACT_常闇トワ.mp3', 'FACT_常闇トワ', true);
     triggerLightShow();
     triggerTowaImpact();
@@ -1300,7 +1243,7 @@ function setupBackToTop() {
 }
 
 /* ----------------------------------------------------
-   10. 手機版導覽選單與滾動顯現特效
+   10. 手機版導覽與滾動顯現
 ---------------------------------------------------- */
 function closeMobileNav() {
   if (mobileNavMenu) mobileNavMenu.classList.remove('active');
@@ -1345,9 +1288,7 @@ function setupScrollReveal() {
   }
 }
 
-/* ----------------------------------------------------
-   DOM 載入完成初始化
----------------------------------------------------- */
+/* DOM 載入初始化 */
 document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => introCurtain && introCurtain.classList.add('loaded'), 600);
   
