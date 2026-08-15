@@ -1,5 +1,6 @@
 /**
- * ERBLOG // NOTHING OS STYLE - MAIN APP SCRIPT WITH ENHANCED EASTER EGGS & PERFORMANCE
+ * ERBLOG // NOTHING OS STYLE - MAIN APP SCRIPT
+ * ENHANCED WITH 3 VISUALIZER STYLES, SMOOTH TRANSITIONS & LOW LATENCY EASTER EGGS
  */
 
 // Towa 彩蛋隨機圖片清單
@@ -115,6 +116,7 @@ const playerVolumeSlider = document.getElementById('player-volume-slider');
 const playerVolumeText = document.getElementById('player-volume-text');
 const playerDragHandle = document.getElementById('player-drag-handle');
 const playerVisualizerCanvas = document.getElementById('player-visualizer');
+const playerVizStyleBtn = document.getElementById('player-viz-style-btn');
 
 // 全域音訊與 Web Audio API
 let globalAudio = new Audio();
@@ -125,11 +127,23 @@ let audioCtx = null;
 let analyserNode = null;
 let audioSourceNode = null;
 let dataArray = null;
+let smoothDataArray = null; // 平滑平退衰減陣列
 let bufferLength = 0;
 let peakArray = [];
 
 let soundEnabled = true;
 let ripplePhase = 0;
+
+// 音波條樣式控制: 0: BARS (頻譜條), 1: WAVE (調幅正弦波), 2: MATRIX (數位矩陣柱狀圖)
+let vizStyle = 0;
+const VIZ_STYLES = [
+  { name: 'BARS', label: 'STYLE: BARS' },
+  { name: 'WAVE', label: 'STYLE: WAVE' },
+  { name: 'MATRIX', label: 'STYLE: MATRIX' }
+];
+
+// 平滑過渡因子 (當暫停時漸變為 0)
+let activeAlpha = 0;
 
 // Lightbox 狀態
 let currentGallery = [];
@@ -158,13 +172,13 @@ function setupCustomCursor() {
   }, { passive: true });
 
   document.addEventListener('mouseover', (e) => {
-    if (e.target.closest('a, button, .card, .filter-btn, .cmd-item, input, .wiki-link-btn, .player-drag-handle')) {
+    if (e.target.closest('a, button, .card, .filter-btn, .cmd-item, input, .wiki-link-btn, .player-drag-handle, .volume-slider')) {
       cursor.classList.add('hovered');
     }
   });
 
   document.addEventListener('mouseout', (e) => {
-    if (e.target.closest('a, button, .card, .filter-btn, .cmd-item, input, .wiki-link-btn, .player-drag-handle')) {
+    if (e.target.closest('a, button, .card, .filter-btn, .cmd-item, input, .wiki-link-btn, .player-drag-handle, .volume-slider')) {
       cursor.classList.remove('hovered');
     }
   });
@@ -196,8 +210,8 @@ function apply3DTiltEffect(card) {
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
 
-    const rotateX = ((y - centerY) / centerY) * -18;
-    const rotateY = ((x - centerX) / centerX) * 18;
+    const rotateX = ((y - centerY) / centerY) * -16;
+    const rotateY = ((x - centerX) / centerX) * 16;
 
     card.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) scale3d(1.03, 1.03, 1.03)`;
 
@@ -246,6 +260,11 @@ function getAudioContext() {
   return audioCtx;
 }
 
+// 預先註冊點擊事件解鎖 AudioContext 防止延遲
+window.addEventListener('click', () => {
+  try { getAudioContext(); } catch(e){}
+}, { once: true });
+
 function playClickSound(freq = 750, type = 'sine', duration = 0.035) {
   if (!soundEnabled) return;
   try {
@@ -278,7 +297,7 @@ function setupSoundToggle() {
 }
 
 /* ----------------------------------------------------
-   4. Web Audio 頻譜分析模組與升級版視覺化 Canvas
+   4. Web Audio 頻譜分析模組與多樣化過渡 Canvas 視覺化
 ---------------------------------------------------- */
 function initWebAudioAnalyser() {
   const ctx = getAudioContext();
@@ -290,6 +309,7 @@ function initWebAudioAnalyser() {
 
     bufferLength = analyserNode.frequencyBinCount;
     dataArray = new Uint8Array(bufferLength);
+    smoothDataArray = new Float32Array(bufferLength);
     peakArray = new Array(32).fill(0);
   }
 
@@ -336,68 +356,153 @@ function setupCanvasVisualizer() {
 
     const isPlaying = globalAudio && !globalAudio.paused && globalAudio.currentTime > 0;
 
-    if (isPlaying && analyserNode) {
-      analyserNode.getByteFrequencyData(dataArray);
+    // 平滑過渡因子 (0 ~ 1)
+    const targetAlpha = isPlaying ? 1.0 : 0.0;
+    activeAlpha += (targetAlpha - activeAlpha) * 0.1;
 
-      const numBars = 28;
-      const barGap = 2 * dpr;
-      const barWidth = (w - (numBars - 1) * barGap) / numBars;
-      const activeLength = Math.floor(bufferLength * 0.72);
-      const mainHeight = h * 0.72;
-
-      // 建立漸層色 (主主題色到高亮發光)
-      const grad = ctx.createLinearGradient(0, mainHeight, 0, 0);
-      grad.addColorStop(0, cachedAccentColor);
-      grad.addColorStop(1, '#ffffff');
-
-      for (let i = 0; i < numBars; i++) {
-        const binIndex = Math.min(bufferLength - 1, Math.floor((i / numBars) * activeLength));
-        let rawVal = dataArray[binIndex];
-        const percent = Math.min(1, Math.max(0, rawVal / 255));
-        const barHeight = Math.max(2 * dpr, percent * (mainHeight - 4 * dpr));
-
-        const x = i * (barWidth + barGap);
-        const y = mainHeight - barHeight;
-
-        // 1. 繪製頻譜條
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        if (ctx.roundRect) {
-          ctx.roundRect(x, y, barWidth, barHeight, [2 * dpr, 2 * dpr, 0, 0]);
-        } else {
-          ctx.rect(x, y, barWidth, barHeight);
-        }
-        ctx.fill();
-
-        // 2. 頂部動態峰值 Drop Dots 特效
-        if (!peakArray[i] || barHeight > peakArray[i]) {
-          peakArray[i] = barHeight;
-        } else {
-          peakArray[i] = Math.max(0, peakArray[i] - 1.2 * dpr);
-        }
-
-        const peakY = mainHeight - peakArray[i] - 2 * dpr;
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(x, Math.max(0, peakY), barWidth, 1.5 * dpr);
-
-        // 3. 鏡面倒影效果
-        ctx.fillStyle = cachedAccentColor;
-        ctx.globalAlpha = 0.22;
-        ctx.fillRect(x, mainHeight + 2 * dpr, barWidth, barHeight * 0.35);
-        ctx.globalAlpha = 1.0;
+    if (analyserNode && dataArray) {
+      if (isPlaying) {
+        analyserNode.getByteFrequencyData(dataArray);
       }
-    } else {
-      // 待機狀態：平滑雙重正弦科技波形
-      ripplePhase += 0.05;
-      const centerY = h / 2;
+      
+      // 無論播放與否，均對平滑數據做平滑衰減衰退，防止突兀卡住
+      for (let i = 0; i < bufferLength; i++) {
+        const raw = isPlaying ? dataArray[i] : 0;
+        smoothDataArray[i] += (raw - smoothDataArray[i]) * 0.18;
+      }
+    }
 
+    // 1. 繪製動態音樂波形 (3 種樣式)
+    if (activeAlpha > 0.02 && smoothDataArray) {
+      ctx.save();
+      ctx.globalAlpha = activeAlpha;
+
+      if (vizStyle === 0) {
+        // === 樣式 1: STYLE: BARS (經典頻譜條 + 頂部 Drop Dots + 鏡面) ===
+        const numBars = 26;
+        const barGap = 2 * dpr;
+        const barWidth = (w - (numBars - 1) * barGap) / numBars;
+        const activeLength = Math.floor(bufferLength * 0.72);
+        const mainHeight = h * 0.72;
+
+        const grad = ctx.createLinearGradient(0, mainHeight, 0, 0);
+        grad.addColorStop(0, cachedAccentColor);
+        grad.addColorStop(1, '#ffffff');
+
+        for (let i = 0; i < numBars; i++) {
+          const binIndex = Math.min(bufferLength - 1, Math.floor((i / numBars) * activeLength));
+          let rawVal = smoothDataArray[binIndex];
+          const percent = Math.min(1, Math.max(0, rawVal / 255));
+          const barHeight = Math.max(2 * dpr, percent * (mainHeight - 4 * dpr));
+
+          const x = i * (barWidth + barGap);
+          const y = mainHeight - barHeight;
+
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          if (ctx.roundRect) {
+            ctx.roundRect(x, y, barWidth, barHeight, [2 * dpr, 2 * dpr, 0, 0]);
+          } else {
+            ctx.rect(x, y, barWidth, barHeight);
+          }
+          ctx.fill();
+
+          // Peak drop dots
+          if (!peakArray[i] || barHeight > peakArray[i]) {
+            peakArray[i] = barHeight;
+          } else {
+            peakArray[i] = Math.max(0, peakArray[i] - 1.2 * dpr);
+          }
+
+          const peakY = mainHeight - peakArray[i] - 2 * dpr;
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(x, Math.max(0, peakY), barWidth, 1.5 * dpr);
+
+          // 倒影
+          ctx.fillStyle = cachedAccentColor;
+          ctx.globalAlpha = activeAlpha * 0.2;
+          ctx.fillRect(x, mainHeight + 2 * dpr, barWidth, barHeight * 0.3);
+          ctx.globalAlpha = activeAlpha;
+        }
+
+      } else if (vizStyle === 1) {
+        // === 樣式 2: STYLE: WAVE (正弦連續震盪波形) ===
+        const centerY = h / 2;
+        ctx.lineWidth = 2 * dpr;
+        ctx.strokeStyle = cachedAccentColor;
+
+        ctx.beginPath();
+        const sliceWidth = w / 32;
+        for (let i = 0; i < 32; i++) {
+          const binIndex = Math.floor((i / 32) * (bufferLength * 0.6));
+          const val = (smoothDataArray[binIndex] / 255) * (h * 0.42);
+          const x = i * sliceWidth;
+          const y = centerY + (i % 2 === 0 ? -val : val);
+
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.quadraticCurveTo(x - sliceWidth / 2, centerY, x, y);
+        }
+        ctx.stroke();
+
+        // 螢光輔助波形
+        ctx.lineWidth = 1 * dpr;
+        ctx.strokeStyle = '#ffffff';
+        ctx.beginPath();
+        for (let i = 0; i < 32; i++) {
+          const binIndex = Math.floor((i / 32) * (bufferLength * 0.6));
+          const val = (smoothDataArray[binIndex] / 255) * (h * 0.28);
+          const x = i * sliceWidth;
+          const y = centerY + (i % 2 === 0 ? val : -val);
+
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+
+      } else if (vizStyle === 2) {
+        // === 樣式 3: STYLE: MATRIX (數位點陣 VU 表格) ===
+        const cols = 20;
+        const rows = 6;
+        const gap = 2 * dpr;
+        const cellW = (w - (cols - 1) * gap) / cols;
+        const cellH = (h - (rows - 1) * gap) / rows;
+
+        for (let c = 0; c < cols; c++) {
+          const binIndex = Math.floor((c / cols) * (bufferLength * 0.65));
+          const val = smoothDataArray[binIndex] / 255;
+          const activeRows = Math.round(val * rows);
+
+          for (let r = 0; r < rows; r++) {
+            const x = c * (cellW + gap);
+            const y = h - (r + 1) * (cellH + gap);
+
+            if (r < activeRows) {
+              ctx.fillStyle = r > rows - 2 ? '#ffffff' : cachedAccentColor;
+            } else {
+              ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+            }
+            ctx.fillRect(x, y, cellW, cellH);
+          }
+        }
+      }
+
+      ctx.restore();
+    }
+
+    // 2. 待機/過渡狀態（當 activeAlpha 降至 0 或低於 1 時平滑疊加科技待機微波）
+    if (activeAlpha < 0.98) {
+      ripplePhase += 0.04;
+      const centerY = h / 2;
+      const idleAlpha = (1 - activeAlpha) * 0.6;
+
+      ctx.save();
+      ctx.globalAlpha = idleAlpha;
       ctx.beginPath();
       ctx.lineWidth = 1.5 * dpr;
       ctx.strokeStyle = cachedAccentColor;
-      ctx.globalAlpha = 0.6;
 
       for (let x = 0; x < w; x += 2 * dpr) {
-        const y = centerY + Math.sin(x * 0.03 + ripplePhase) * 6 * dpr;
+        const y = centerY + Math.sin(x * 0.03 + ripplePhase) * 5 * dpr;
         if (x === 0) ctx.moveTo(x, y);
         else ctx.lineTo(x, y);
       }
@@ -407,15 +512,15 @@ function setupCanvasVisualizer() {
       ctx.beginPath();
       ctx.lineWidth = 1 * dpr;
       ctx.strokeStyle = '#ffffff';
-      ctx.globalAlpha = 0.35;
+      ctx.globalAlpha = idleAlpha * 0.5;
 
       for (let x = 0; x < w; x += 2 * dpr) {
-        const y = centerY + Math.cos(x * 0.02 - ripplePhase * 1.2) * 4 * dpr;
+        const y = centerY + Math.cos(x * 0.02 - ripplePhase * 1.2) * 3 * dpr;
         if (x === 0) ctx.moveTo(x, y);
         else ctx.lineTo(x, y);
       }
       ctx.stroke();
-      ctx.globalAlpha = 1.0;
+      ctx.restore();
     }
   }
 
@@ -423,7 +528,7 @@ function setupCanvasVisualizer() {
 }
 
 /* ----------------------------------------------------
-   5. Mini Music Player 邏輯控制與滑桿動態同步
+   5. Mini Music Player 邏輯控制與音量/樣式切換
 ---------------------------------------------------- */
 function updatePlayBtnText(isPlaying) {
   if (!playerPlayBtn) return;
@@ -467,11 +572,20 @@ function setupMiniPlayer() {
     }
   });
 
+  // 音波樣式切換事件
+  if (playerVizStyleBtn) {
+    playerVizStyleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      vizStyle = (vizStyle + 1) % VIZ_STYLES.length;
+      playerVizStyleBtn.textContent = VIZ_STYLES[vizStyle].label;
+      playClickSound(800, 'square');
+    });
+  }
+
   if (playerVolumeSlider && playerVolumeText) {
-    playerVolumeSlider.value = 0.7;
-    globalAudio.volume = 0.7;
-    playerVolumeText.textContent = '70%';
-    updateVolumeSliderBackground(0.7);
+    playerVolumeSlider.value = globalAudio.volume;
+    playerVolumeText.textContent = `${Math.round(globalAudio.volume * 100)}%`;
+    updateVolumeSliderBackground(globalAudio.volume);
 
     playerVolumeSlider.addEventListener('input', (e) => {
       const val = parseFloat(e.target.value);
@@ -507,19 +621,34 @@ function togglePlayerCollapse() {
   playClickSound(700, 'sine');
 }
 
-function playAudioTrack(fileName, trackDisplayName) {
+/**
+ * 播放音軌 (針對彩蛋加入 isEasterEgg 參數，預設 initial volume 為 20%)
+ */
+function playAudioTrack(fileName, trackDisplayName, isEasterEgg = false) {
   initWebAudioAnalyser();
   getAudioContext();
 
+  // 若為彩蛋音樂，強制設為 20% 音量 (0.2)
+  if (isEasterEgg) {
+    globalAudio.volume = 0.2;
+    if (playerVolumeSlider) playerVolumeSlider.value = 0.2;
+    if (playerVolumeText) playerVolumeText.textContent = '20%';
+    updateVolumeSliderBackground(0.2);
+  }
+
   globalAudio.src = `assets/audio/${fileName}`;
+  globalAudio.load(); // 預先加載防止延遲
   playerTrackName.textContent = trackDisplayName;
   
-  globalAudio.play().then(() => {
-    miniPlayer.classList.add('playing');
-    updatePlayBtnText(true);
-  }).catch(() => {
-    console.warn(`請確認 assets/audio/${fileName} 音訊檔案是否存在。`);
-  });
+  const playPromise = globalAudio.play();
+  if (playPromise !== undefined) {
+    playPromise.then(() => {
+      miniPlayer.classList.add('playing');
+      updatePlayBtnText(true);
+    }).catch((err) => {
+      console.warn(`請確認 assets/audio/${fileName} 音訊檔案是否存在。`, err);
+    });
+  }
 }
 
 function setupDraggableWidget(element, handle) {
@@ -584,7 +713,7 @@ function setupDraggableWidget(element, handle) {
 }
 
 /* ----------------------------------------------------
-   6. 彩蛋處理器 (JOJO, Towa, Holo 特效加強)
+   6. 彩蛋處理器 (JOJO, Towa, Holo 特效加強與即時播放)
 ---------------------------------------------------- */
 function triggerLightShow() {
   const overlay = document.getElementById('lightshow-overlay');
@@ -627,18 +756,19 @@ function spawnJojoMenace() {
   if (!container) return;
   container.innerHTML = '';
 
+  const fragment = document.createDocumentFragment();
   for (let i = 0; i < 7; i++) {
-    setTimeout(() => {
-      const el = document.createElement('div');
-      el.className = 'jojo-menace-text';
-      el.textContent = 'ゴ';
-      el.style.left = `${Math.random() * 80 + 10}vw`;
-      el.style.top = `${Math.random() * 60 + 20}vh`;
-      container.appendChild(el);
+    const el = document.createElement('div');
+    el.className = 'jojo-menace-text';
+    el.textContent = 'ゴ';
+    el.style.left = `${Math.random() * 80 + 10}vw`;
+    el.style.top = `${Math.random() * 60 + 20}vh`;
+    el.style.animationDelay = `${i * 0.18}s`;
+    fragment.appendChild(el);
 
-      setTimeout(() => el.remove(), 2200);
-    }, i * 200);
+    setTimeout(() => el.remove(), 2200 + i * 180);
   }
+  container.appendChild(fragment);
 }
 
 function triggerTowaImpact() {
@@ -665,9 +795,11 @@ function triggerTowaImpact() {
   void overlay.offsetWidth;
   overlay.classList.add('active');
 
-  if (container) {
+  // 使用 requestAnimationFrame 異步生成粒子，避免卡住音訊起播
+  requestAnimationFrame(() => {
+    if (!container) return;
     const fragment = document.createDocumentFragment();
-    const particleCount = 36;
+    const particleCount = 30;
     for (let i = 0; i < particleCount; i++) {
       const particle = document.createElement('div');
       const type = i % 3;
@@ -677,14 +809,14 @@ function triggerTowaImpact() {
 
       particle.style.left = `${Math.random() * 94 + 3}vw`;
       particle.style.top = `${Math.random() * -20 - 10}vh`;
-      particle.style.animationDelay = `${(Math.random() * 1.0).toFixed(2)}s`;
+      particle.style.animationDelay = `${(Math.random() * 0.8).toFixed(2)}s`;
       particle.style.animationDuration = `${(2.5 + Math.random() * 1.2).toFixed(2)}s`;
       const scale = (0.6 + Math.random() * 0.8).toFixed(2);
       particle.style.transform = `scale(${scale})`;
       fragment.appendChild(particle);
     }
     container.appendChild(fragment);
-  }
+  });
 
   playClickSound(1200, 'sine', 0.4);
 
@@ -714,21 +846,22 @@ function triggerHoloImpact() {
   void overlay.offsetWidth;
   overlay.classList.add('active');
 
-  if (container) {
+  requestAnimationFrame(() => {
+    if (!container) return;
     const fragment = document.createDocumentFragment();
-    const particleCount = 42;
+    const particleCount = 36;
     for (let i = 0; i < particleCount; i++) {
       const p = document.createElement('div');
       const type = i % 3;
       p.className = type === 0 ? 'holo-hex-particle' : (type === 1 ? 'holo-particle' : 'holo-ring-particle');
       p.style.left = `${Math.random() * 92 + 4}vw`;
       p.style.top = `${Math.random() * 75 + 10}vh`;
-      p.style.animationDelay = `${(Math.random() * 1.0).toFixed(2)}s`;
+      p.style.animationDelay = `${(Math.random() * 0.8).toFixed(2)}s`;
       p.style.animationDuration = `${(2.6 + Math.random() * 1.2).toFixed(2)}s`;
       fragment.appendChild(p);
     }
     container.appendChild(fragment);
-  }
+  });
 
   playClickSound(1400, 'triangle', 0.35);
 
@@ -747,18 +880,19 @@ function handleEasterEgg(keyword) {
 
   if (key === 'towa') {
     document.body.classList.add('towa-theme');
+    // 優先調用音訊起播，解決延遲
+    playAudioTrack('FACT_常闇トワ.mp3', 'FACT_常闇トワ', true);
     triggerLightShow();
     triggerTowaImpact();
-    playAudioTrack('FACT_常闇トワ.mp3', 'FACT_常闇トワ');
     return true;
   }
 
   if (key === '99') {
     document.body.classList.add('jojo-theme');
+    playAudioTrack('il vento doro.mp3', 'il vento doro (99 Egg)', true);
     triggerLightShow();
     triggerJojoImpact(() => {
       spawnJojoMenace();
-      playAudioTrack('il vento doro.mp3', 'il vento doro (99 Egg)');
     });
     return true;
   }
@@ -775,19 +909,19 @@ function handleEasterEgg(keyword) {
 
   if (jojoMap[key]) {
     document.body.classList.add('jojo-theme');
+    playAudioTrack(jojoMap[key].file, jojoMap[key].name, true);
     triggerLightShow();
     triggerJojoImpact(() => {
       spawnJojoMenace();
-      playAudioTrack(jojoMap[key].file, jojoMap[key].name);
     });
     return true;
   }
 
   if (key === 'holo') {
     document.body.classList.add('holo-theme');
+    playAudioTrack('holo_remix.mp3', 'holo_remix', true);
     triggerLightShow();
     triggerHoloImpact();
-    playAudioTrack('holo_remix.mp3', 'holo_remix');
     return true;
   }
 
