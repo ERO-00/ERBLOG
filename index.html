@@ -8,7 +8,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Noto+Sans+TC:wght@300;400;500;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="base.css">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -77,12 +76,12 @@
         <div id="player-track-name" class="player-track-name">NO AUDIO LOADED</div>
         
         <div class="player-controls">
-          <button id="player-play-btn" class="player-btn" title="播放/暫停">
+          <button id="player-play-btn" class="player-btn jelly-btn" title="播放/暫停">
             <span class="play-icon">▶</span>
             <span class="play-text">PLAY</span>
           </button>
           <!-- 音波樣式切換按鈕 -->
-          <button id="player-viz-style-btn" class="player-btn viz-style-btn" title="切換音波視覺樣式">
+          <button id="player-viz-style-btn" class="player-btn viz-style-btn jelly-btn" title="切換音波視覺樣式">
             STYLE: BARS
           </button>
         </div>
@@ -98,12 +97,13 @@
       </div>
     </div>
 
-    <!-- 右側延伸 3D CD 唱盤與唱針結構 (精確對齊與重疊設計) -->
+    <!-- 右側延伸 3D CD 唱盤與唱針結構 (精確修正唱針頭重疊定位) -->
     <div class="cd-player-bay" title="3D 科技感 CD 唱盤">
       <div class="cd-stylus-arm">
         <div class="cd-stylus-pivot"></div>
-        <div class="cd-stylus-shaft"></div>
-        <div class="cd-stylus-head"></div>
+        <div class="cd-stylus-shaft">
+          <div class="cd-stylus-head"></div>
+        </div>
       </div>
       <div class="cd-disc-container">
         <div class="cd-disc" id="cd-disc">
@@ -123,7 +123,7 @@
     <div class="nav-container">
       
       <!-- LOGO 品牌 -->
-      <a href="#" class="logo">
+      <a href="#" class="logo jelly-btn">
         <span class="red-dot"></span> ERBLOG
       </a>
       
@@ -141,18 +141,18 @@
         <div id="matrix-clock" class="matrix-clock-widget">00:00:00 CST</div>
 
         <!-- 音效開關按鈕 -->
-        <button id="sound-toggle" class="nav-btn sound-toggle-btn" aria-label="切換音效">SOUND: ON</button>
+        <button id="sound-toggle" class="nav-btn sound-toggle-btn jelly-btn" aria-label="切換音效">SOUND: ON</button>
 
         <!-- 命令列快捷提示 / 按鈕 -->
-        <button id="cmd-trigger-btn" class="nav-btn cmd-trigger-btn" title="快捷鍵 Ctrl + K">Ctrl+K</button>
+        <button id="cmd-trigger-btn" class="nav-btn cmd-trigger-btn jelly-btn" title="快捷鍵 Ctrl + K">Ctrl+K</button>
 
         <!-- 明暗主題切換按鈕 -->
-        <button id="theme-toggle" class="nav-btn theme-toggle-btn" aria-label="切換亮暗主題">
+        <button id="theme-toggle" class="nav-btn theme-toggle-btn jelly-btn" aria-label="切換亮暗主題">
           <span id="theme-icon">DARK</span>
         </button>
 
         <!-- 手機版選單按鈕 -->
-        <button id="mobile-menu-btn" class="mobile-menu-btn" aria-label="切換選單">MENU</button>
+        <button id="mobile-menu-btn" class="mobile-menu-btn jelly-btn" aria-label="切換選單">MENU</button>
       </div>
 
     </div>
@@ -163,7 +163,7 @@
       <a href="#portfolio" class="mobile-nav-item">// 02. 作品集</a>
       <a href="#contact" class="mobile-nav-item">// 03. 聯絡我</a>
       <div class="mobile-menu-divider"></div>
-      <button id="mobile-cmd-btn" class="mobile-cmd-launch-btn">>_ 輸入彩蛋 (99, towa, holo...) / 執行指令</button>
+      <button id="mobile-cmd-launch-btn" class="mobile-cmd-launch-btn jelly-btn">>_ 輸入彩蛋 (99, towa, holo...) / 執行指令</button>
     </nav>
   </header>
 
@@ -196,10 +196,10 @@
 
       <!-- 分類篩選按鈕 -->
       <div class="filter-buttons">
-        <button class="filter-btn active" data-filter="all">(ALL) 全部作品</button>
-        <button class="filter-btn" data-filter="image">(ILLUST) 精選插畫</button>
-        <button class="filter-btn" data-filter="gallery">(GALLERY) 相片集錦</button>
-        <button class="filter-btn" data-filter="video">(VIDEO) 動態影像</button>
+        <button class="filter-btn jelly-btn active" data-filter="all">(ALL) 全部作品</button>
+        <button class="filter-btn jelly-btn" data-filter="image">(ILLUST) 精選插畫</button>
+        <button class="filter-btn jelly-btn" data-filter="gallery">(GALLERY) 相片集錦</button>
+        <button class="filter-btn jelly-btn" data-filter="video">(VIDEO) 動態影像</button>
       </div>
 
       <!-- 作品網格 -->
@@ -214,11 +214,11 @@
       <p class="contact-sub">如果有任何合作想法或問題，歡迎隨時透過下方管道與我聯繫！</p>
       
       <div class="contact-links">
-        <a href="mailto:albertaresocool@gmail.com" class="contact-btn email-btn">
+        <a href="mailto:albertaresocool@gmail.com" class="contact-btn email-btn jelly-btn">
           <span class="btn-tag">GMAIL</span>
           <span class="btn-text">發送 Email</span>
         </a>
-        <a href="https://www.instagram.com/holo_ero/" target="_blank" rel="noopener noreferrer" class="contact-btn instagram-btn">
+        <a href="https://www.instagram.com/holo_ero/" target="_blank" rel="noopener noreferrer" class="contact-btn instagram-btn jelly-btn">
           <span class="btn-tag">INSTAGRAM</span>
           <span class="btn-text">追蹤 Instagram</span>
         </a>
@@ -240,15 +240,15 @@
     <div class="lightbox-container">
       
       <div class="lightbox-top-tools">
-        <button id="lightbox-zoom-reset" class="lightbox-tool-btn" title="重置縮放">100%</button>
-        <button id="lightbox-fullscreen" class="lightbox-tool-btn" title="全螢幕展示">⛶</button>
-        <button class="lightbox-close" id="lightbox-close" aria-label="關閉">✕</button>
+        <button id="lightbox-zoom-reset" class="lightbox-tool-btn jelly-btn" title="重置縮放">100%</button>
+        <button id="lightbox-fullscreen" class="lightbox-tool-btn jelly-btn" title="全螢幕展示">⛶</button>
+        <button class="lightbox-close jelly-btn" id="lightbox-close" aria-label="關閉">✕</button>
       </div>
       
       <div class="lightbox-media-wrapper">
-        <button class="lightbox-nav prev" id="lightbox-prev" aria-label="上一張">◄</button>
+        <button class="lightbox-nav prev jelly-btn" id="lightbox-prev" aria-label="上一張">◄</button>
         <div class="lightbox-content" id="lightbox-content"></div>
-        <button class="lightbox-nav next" id="lightbox-next" aria-label="下一張">►</button>
+        <button class="lightbox-nav next jelly-btn" id="lightbox-next" aria-label="下一張">►</button>
       </div>
 
       <div class="lightbox-info">
@@ -275,7 +275,7 @@
   </div>
 
   <!-- 返回頂部懸浮按鈕 -->
-  <button id="back-to-top" class="back-to-top" aria-label="返回頁首">
+  <button id="back-to-top" class="back-to-top jelly-btn" aria-label="返回頁首">
     <span class="arrow">↑</span>
     <span class="txt">TOP</span>
   </button>

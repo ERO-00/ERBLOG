@@ -105,7 +105,7 @@ const cmdInput = document.getElementById('cmd-input');
 const cmdList = document.getElementById('cmd-list');
 const cmdOverlay = document.getElementById('cmd-overlay');
 const cmdTriggerBtn = document.getElementById('cmd-trigger-btn');
-const mobileCmdBtn = document.getElementById('mobile-cmd-btn');
+const mobileCmdBtn = document.getElementById('mobile-cmd-launch-btn');
 
 // Mini Player DOM
 const miniPlayer = document.getElementById('mini-player');
@@ -1131,7 +1131,7 @@ function renderPortfolio(data) {
         <p class="card-desc">${item.desc}</p>
         ${isTowaCard ? `
           <div class="card-actions" style="margin-top: 10px;">
-            <a href="https://zh.wikipedia.org/zh-tw/%E5%B8%B8%E9%97%87%E6%B0%B8%E9%81%A0" target="_blank" rel="noopener noreferrer" class="wiki-link-btn" style="display: inline-block; font-family: var(--font-mono); font-size: 0.72rem; color: var(--accent-red); border: 1px dashed var(--accent-red); padding: 3px 8px; border-radius: 3px;" onclick="event.stopPropagation();">
+            <a href="https://zh.wikipedia.org/zh-tw/%E5%B8%B8%E9%97%87%E6%B0%B8%E9%81%A0" target="_blank" rel="noopener noreferrer" class="wiki-link-btn jelly-btn" style="display: inline-block; font-family: var(--font-mono); font-size: 0.72rem; color: var(--accent-red); border: 1px dashed var(--accent-red); padding: 3px 8px; border-radius: 3px;" onclick="event.stopPropagation();">
               ↗ 維基百科：常闇永遠
             </a>
           </div>
