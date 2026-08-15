@@ -51,7 +51,7 @@
   <!-- 背景點陣圖層 -->
   <div class="dot-matrix-bg"></div>
 
-  <!-- 獨立式音樂播放器 Widget -->
+  <!-- 獨立式 NOTHING OS 科技感 CD 音樂播放器 Widget -->
   <div id="mini-player" class="mini-player-widget">
     <div class="player-left-panel">
       <div class="player-drag-handle" id="player-drag-handle" title="按住可拖動 / 點擊圓鈕收合">
@@ -69,7 +69,9 @@
 
       <div class="player-main-content">
         <!-- 真實音訊視覺化 Canvas 畫面 -->
-        <canvas id="player-visualizer" class="player-visualizer"></canvas>
+        <div class="visualizer-wrapper">
+          <canvas id="player-visualizer" class="player-visualizer"></canvas>
+        </div>
 
         <div id="player-track-name" class="player-track-name">NO AUDIO LOADED</div>
         
@@ -83,21 +85,29 @@
         <!-- 音量控制區域 -->
         <div class="player-volume-box">
           <span class="vol-label">VOL</span>
-          <input type="range" id="player-volume-slider" class="volume-slider" min="0" max="1" step="0.01" value="0.7" aria-label="音量控制">
+          <div class="volume-slider-wrapper">
+            <input type="range" id="player-volume-slider" class="volume-slider" min="0" max="1" step="0.01" value="0.7" aria-label="音量控制">
+          </div>
           <span id="player-volume-text" class="vol-text">70%</span>
         </div>
       </div>
     </div>
 
-    <!-- 右側延伸 CD Player 唱盤結構 -->
+    <!-- 右側延伸 3D CD 唱盤與唱針結構 -->
     <div class="cd-player-bay" title="3D 科技感 CD 唱盤">
-      <div class="cd-stylus-needle"></div>
-      <div class="cd-disc" id="cd-disc">
-        <div class="cd-grooves"></div>
-        <div class="cd-hologram-shine"></div>
-        <div class="cd-center-label">
-          <span class="cd-brand">ERBLOG</span>
-          <div class="cd-center-hole"></div>
+      <div class="cd-stylus-arm">
+        <div class="cd-stylus-pivot"></div>
+        <div class="cd-stylus-shaft"></div>
+        <div class="cd-stylus-head"></div>
+      </div>
+      <div class="cd-disc-container">
+        <div class="cd-disc" id="cd-disc">
+          <div class="cd-grooves"></div>
+          <div class="cd-hologram-shine"></div>
+          <div class="cd-center-label">
+            <span class="cd-brand">ERBLOG</span>
+            <div class="cd-center-hole"></div>
+          </div>
         </div>
       </div>
     </div>
