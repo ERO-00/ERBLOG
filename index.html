@@ -3,17 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ERBLOG // NOTHING OS HUD v2</title>
+  <title>ERBLOG // NOTHING OS HUD v2.5</title>
   <!-- Google Fonts: Space Mono, Noto Sans TC, Dela Gothic One -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Noto+Sans+TC:wght@300;400;500;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="hud-glass">
 
   <!-- 頂部動態閱讀進度條 -->
   <div id="reading-progress-bar" class="reading-progress-bar" aria-hidden="true"></div>
+
+  <!-- 點擊畫面粒子與點陣漣漪圖層 -->
+  <div id="click-fx-layer" class="click-fx-layer" aria-hidden="true"></div>
 
   <!-- 科技感自訂瞄準游標 (桌機端顯示) -->
   <div id="custom-cursor" class="custom-cursor" aria-hidden="true">
@@ -43,10 +46,10 @@
   <!-- 開場中間展開動畫 -->
   <div id="intro-curtain" class="intro-curtain" aria-hidden="true">
     <div class="curtain-panel curtain-top">
-      <span class="intro-text"><span class="red-dot"></span> ERBLOG_OS v2</span>
+      <span class="intro-text"><span class="red-dot"></span> ERBLOG_OS v2.5</span>
     </div>
     <div class="curtain-panel curtain-bottom">
-      <span class="intro-sub">BOOTING HUD & AUDIO ENGINE...</span>
+      <span class="intro-sub">BOOTING SPRING MOTION, HUD & AUDIO ENGINE...</span>
     </div>
   </div>
 
@@ -55,7 +58,7 @@
   <div class="ambient-glow" id="ambient-glow" aria-hidden="true"></div>
 
   <!-- 獨立式 NOTHING OS 科技感 CD 音樂播放器 Widget -->
-  <div id="mini-player" class="mini-player-widget">
+  <div id="mini-player" class="mini-player-widget jelly-elastic">
     <div class="player-left-panel">
       <div class="player-drag-handle" id="player-drag-handle" title="按住可拖動 / 點擊按鈕收合">
         <span class="drag-dots">⋮⋮</span>
@@ -74,17 +77,24 @@
           <canvas id="player-visualizer" class="player-visualizer"></canvas>
         </div>
 
-        <div id="player-track-name" class="player-track-name">NO AUDIO LOADED</div>
+        <div class="track-header-row">
+          <div id="player-track-name" class="player-track-name">FACT_常闇トワ</div>
+          <button id="player-playlist-btn" class="player-mini-tag-btn jelly-btn" type="button" title="展開/收合曲目清單">LIST</button>
+        </div>
 
         <div class="player-controls">
+          <button id="player-prev-btn" class="player-btn player-icon-btn jelly-btn" type="button" title="上一首" aria-label="上一首">⏮</button>
           <button id="player-play-btn" class="player-btn jelly-btn" type="button" title="播放/暫停">
             <span class="play-icon">▶</span>
             <span class="play-text">PLAY</span>
           </button>
+          <button id="player-next-btn" class="player-btn player-icon-btn jelly-btn" type="button" title="下一首" aria-label="下一首">⏭</button>
           <button id="player-viz-style-btn" class="player-btn viz-style-btn jelly-btn" type="button" title="切換音波視覺樣式">
-            STYLE: BARS
+            BARS
           </button>
         </div>
+
+        <div id="player-playlist-drawer" class="player-playlist-drawer" aria-label="迷你播放清單"></div>
 
         <div class="player-volume-box">
           <span class="vol-label">VOL</span>
@@ -132,6 +142,8 @@
 
       <div class="nav-tools">
         <div id="matrix-clock" class="matrix-clock-widget">00:00:00 CST</div>
+        <button id="accent-cycle-btn" class="nav-btn accent-cycle-btn jelly-btn" type="button" title="切換全站主題色">COLOR: CRIMSON</button>
+        <button id="hud-style-btn" class="nav-btn hud-style-btn jelly-btn" type="button" title="切換 HUD 風格">HUD: GLASS</button>
         <button id="sound-toggle" class="nav-btn sound-toggle-btn jelly-btn" type="button" aria-label="切換音效">SOUND: ON</button>
         <button id="cmd-trigger-btn" class="nav-btn cmd-trigger-btn jelly-btn" type="button" title="快捷鍵 Ctrl + K">Ctrl+K</button>
         <button id="theme-toggle" class="nav-btn theme-toggle-btn jelly-btn" type="button" aria-label="切換亮暗主題">
@@ -146,6 +158,10 @@
       <a href="#portfolio" class="mobile-nav-item">// 02. 作品集</a>
       <a href="#contact" class="mobile-nav-item">// 03. 聯絡我</a>
       <div class="mobile-menu-divider"></div>
+      <div class="mobile-quick-row">
+        <button id="mobile-accent-btn" class="nav-btn jelly-btn" type="button">切換主題色</button>
+        <button id="mobile-hud-btn" class="nav-btn jelly-btn" type="button">切換 HUD</button>
+      </div>
       <button id="mobile-cmd-launch-btn" class="mobile-cmd-launch-btn jelly-btn" type="button">>_ 輸入彩蛋 (99, towa, holo...) / 執行指令</button>
     </nav>
   </header>
@@ -158,14 +174,14 @@
         <span class="avatar-badge"><span class="red-dot"></span>ONLINE</span>
       </div>
       <div class="hero-content">
-        <div class="sys-tag">SYS_USER: PO_YI // HUD_V2.0</div>
+        <div class="sys-tag">SYS_USER: PO_YI // HUD_V2.5</div>
         <h1 class="hero-title">HELLO, 我是 <span class="highlight">柏頤</span></h1>
         <p class="subtitle"><span id="typewriter"></span><span class="typing-cursor">_</span></p>
         <p class="bio">專注於數位媒體內容創作、互動實驗與視覺呈現，熱衷於探索人工智慧應用、前端動效與前沿科技工具。</p>
         <div class="hero-chips">
-          <span class="hud-chip">GLASS_HUD</span>
-          <span class="hud-chip">WEB_AUDIO_FFT</span>
-          <span class="hud-chip">EASTER_EGGS_READY</span>
+          <span class="hud-chip">SPRING_JELLY_FX</span>
+          <span class="hud-chip">DOT_RIPPLE_PARTICLES</span>
+          <span class="hud-chip">MULTI_HUD_THEMES</span>
         </div>
       </div>
     </div>
@@ -176,7 +192,7 @@
     <div class="container">
       <div class="section-header">
         <h2 class="section-title"><span class="red-dot"></span> 作品展示</h2>
-        <span class="section-code">ARCHIVE_DATA // v2</span>
+        <span class="section-code">ARCHIVE_DATA // v2.5</span>
       </div>
 
       <div class="filter-buttons">
@@ -217,16 +233,21 @@
   <footer class="footer">
     <div class="footer-content">
       <p>&copy; 2026 ERBLOG. ALL RIGHTS RESERVED.</p>
-      <p class="footer-tech">REBUILT WITH MICRO-DOT HUD & MOTION ENGINE</p>
+      <p class="footer-tech">CRAFTED WITH SPRING MOTION, DOT HUD & WEB AUDIO</p>
     </div>
   </footer>
 
   <!-- 桌面小夥伴 / 看板角色互動區 -->
-  <aside id="companion-widget" class="companion-widget" aria-label="看板小夥伴">
-    <div id="companion-bubble" class="companion-bubble">ER-BOT 上線！點我聊天，或按 Ctrl+K 玩彩蛋。</div>
+  <aside id="companion-widget" class="companion-widget jelly-elastic" aria-label="看板小夥伴">
+    <div id="companion-bubble" class="companion-bubble">ER-BOT v2.5 就緒！點我換心情、切主題或玩彩蛋。</div>
+    <div class="companion-mood-bar" id="companion-mood-bar">
+      <button class="mood-chip jelly-btn" type="button" data-bot-action="vibe">加油打氣</button>
+      <button class="mood-chip jelly-btn" type="button" data-bot-action="color">換主題色</button>
+      <button class="mood-chip jelly-btn" type="button" data-bot-action="egg">玩彩蛋</button>
+    </div>
     <div class="companion-core" id="companion-core">
       <button id="companion-avatar-btn" class="companion-avatar jelly-btn" type="button" title="與 ER-BOT 互動">BOT</button>
-      <span class="companion-label">ER-BOT</span>
+      <span class="companion-label" id="companion-state-label">ER-BOT // IDLE</span>
       <button id="companion-min-btn" class="companion-mini-btn" type="button" title="縮小/展開小夥伴" aria-label="縮小/展開小夥伴">−</button>
     </div>
   </aside>
@@ -262,7 +283,7 @@
     <div class="cmd-box">
       <div class="cmd-header">
         <span class="cmd-prompt">></span>
-        <input type="text" id="cmd-input" placeholder="輸入指令或彩蛋 (help, status, 99, towa, holo)..." autocomplete="off" autocorrect="off" autocapitalize="none">
+        <input type="text" id="cmd-input" placeholder="輸入指令或彩蛋 (help, status, color, hud, 99, towa, holo)..." autocomplete="off" autocorrect="off" autocapitalize="none">
         <span class="cmd-badge">ESC</span>
       </div>
       <ul id="cmd-list" class="cmd-list"></ul>
